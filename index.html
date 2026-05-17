@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — O cuidado certo começa com a combinação certa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f9f8f5;
+      color: #2d2d2d;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(145deg, #4a5e3a, #6b7c52);
+      color: white;
+      padding: 80px 24px;
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -150px; right: -150px;
+      width: 400px; height: 400px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -100px; left: -100px;
+      width: 300px; height: 300px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .logo {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo span {
+      font-size: 20px;
+      display: block;
+      font-weight: 300;
+      letter-spacing: 3px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    .coracao {
+      font-size: 48px;
+      margin: 32px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 700;
+      line-height: 1.25;
+      max-width: 700px;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: #c8d8a0;
+    }
+
+    .hero p {
+      font-size: clamp(16px, 2.5vw, 22px);
+      font-weight: 300;
+      opacity: 0.85;
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* FORM */
+    .form-box {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 480px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(4px);
+    }
+
+    .form-box h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .form-box p {
+      font-size: 14px;
+      opacity: 0.7;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.95);
+      color: #2d2d2d;
+      font-size: 15px;
+      font-family: 'Nunito', sans-serif;
+      outline: none;
+    }
+
+    .form-group select {
+      cursor: pointer;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: #c8d8a0;
+      color: #2d2d2d;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #b5c88a;
+    }
+
+    /* COMO FUNCIONA */
+    .como {
+      padding: 80px 24px;
+      text-align: center;
+      background: #f9f8f5;
+    }
+
+    .como h2 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 48px;
+      color: #4a5e3a;
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .step {
+      max-width: 240px;
+      text-align: center;
+    }
+
+    .step-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .step h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #4a5e3a;
+    }
+
+    .step p {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #2d2d2d;
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+    }
+
+    footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="logo">
+      KINDER
+      <span>kindness • gentileza</span>
+    </div>
+
+    <div class="coracao">🤍</div>
+
+    <h1>O problema quase nunca é <em>competência</em>.<br>É <em>compatibilidade</em>.</h1>
+
+    <p>Fazemos match entre idosos e cuidadores. Não o primeiro disponível — o certo para o seu familiar.</p>
+
+    <div class="form-box">
+      <h2>Seja o primeiro a saber</h2>
+      <p>O Kinder está chegando. Cadastre-se e receba acesso antecipado.</p>
+
+      <div class="form-group">
+        <input type="text" placeholder="Seu nome" />
+      </div>
+      <div class="form-group">
+        <input type="email" placeholder="Seu e-mail" />
+      </div>
+      <div class="form-group">
+        <input type="tel" placeholder="WhatsApp (opcional)" />
+      </div>
+      <div class="form-group">
+        <select>
+          <option value="" disabled selected>Você é...</option>
+          <option value="familia">Familiar de idoso</option>
+          <option value="cuidadora">Cuidadora profissional</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+
+      <button class="btn">Quero acesso antecipado →</button>
+    </div>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="como">
+    <h2>Como funciona</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon">📋</div>
+        <h3>Perfil do idoso</h3>
+        <p>A família descreve a personalidade, rotina e necessidades do familiar.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">👩‍⚕️</div>
+        <h3>Perfil da cuidadora</h3>
+        <p>A cuidadora descreve seu estilo, experiências e preferências de trabalho.</p>
+      </div>
+      <div class="step">
+        <div class="step-icon">🤝</div>
+        <h3>O match certo</h3>
+        <p>O Kinder cruza os perfis e apresenta as melhores combinações com % de compatibilidade.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Kinder Care · <a href="mailto:contato@kindercare.com.br">contato@kindercare.com.br</a> · <a href="https://www.facebook.com/kindercare" target="_blank">Facebook</a></p>
+  </footer>
+
+</body>
+</html>
