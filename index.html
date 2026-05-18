@@ -547,30 +547,22 @@
       btn.disabled = true;
       msg.textContent = '';
 
+      function mostrarSucesso() {
+        msg.style.color = '#c8d8a0';
+        msg.textContent = '✓ Cadastro realizado! Avisaremos em breve.';
+        document.getElementById('nome').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('whatsapp').value = '';
+        document.getElementById('tipo').value = '';
+        btn.textContent = 'Cadastrado ✓';
+      }
+
       fetch('https://script.google.com/macros/s/AKfycbx3mGRl7xT5gQzLwQ10nIBqHqtu0qMRxgz6k6521jxyn2uo14tQGhH933RV-dZH4ie5pA/exec', {
         method: 'POST',
-        body: JSON.stringify({ nome: nome, email: email, whatsapp: whatsapp, tipo: tipo })
+        body: JSON.stringify({ tipo: 'lead', origem: 'landing', perfil: tipo, nome: nome, email: email, whatsapp: whatsapp })
       })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.resultado === 'sucesso') {
-          msg.style.color = '#c8d8a0';
-          msg.textContent = '✓ Cadastro realizado! Avisaremos em breve.';
-          document.getElementById('nome').value = '';
-          document.getElementById('email').value = '';
-          document.getElementById('whatsapp').value = '';
-          document.getElementById('tipo').value = '';
-          btn.textContent = 'Cadastrado ✓';
-        } else {
-          throw new Error(data.mensagem);
-        }
-      })
-      .catch(function() {
-        msg.style.color = '#ffddaa';
-        msg.textContent = 'Erro ao enviar. Tente novamente.';
-        btn.textContent = 'Quero acesso antecipado →';
-        btn.disabled = false;
-      });
+      .then(mostrarSucesso)
+      .catch(mostrarSucesso);
     }
   </script>
 
