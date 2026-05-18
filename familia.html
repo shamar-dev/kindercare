@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — Encontre a cuidadora certa para o seu familiar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f9f8f5;
+      color: #2d2d2d;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #3a4e2a, #4a5e3a);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: white;
+      text-decoration: none;
+    }
+
+    .header-logo span {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    /* HERO */
+    .hero {
+      background:
+        linear-gradient(160deg, rgba(30,45,20,0.90) 0%, rgba(74,94,58,0.82) 100%),
+        url('https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1400&q=80') center/cover no-repeat;
+      color: white;
+      padding: 64px 24px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: #c8d8a0;
+    }
+
+    .hero p {
+      font-size: clamp(15px, 2vw, 18px);
+      opacity: 0.85;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* COMO FUNCIONA */
+    .como {
+      padding: 48px 24px;
+      background: white;
+      text-align: center;
+    }
+
+    .como h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #3a4e2a;
+      margin-bottom: 32px;
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .step {
+      max-width: 200px;
+      text-align: center;
+    }
+
+    .step-num {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #c8d8a0, #a8c070);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2d2d2d;
+      margin: 0 auto 12px;
+    }
+
+    .step h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #3a4e2a;
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      font-size: 13px;
+      color: #777;
+      line-height: 1.6;
+    }
+
+    /* FORMULÁRIO */
+    .form-section {
+      padding: 56px 24px;
+      background: #f9f8f5;
+    }
+
+    .form-container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .form-container h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #3a4e2a;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .form-container > p {
+      font-size: 14px;
+      color: #888;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .bloco {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .bloco h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #3a4e2a;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .campo {
+      margin-bottom: 20px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 10px;
+    }
+
+    .campo input[type="text"],
+    .campo input[type="tel"],
+    .campo input[type="email"],
+    .campo input[type="number"],
+    .campo textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e0e0e0;
+      font-size: 14px;
+      font-family: 'Nunito', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+
+    .campo input:focus,
+    .campo textarea:focus {
+      border-color: #6b7c52;
+      background: white;
+    }
+
+    .campo textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .opcoes-radio {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .opcao-radio {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1.5px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafafa;
+    }
+
+    .opcao-radio:hover {
+      border-color: #6b7c52;
+      background: #f5f8f0;
+    }
+
+    .opcao-radio input[type="radio"] {
+      accent-color: #4a5e3a;
+      width: 16px;
+      height: 16px;
+    }
+
+    .opcao-radio span {
+      font-size: 14px;
+      color: #444;
+    }
+
+    .opcoes-check {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .opcao-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafafa;
+    }
+
+    .opcao-check:hover {
+      border-color: #6b7c52;
+      background: #f5f8f0;
+    }
+
+    .opcao-check input[type="checkbox"] {
+      accent-color: #4a5e3a;
+      width: 16px;
+      height: 16px;
+    }
+
+    .opcao-check span {
+      font-size: 14px;
+      color: #444;
+    }
+
+    .btn-enviar {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #4a5e3a, #6b7c52);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(74,94,58,0.3);
+      letter-spacing: 0.5px;
+    }
+
+    .btn-enviar:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(74,94,58,0.4);
+    }
+
+    .btn-enviar:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    #msg-retorno {
+      margin-top: 16px;
+      font-size: 14px;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #1e2a14;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+    }
+
+    footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+
+    footer a:hover { color: #c8d8a0; }
+
+    .footer-logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <a href="/" class="header-logo"><span>🤍</span> KINDER</a>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Encontre a cuidadora <em>certa</em><br>para o seu familiar</h1>
+    <p>Não a primeira disponível. Aquela que realmente combina com ele — com a personalidade, a rotina e as necessidades dele.</p>
+  </section>
+
+  <!-- COMO FUNCIONA -->
+  <section class="como">
+    <h2>Como funciona</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Você preenche o perfil</h3>
+        <p>Descreve seu familiar — personalidade, rotina, condições de saúde.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Fazemos o match</h3>
+        <p>Cruzamos com o banco de cuidadoras validadas e encontramos quem realmente combina.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Você escolhe</h3>
+        <p>Apresentamos as 3 melhores opções com % de compatibilidade e razões do match.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMULÁRIO -->
+  <section class="form-section">
+    <div class="form-container">
+      <h2>Perfil do seu familiar</h2>
+      <p>Quanto mais detalhado, melhor o match. Leva cerca de 5 minutos.</p>
+
+      <!-- DADOS DO RESPONSÁVEL -->
+      <div class="bloco">
+        <h3>👤 Seus dados (responsável)</h3>
+        <div class="campo">
+          <label>Seu nome completo *</label>
+          <input type="text" id="nome_responsavel" placeholder="Seu nome" />
+        </div>
+        <div class="campo">
+          <label>WhatsApp *</label>
+          <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" />
+        </div>
+        <div class="campo">
+          <label>E-mail</label>
+          <input type="email" id="email" placeholder="seu@email.com (opcional)" />
+        </div>
+        <div class="campo">
+          <label>Bairro / Cidade *</label>
+          <input type="text" id="cidade" placeholder="Ex: São Paulo — Vila Mariana" />
+        </div>
+      </div>
+
+      <!-- PERFIL DO IDOSO -->
+      <div class="bloco">
+        <h3>🧓 Sobre o seu familiar</h3>
+        <div class="campo">
+          <label>Nome do familiar (pode ser só o primeiro nome)</label>
+          <input type="text" id="nome_idoso" placeholder="Ex: Roberto" />
+        </div>
+        <div class="campo">
+          <label>Idade aproximada</label>
+          <input type="number" id="idade" placeholder="Ex: 82" min="60" max="120" />
+        </div>
+      </div>
+
+      <!-- PERSONALIDADE -->
+      <div class="bloco">
+        <h3>😊 Personalidade</h3>
+
+        <div class="campo">
+          <label>Como seu familiar reage a situações inesperadas?</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="reacao" value="agitado" /><span>Fica agitado/ansioso</span></label>
+            <label class="opcao-radio"><input type="radio" name="reacao" value="adapta" /><span>Aceita bem, se adapta</span></label>
+            <label class="opcao-radio"><input type="radio" name="reacao" value="depende" /><span>Depende do dia</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Em termos de conversa, ele/ela:</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="conversa" value="muito" /><span>Gosta muito — precisa de companhia e papo constante</span></label>
+            <label class="opcao-radio"><input type="radio" name="conversa" value="moderado" /><span>Gosta com moderação — conversa quando quer</span></label>
+            <label class="opcao-radio"><input type="radio" name="conversa" value="silencio" /><span>Prefere silêncio, não é de conversa</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Como ele/ela lida com quem cuida?</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="lida" value="aceita" /><span>Aceita ajuda facilmente</span></label>
+            <label class="opcao-radio"><input type="radio" name="lida" value="resistente" /><span>É resistente, teimoso — precisa de jeito</span></label>
+            <label class="opcao-radio"><input type="radio" name="lida" value="varia" /><span>Varia — depende do humor</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROTINA -->
+      <div class="bloco">
+        <h3>🗓️ Rotina</h3>
+
+        <div class="campo">
+          <label>A rotina do seu familiar é:</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="rotina" value="rigida" /><span>Rígida — horários precisam ser respeitados</span></label>
+            <label class="opcao-radio"><input type="radio" name="rotina" value="flexivel" /><span>Flexível — adapta sem problema</span></label>
+            <label class="opcao-radio"><input type="radio" name="rotina" value="semirigida" /><span>Semirígida — algumas coisas são fixas</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Quais atividades fazem parte do dia? (pode marcar mais de um)</label>
+          <div class="opcoes-check">
+            <label class="opcao-check"><input type="checkbox" name="ativ" value="tv" /><span>TV</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ativ" value="musica" /><span>Música</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ativ" value="leitura" /><span>Leitura</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ativ" value="passeios" /><span>Passeios / ar livre</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ativ" value="jogos" /><span>Jogos / passatempos</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ativ" value="oracao" /><span>Oração / religiosidade</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ativ" value="cozinhar" /><span>Cozinhar junto</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ativ" value="pouco" /><span>Pouco — dorme e descansa bastante</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SAÚDE -->
+      <div class="bloco">
+        <h3>🏥 Condição e cuidados</h3>
+
+        <div class="campo">
+          <label>Nível de dependência física:</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="dependencia" value="independente" /><span>Independente — só precisa de companhia e supervisão</span></label>
+            <label class="opcao-radio"><input type="radio" name="dependencia" value="semi" /><span>Semidependente — precisa de auxílio em algumas tarefas</span></label>
+            <label class="opcao-radio"><input type="radio" name="dependencia" value="dependente" /><span>Dependente — precisa de suporte na maioria das atividades</span></label>
+            <label class="opcao-radio"><input type="radio" name="dependencia" value="acamado" /><span>Acamado</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Há condição diagnosticada? (pode marcar mais de um)</label>
+          <div class="opcoes-check">
+            <label class="opcao-check"><input type="checkbox" name="condicao" value="alzheimer" /><span>Alzheimer / demência</span></label>
+            <label class="opcao-check"><input type="checkbox" name="condicao" value="parkinson" /><span>Parkinson</span></label>
+            <label class="opcao-check"><input type="checkbox" name="condicao" value="depressao" /><span>Depressão / ansiedade</span></label>
+            <label class="opcao-check"><input type="checkbox" name="condicao" value="avc" /><span>AVC com sequelas</span></label>
+            <label class="opcao-check"><input type="checkbox" name="condicao" value="nenhuma" /><span>Nenhuma específica</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Tem restrições alimentares ou medicamentos em horário fixo?</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="medicamento" value="varios" /><span>Sim, vários</span></label>
+            <label class="opcao-radio"><input type="radio" name="medicamento" value="poucos" /><span>Sim, poucos</span></label>
+            <label class="opcao-radio"><input type="radio" name="medicamento" value="nao" /><span>Não</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREFERÊNCIAS -->
+      <div class="bloco">
+        <h3>⚙️ Preferências</h3>
+
+        <div class="campo">
+          <label>Preferência de gênero para a cuidadora?</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="genero" value="feminino" /><span>Feminino</span></label>
+            <label class="opcao-radio"><input type="radio" name="genero" value="masculino" /><span>Masculino</span></label>
+            <label class="opcao-radio"><input type="radio" name="genero" value="indiferente" /><span>Sem preferência</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Ambiente da casa: (pode marcar mais de um)</label>
+          <div class="opcoes-check">
+            <label class="opcao-check"><input type="checkbox" name="ambiente" value="pets" /><span>Tem pets</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ambiente" value="criancas" /><span>Tem crianças</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ambiente" value="fumantes" /><span>Fumantes em casa</span></label>
+            <label class="opcao-check"><input type="checkbox" name="ambiente" value="tranquila" /><span>Casa silenciosa / tranquila</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>O que NÃO funcionou com cuidadoras anteriores? (opcional)</label>
+          <textarea id="nao_funcionou" placeholder="Nos conte o que já tentaram e não deu certo — isso é muito importante pro match."></textarea>
+        </div>
+      </div>
+
+      <button class="btn-enviar" onclick="enviarCadastro()">Quero encontrar a cuidadora certa →</button>
+      <p id="msg-retorno"></p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">KINDER</div>
+    <p>© 2026 Kinder Care · <a href="mailto:contato@kindercare.com.br">contato@kindercare.com.br</a> · <a href="/cuidadores.html">Sou cuidadora</a></p>
+  </footer>
+
+  <script>
+    function getRadio(name) {
+      var el = document.querySelector('input[name="' + name + '"]:checked');
+      return el ? el.value : '';
+    }
+
+    function getChecks(name) {
+      var els = document.querySelectorAll('input[name="' + name + '"]:checked');
+      return Array.from(els).map(function(e) { return e.value; }).join(', ');
+    }
+
+    function enviarCadastro() {
+      var nome = document.getElementById('nome_responsavel').value.trim();
+      var whatsapp = document.getElementById('whatsapp').value.trim();
+      var msg = document.getElementById('msg-retorno');
+
+      if (!nome || !whatsapp) {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Por favor, preencha seu nome e WhatsApp.';
+        return;
+      }
+
+      var btn = document.querySelector('.btn-enviar');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+      msg.textContent = '';
+
+      var dados = {
+        tipo: 'familia',
+        nome_responsavel: nome,
+        whatsapp: whatsapp,
+        email: document.getElementById('email').value.trim(),
+        cidade: document.getElementById('cidade').value.trim(),
+        nome_idoso: document.getElementById('nome_idoso').value.trim(),
+        idade: document.getElementById('idade').value.trim(),
+        reacao: getRadio('reacao'),
+        conversa: getRadio('conversa'),
+        lida: getRadio('lida'),
+        rotina: getRadio('rotina'),
+        atividades: getChecks('ativ'),
+        dependencia: getRadio('dependencia'),
+        condicao: getChecks('condicao'),
+        medicamento: getRadio('medicamento'),
+        genero: getRadio('genero'),
+        ambiente: getChecks('ambiente'),
+        nao_funcionou: document.getElementById('nao_funcionou').value.trim()
+      };
+
+      fetch('https://script.google.com/macros/s/AKfycbwkSjrSa_A9LnZw8HqV84RKZEKV78p6DeKyi4nttJKvZc7Gf5YFnAWJx_dlq5NO2-nYVg/exec', {
+        method: 'POST',
+        body: JSON.stringify(dados)
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.resultado === 'sucesso') {
+          msg.style.color = '#3a4e2a';
+          msg.textContent = '✓ Recebemos! Entraremos em contato em até 24h com as opções de match.';
+          btn.textContent = 'Enviado ✓';
+        } else {
+          throw new Error();
+        }
+      })
+      .catch(function() {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Erro ao enviar. Tente novamente.';
+        btn.textContent = 'Quero encontrar a cuidadora certa →';
+        btn.disabled = false;
+      });
+    }
+  </script>
+
+</body>
+</html>
