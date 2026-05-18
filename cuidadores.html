@@ -615,7 +615,7 @@
       })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        if (data.resultado === 'sucesso') {
+        if (data.status === 'ok') {
           msg.style.color = '#3a4e2a';
           msg.textContent = '✓ Cadastro realizado! Entraremos em contato em breve.';
           btn.textContent = 'Cadastrado ✓';
