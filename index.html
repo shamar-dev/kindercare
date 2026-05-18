@@ -528,6 +528,15 @@
       observer.observe(el);
     });
 
+    /* Máscara WhatsApp */
+    document.getElementById('whatsapp').addEventListener('input', function() {
+      var v = this.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 2) v = v;
+      else if (v.length <= 7) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
+      else v = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+      this.value = v;
+    });
+
     /* FORM */
     function enviarCadastro() {
       var nome = document.getElementById('nome').value.trim();
@@ -536,9 +545,17 @@
       var tipo = document.getElementById('tipo').value;
       var msg = document.getElementById('msg-retorno');
 
+      var emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
       if (!nome || !email) {
         msg.style.color = '#ffddaa';
         msg.textContent = 'Por favor, preencha nome e e-mail.';
+        return;
+      }
+
+      if (!emailValido) {
+        msg.style.color = '#ffddaa';
+        msg.textContent = 'E-mail inválido. Verifique e tente novamente.';
         return;
       }
 
