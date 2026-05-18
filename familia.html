@@ -553,7 +553,7 @@
 
     function getChecks(name) {
       var els = document.querySelectorAll('input[name="' + name + '"]:checked');
-      return Array.from(els).map(function(e) { return e.value; }).join(', ');
+      return Array.from(els).map(function(e) { return e.value; });
     }
 
     function enviarCadastro() {

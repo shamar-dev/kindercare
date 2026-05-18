@@ -572,7 +572,7 @@
 
     function getChecks(name) {
       var els = document.querySelectorAll('input[name="' + name + '"]:checked');
-      return Array.from(els).map(function(e) { return e.value; }).join(', ');
+      return Array.from(els).map(function(e) { return e.value; });
     }
 
     function enviarCadastro() {
@@ -598,10 +598,10 @@
         email: document.getElementById('email').value.trim(),
         cidade: document.getElementById('cidade').value.trim(),
         estilo: getRadio('estilo'),
-        resistencia: getRadio('resistencia'),
+        resistente: getRadio('resistencia'),
         rotina: getRadio('rotina'),
         experiencia: getChecks('exp'),
-        cuidados_fisicos: getRadio('cuidados'),
+        cuidados: getRadio('cuidados'),
         cozinha: getRadio('cozinha'),
         modalidade: getChecks('modal'),
         restricao: getRadio('restricao'),
