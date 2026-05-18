@@ -431,15 +431,29 @@
     <p>Fazemos match entre idosos e cuidadores. Não o primeiro disponível — o certo para o seu familiar.</p>
 
     <div class="form-box">
-      <h2>Por onde você começa?</h2>
-      <p>Cadastre-se e encontre o match certo — é rápido e gratuito.</p>
+      <h2>Seja o primeiro a saber</h2>
+      <p>O Kinder está chegando. Cadastre-se e receba acesso antecipado.</p>
 
-      <a href="/familia.html" class="btn" style="display:block;text-align:center;text-decoration:none;margin-bottom:14px;">
-        👴 Quero encontrar uma cuidadora para meu familiar
-      </a>
-      <a href="/cuidadores.html" style="display:block;text-align:center;color:#b5c4a1;font-size:14px;text-decoration:none;letter-spacing:.3px;">
-        Sou cuidadora — quero me cadastrar →
-      </a>
+      <div class="form-group">
+        <input id="nome" type="text" placeholder="Seu nome" />
+      </div>
+      <div class="form-group">
+        <input id="email" type="email" placeholder="Seu e-mail" />
+      </div>
+      <div class="form-group">
+        <input id="whatsapp" type="tel" placeholder="WhatsApp (opcional)" />
+      </div>
+      <div class="form-group">
+        <select id="tipo">
+          <option value="" disabled selected>Você é...</option>
+          <option value="familia">Familiar de idoso</option>
+          <option value="cuidadora">Cuidadora profissional</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+
+      <button class="btn" onclick="enviarCadastro()">Quero acesso antecipado →</button>
+      <p id="msg-retorno" style="margin-top:14px;font-size:13px;text-align:center;min-height:18px;"></p>
     </div>
   </section>
 
