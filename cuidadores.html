@@ -609,12 +609,8 @@
         aceita_validacao: document.getElementById('aceita_docs').checked ? 'Sim' : 'Não'
       };
 
-      fetch('https://script.google.com/macros/s/AKfycbwQySav4i338RvQRE3gA2syOGQy5wlVV_mA6sKsozSvQlebsjmVaKtJGqx1yQVS3OwKZw/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(dados)
-      })
+      var url = 'https://script.google.com/macros/s/AKfycbwQySav4i338RvQRE3gA2syOGQy5wlVV_mA6sKsozSvQlebsjmVaKtJGqx1yQVS3OwKZw/exec?dados=' + encodeURIComponent(JSON.stringify(dados));
+      fetch(url, { mode: 'no-cors' })
       .then(function() {
         msg.style.color = '#3a4e2a';
         msg.textContent = '✓ Cadastro realizado! Entraremos em contato em breve.';

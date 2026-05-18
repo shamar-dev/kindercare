@@ -593,12 +593,8 @@
         nao_funcionou: document.getElementById('nao_funcionou').value.trim()
       };
 
-      fetch('https://script.google.com/macros/s/AKfycbwQySav4i338RvQRE3gA2syOGQy5wlVV_mA6sKsozSvQlebsjmVaKtJGqx1yQVS3OwKZw/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(dados)
-      })
+      var url = 'https://script.google.com/macros/s/AKfycbwQySav4i338RvQRE3gA2syOGQy5wlVV_mA6sKsozSvQlebsjmVaKtJGqx1yQVS3OwKZw/exec?dados=' + encodeURIComponent(JSON.stringify(dados));
+      fetch(url, { mode: 'no-cors' })
       .then(function() {
         msg.style.color = '#3a4e2a';
         msg.textContent = '✓ Recebemos! Entraremos em contato em até 24h com as opções de match.';
