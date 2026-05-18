@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — Seja uma cuidadora parceira</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f9f8f5;
+      color: #2d2d2d;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #3a4e2a, #4a5e3a);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: white;
+      text-decoration: none;
+    }
+
+    .header-logo span {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    /* HERO */
+    .hero {
+      background:
+        linear-gradient(160deg, rgba(30,45,20,0.90) 0%, rgba(74,94,58,0.82) 100%),
+        url('https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1400&q=80') center/cover no-repeat;
+      color: white;
+      padding: 64px 24px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: #c8d8a0;
+    }
+
+    .hero p {
+      font-size: clamp(15px, 2vw, 18px);
+      opacity: 0.85;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* BENEFICIOS */
+    .beneficios {
+      padding: 56px 24px;
+      background: white;
+      text-align: center;
+    }
+
+    .beneficios h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #3a4e2a;
+      margin-bottom: 40px;
+    }
+
+    .beneficios-grid {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .beneficio {
+      max-width: 220px;
+      text-align: center;
+    }
+
+    .beneficio-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .beneficio h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #3a4e2a;
+      margin-bottom: 6px;
+    }
+
+    .beneficio p {
+      font-size: 13px;
+      color: #777;
+      line-height: 1.6;
+    }
+
+    /* FORMULÁRIO */
+    .form-section {
+      padding: 56px 24px;
+      background: #f9f8f5;
+    }
+
+    .form-container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .form-container h2 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #3a4e2a;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .form-container > p {
+      font-size: 14px;
+      color: #888;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .bloco {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .bloco h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #3a4e2a;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .campo {
+      margin-bottom: 20px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 10px;
+    }
+
+    .campo input[type="text"],
+    .campo input[type="tel"],
+    .campo input[type="email"],
+    .campo textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e0e0e0;
+      font-size: 14px;
+      font-family: 'Nunito', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+
+    .campo input:focus,
+    .campo textarea:focus {
+      border-color: #6b7c52;
+      background: white;
+    }
+
+    .campo textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .opcoes-radio {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .opcao-radio {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1.5px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafafa;
+    }
+
+    .opcao-radio:hover {
+      border-color: #6b7c52;
+      background: #f5f8f0;
+    }
+
+    .opcao-radio input[type="radio"] {
+      accent-color: #4a5e3a;
+      width: 16px;
+      height: 16px;
+    }
+
+    .opcao-radio span {
+      font-size: 14px;
+      color: #444;
+    }
+
+    .opcoes-check {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .opcao-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafafa;
+    }
+
+    .opcao-check:hover {
+      border-color: #6b7c52;
+      background: #f5f8f0;
+    }
+
+    .opcao-check input[type="checkbox"] {
+      accent-color: #4a5e3a;
+      width: 16px;
+      height: 16px;
+    }
+
+    .opcao-check span {
+      font-size: 14px;
+      color: #444;
+    }
+
+    .termo {
+      background: #f0f4ea;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+      border: 1px solid #d4e0c0;
+    }
+
+    .termo strong {
+      color: #3a4e2a;
+    }
+
+    .btn-enviar {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #4a5e3a, #6b7c52);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(74,94,58,0.3);
+      letter-spacing: 0.5px;
+    }
+
+    .btn-enviar:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(74,94,58,0.4);
+    }
+
+    .btn-enviar:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    #msg-retorno {
+      margin-top: 16px;
+      font-size: 14px;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #1e2a14;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+    }
+
+    footer a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+    }
+
+    footer a:hover { color: #c8d8a0; }
+
+    .footer-logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <a href="/" class="header-logo"><span>🤍</span> KINDER</a>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Seja uma cuidadora <em>Kinder</em></h1>
+    <p>Conectamos você às famílias certas — não qualquer família. O match é por compatibilidade real, pra você trabalhar bem e o idoso ser bem cuidado.</p>
+  </section>
+
+  <!-- BENEFÍCIOS -->
+  <section class="beneficios">
+    <h2>Por que se cadastrar no Kinder?</h2>
+    <div class="beneficios-grid">
+      <div class="beneficio">
+        <div class="beneficio-icon">🎯</div>
+        <h3>Match real</h3>
+        <p>Você só recebe indicações de famílias compatíveis com seu perfil e estilo de trabalho.</p>
+      </div>
+      <div class="beneficio">
+        <div class="beneficio-icon">🤝</div>
+        <h3>Você é autônoma</h3>
+        <p>O contrato é direto com a família. Sem vínculo empregatício com o Kinder.</p>
+      </div>
+      <div class="beneficio">
+        <div class="beneficio-icon">⭐</div>
+        <h3>Clientes qualificados</h3>
+        <p>Famílias que chegam pelo Kinder já passaram por triagem e sabem o que precisam.</p>
+      </div>
+      <div class="beneficio">
+        <div class="beneficio-icon">🛡️</div>
+        <h3>Sem surpresas</h3>
+        <p>Você sabe antes de aceitar: o perfil do idoso, a rotina, as condições do trabalho.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMULÁRIO -->
+  <section class="form-section">
+    <div class="form-container">
+      <h2>Cadastre seu perfil</h2>
+      <p>Preencha com honestidade — quanto mais preciso seu perfil, melhor o match.</p>
+
+      <!-- DADOS PESSOAIS -->
+      <div class="bloco">
+        <h3>📋 Dados pessoais</h3>
+        <div class="campo">
+          <label>Nome completo *</label>
+          <input type="text" id="nome" placeholder="Seu nome completo" />
+        </div>
+        <div class="campo">
+          <label>WhatsApp *</label>
+          <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" />
+        </div>
+        <div class="campo">
+          <label>E-mail</label>
+          <input type="email" id="email" placeholder="seu@email.com (opcional)" />
+        </div>
+        <div class="campo">
+          <label>Cidade / Bairro onde atua *</label>
+          <input type="text" id="cidade" placeholder="Ex: São Paulo — Mooca, Vila Mariana..." />
+        </div>
+      </div>
+
+      <!-- ESTILO DE TRABALHO -->
+      <div class="bloco">
+        <h3>💬 Estilo de trabalho</h3>
+
+        <div class="campo">
+          <label>Como você se descreve no trabalho?</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio">
+              <input type="radio" name="estilo" value="comunicativa" />
+              <span>Comunicativa — gosto de conversar com quem cuido</span>
+            </label>
+            <label class="opcao-radio">
+              <input type="radio" name="estilo" value="tranquila" />
+              <span>Tranquila — falo quando necessário</span>
+            </label>
+            <label class="opcao-radio">
+              <input type="radio" name="estilo" value="adapto" />
+              <span>Me adapto ao que o idoso prefere</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Como lida com idosos resistentes ou teimosos?</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio">
+              <input type="radio" name="resistencia" value="facilidade" />
+              <span>Tenho facilidade — sei contornar com paciência</span>
+            </label>
+            <label class="opcao-radio">
+              <input type="radio" name="resistencia" value="desafiador" />
+              <span>É desafiador, mas consigo</span>
+            </label>
+            <label class="opcao-radio">
+              <input type="radio" name="resistencia" value="tranquilos" />
+              <span>Prefiro idosos mais tranquilos</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Prefere rotinas:</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio">
+              <input type="radio" name="rotina" value="definidas" />
+              <span>Bem definidas — gosto de saber o que esperar</span>
+            </label>
+            <label class="opcao-radio">
+              <input type="radio" name="rotina" value="flexiveis" />
+              <span>Flexíveis — me adapto bem ao imprevisível</span>
+            </label>
+            <label class="opcao-radio">
+              <input type="radio" name="rotina" value="indiferente" />
+              <span>Indiferente</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPERIÊNCIA -->
+      <div class="bloco">
+        <h3>👩‍⚕️ Experiência e habilidades</h3>
+
+        <div class="campo">
+          <label>Tem experiência com: (pode marcar mais de um)</label>
+          <div class="opcoes-check">
+            <label class="opcao-check"><input type="checkbox" name="exp" value="alzheimer" /><span>Alzheimer / demência</span></label>
+            <label class="opcao-check"><input type="checkbox" name="exp" value="parkinson" /><span>Parkinson</span></label>
+            <label class="opcao-check"><input type="checkbox" name="exp" value="acamados" /><span>Pacientes acamados</span></label>
+            <label class="opcao-check"><input type="checkbox" name="exp" value="avc" /><span>Reabilitação pós-AVC</span></label>
+            <label class="opcao-check"><input type="checkbox" name="exp" value="paliativos" /><span>Cuidados paliativos</span></label>
+            <label class="opcao-check"><input type="checkbox" name="exp" value="nenhum" /><span>Nenhum específico ainda</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Nível de conforto com cuidados físicos:</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio">
+              <input type="radio" name="cuidados" value="todos" />
+              <span>Confortável com todos (banho, troca, mobilidade)</span>
+            </label>
+            <label class="opcao-radio">
+              <input type="radio" name="cuidados" value="maioria" />
+              <span>Confortável com a maioria, exceto alguns</span>
+            </label>
+            <label class="opcao-radio">
+              <input type="radio" name="cuidados" value="menor" />
+              <span>Prefiro casos de menor dependência física</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Sabe cozinhar ou tem interesse em cozinhar junto com o idoso?</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="cozinha" value="sim" /><span>Sim, gosto</span></label>
+            <label class="opcao-radio"><input type="radio" name="cozinha" value="basico" /><span>Faço o básico</span></label>
+            <label class="opcao-radio"><input type="radio" name="cozinha" value="nao" /><span>Prefiro não — foco no cuidado</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISPONIBILIDADE -->
+      <div class="bloco">
+        <h3>🗓️ Disponibilidade e limites</h3>
+
+        <div class="campo">
+          <label>Modalidade disponível: (pode marcar mais de um)</label>
+          <div class="opcoes-check">
+            <label class="opcao-check"><input type="checkbox" name="modal" value="diurno" /><span>Diurno (6h-12h por dia)</span></label>
+            <label class="opcao-check"><input type="checkbox" name="modal" value="integral" /><span>Integral (12h)</span></label>
+            <label class="opcao-check"><input type="checkbox" name="modal" value="pernoite" /><span>Pernoite</span></label>
+            <label class="opcao-check"><input type="checkbox" name="modal" value="24h" /><span>Plantão 24h</span></label>
+            <label class="opcao-check"><input type="checkbox" name="modal" value="fds" /><span>Fins de semana</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Tem restrições de ambiente?</label>
+          <div class="opcoes-radio">
+            <label class="opcao-radio"><input type="radio" name="restricao" value="fumantes" /><span>Não trabalho em casa com fumantes</span></label>
+            <label class="opcao-radio"><input type="radio" name="restricao" value="pets" /><span>Não trabalho com pets</span></label>
+            <label class="opcao-radio"><input type="radio" name="restricao" value="nenhuma" /><span>Sem restrições</span></label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label>Qual situação você NÃO se sente preparada para lidar? (opcional)</label>
+          <textarea id="limite" placeholder="Seja honesta — isso nos ajuda a fazer o match certo pra você também."></textarea>
+        </div>
+      </div>
+
+      <!-- TERMO -->
+      <div class="termo">
+        <strong>Importante:</strong> Ao se cadastrar, você entende que o Kinder é uma plataforma de intermediação. Você é profissional autônoma — o contrato de serviço será direto com a família contratante. O Kinder não é seu empregador.
+      </div>
+
+      <button class="btn-enviar" onclick="enviarCadastro()">Quero me cadastrar como cuidadora →</button>
+      <p id="msg-retorno"></p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">KINDER</div>
+    <p>© 2026 Kinder Care · <a href="mailto:contato@kindercare.com.br">contato@kindercare.com.br</a> · <a href="/">Para famílias</a></p>
+  </footer>
+
+  <script>
+    function getRadio(name) {
+      var el = document.querySelector('input[name="' + name + '"]:checked');
+      return el ? el.value : '';
+    }
+
+    function getChecks(name) {
+      var els = document.querySelectorAll('input[name="' + name + '"]:checked');
+      return Array.from(els).map(function(e) { return e.value; }).join(', ');
+    }
+
+    function enviarCadastro() {
+      var nome = document.getElementById('nome').value.trim();
+      var whatsapp = document.getElementById('whatsapp').value.trim();
+      var msg = document.getElementById('msg-retorno');
+
+      if (!nome || !whatsapp) {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Por favor, preencha nome e WhatsApp.';
+        return;
+      }
+
+      var btn = document.querySelector('.btn-enviar');
+      btn.textContent = 'Enviando...';
+      btn.disabled = true;
+      msg.textContent = '';
+
+      var dados = {
+        tipo: 'cuidadora',
+        nome: nome,
+        whatsapp: whatsapp,
+        email: document.getElementById('email').value.trim(),
+        cidade: document.getElementById('cidade').value.trim(),
+        estilo: getRadio('estilo'),
+        resistencia: getRadio('resistencia'),
+        rotina: getRadio('rotina'),
+        experiencia: getChecks('exp'),
+        cuidados_fisicos: getRadio('cuidados'),
+        cozinha: getRadio('cozinha'),
+        modalidade: getChecks('modal'),
+        restricao: getRadio('restricao'),
+        limite: document.getElementById('limite').value.trim()
+      };
+
+      fetch('https://script.google.com/macros/s/AKfycbwkSjrSa_A9LnZw8HqV84RKZEKV78p6DeKyi4nttJKvZc7Gf5YFnAWJx_dlq5NO2-nYVg/exec', {
+        method: 'POST',
+        body: JSON.stringify(dados)
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.resultado === 'sucesso') {
+          msg.style.color = '#3a4e2a';
+          msg.textContent = '✓ Cadastro realizado! Entraremos em contato em breve.';
+          btn.textContent = 'Cadastrado ✓';
+        } else {
+          throw new Error();
+        }
+      })
+      .catch(function() {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Erro ao enviar. Tente novamente.';
+        btn.textContent = 'Quero me cadastrar como cuidadora →';
+        btn.disabled = false;
+      });
+    }
+  </script>
+
+</body>
+</html>
