@@ -609,7 +609,7 @@
         aceita_validacao: document.getElementById('aceita_docs').checked ? 'Sim' : 'Não'
       };
 
-      var url = 'https://script.google.com/macros/s/AKfycbwQySav4i338RvQRE3gA2syOGQy5wlVV_mA6sKsozSvQlebsjmVaKtJGqx1yQVS3OwKZw/exec?dados=' + encodeURIComponent(JSON.stringify(dados));
+      var url = 'https://script.google.com/macros/s/AKfycbwpOnBJ4gZy_LfLB4Pv_QoCkUvCfd7L1plaqAHRO1K-RSj-mxpWX-SD-swwIn3bHmpj2g/exec?dados=' + encodeURIComponent(JSON.stringify(dados));
       fetch(url, { mode: 'no-cors' })
       .then(function() {
         msg.style.color = '#3a4e2a';
