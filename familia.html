@@ -381,19 +381,27 @@
         <h3>👤 Seus dados (responsável)</h3>
         <div class="campo">
           <label>Seu nome completo *</label>
-          <input type="text" id="nome_responsavel" placeholder="Seu nome" />
+          <input type="text" id="nome_responsavel" placeholder="Nome e sobrenome" />
         </div>
         <div class="campo">
           <label>WhatsApp *</label>
           <input type="tel" id="whatsapp" placeholder="(11) 99999-9999" />
         </div>
         <div class="campo">
-          <label>E-mail</label>
-          <input type="email" id="email" placeholder="seu@email.com (opcional)" />
+          <label>E-mail *</label>
+          <input type="email" id="email" placeholder="seu@email.com" />
         </div>
         <div class="campo">
-          <label>Bairro / Cidade *</label>
-          <input type="text" id="cidade" placeholder="Ex: São Paulo — Vila Mariana" />
+          <label>CEP *</label>
+          <input type="text" id="cep" placeholder="00000-000" inputmode="numeric" maxlength="9" />
+        </div>
+        <div class="campo">
+          <label>Endereço completo *</label>
+          <input type="text" id="endereco" placeholder="Rua, número, bairro" />
+        </div>
+        <div class="campo">
+          <label>Cidade *</label>
+          <input type="text" id="cidade" placeholder="Ex: São Paulo" />
         </div>
       </div>
 
@@ -556,14 +564,44 @@
       return Array.from(els).map(function(e) { return e.value; });
     }
 
+    /* Máscara WhatsApp */
+    document.getElementById('whatsapp').addEventListener('input', function() {
+      var v = this.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 2) v = v;
+      else if (v.length <= 7) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
+      else v = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+      this.value = v;
+    });
+
+    /* Máscara CEP */
+    document.getElementById('cep').addEventListener('input', function() {
+      var v = this.value.replace(/\D/g, '').slice(0, 8);
+      if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+      this.value = v;
+    });
+
     function enviarCadastro() {
       var nome = document.getElementById('nome_responsavel').value.trim();
       var whatsapp = document.getElementById('whatsapp').value.trim();
+      var email = document.getElementById('email').value.trim();
       var msg = document.getElementById('msg-retorno');
 
-      if (!nome || !whatsapp) {
+      var nomeCompleto = nome.trim().split(/\s+/).length >= 2;
+      var emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      if (!nome || !whatsapp || !email) {
         msg.style.color = '#c0392b';
-        msg.textContent = 'Por favor, preencha seu nome e WhatsApp.';
+        msg.textContent = 'Por favor, preencha nome, WhatsApp e e-mail.';
+        return;
+      }
+      if (!nomeCompleto) {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Por favor, informe seu nome completo (nome e sobrenome).';
+        return;
+      }
+      if (!emailValido) {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'E-mail inválido. Verifique e tente novamente.';
         return;
       }
 
@@ -576,7 +614,9 @@
         tipo: 'familia',
         nome_responsavel: nome,
         whatsapp: whatsapp,
-        email: document.getElementById('email').value.trim(),
+        email: email,
+        cep: document.getElementById('cep').value.trim(),
+        endereco: document.getElementById('endereco').value.trim(),
         cidade: document.getElementById('cidade').value.trim(),
         nome_idoso: document.getElementById('nome_idoso').value.trim(),
         idade: document.getElementById('idade').value.trim(),
