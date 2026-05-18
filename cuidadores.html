@@ -545,6 +545,14 @@
         <strong>Importante:</strong> Ao se cadastrar, você entende que o Kinder é uma plataforma de intermediação. Você é profissional autônoma — o contrato de serviço será direto com a família contratante. O Kinder não é seu empregador.
       </div>
 
+      <!-- VALIDAÇÃO DOCUMENTAL -->
+      <div class="termo" style="margin-top:12px;display:flex;align-items:flex-start;gap:14px;">
+        <input type="checkbox" id="aceita_docs" style="width:18px;height:18px;flex-shrink:0;margin-top:3px;accent-color:#4a5e3a;cursor:pointer;" />
+        <label for="aceita_docs" style="font-size:14px;color:#555;line-height:1.6;cursor:pointer;">
+          <strong>Entendo e topo:</strong> em breve o Kinder solicitará RG, CPF e certidão de antecedentes criminais para validar meu cadastro e garantir a segurança das famílias atendidas.
+        </label>
+      </div>
+
       <button class="btn-enviar" onclick="enviarCadastro()">Quero me cadastrar como cuidadora →</button>
       <p id="msg-retorno"></p>
     </div>
@@ -597,7 +605,8 @@
         cozinha: getRadio('cozinha'),
         modalidade: getChecks('modal'),
         restricao: getRadio('restricao'),
-        limite: document.getElementById('limite').value.trim()
+        limite: document.getElementById('limite').value.trim(),
+        aceita_validacao: document.getElementById('aceita_docs').checked ? 'Sim' : 'Não'
       };
 
       fetch('https://script.google.com/macros/s/AKfycbwkSjrSa_A9LnZw8HqV84RKZEKV78p6DeKyi4nttJKvZc7Gf5YFnAWJx_dlq5NO2-nYVg/exec', {
