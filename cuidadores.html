@@ -402,8 +402,16 @@
           <input type="email" id="email" placeholder="seu@email.com (opcional)" />
         </div>
         <div class="campo">
-          <label>Cidade / Bairro onde atua *</label>
-          <input type="text" id="cidade" placeholder="Ex: São Paulo — Mooca, Vila Mariana..." />
+          <label>CEP *</label>
+          <input type="text" id="cep" placeholder="00000-000" inputmode="numeric" maxlength="9" />
+        </div>
+        <div class="campo">
+          <label>Endereço completo *</label>
+          <input type="text" id="endereco" placeholder="Rua, número, bairro" />
+        </div>
+        <div class="campo">
+          <label>Cidade *</label>
+          <input type="text" id="cidade" placeholder="Ex: São Paulo" />
         </div>
       </div>
 
@@ -575,14 +583,44 @@
       return Array.from(els).map(function(e) { return e.value; });
     }
 
+    /* Máscara WhatsApp */
+    document.getElementById('whatsapp').addEventListener('input', function() {
+      var v = this.value.replace(/\D/g, '').slice(0, 11);
+      if (v.length <= 2) v = v;
+      else if (v.length <= 7) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
+      else v = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+      this.value = v;
+    });
+
+    /* Máscara CEP */
+    document.getElementById('cep').addEventListener('input', function() {
+      var v = this.value.replace(/\D/g, '').slice(0, 8);
+      if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+      this.value = v;
+    });
+
     function enviarCadastro() {
       var nome = document.getElementById('nome').value.trim();
       var whatsapp = document.getElementById('whatsapp').value.trim();
+      var email = document.getElementById('email').value.trim();
       var msg = document.getElementById('msg-retorno');
+
+      var nomeCompleto = nome.trim().split(/\s+/).length >= 2;
+      var emailValido = !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
       if (!nome || !whatsapp) {
         msg.style.color = '#c0392b';
         msg.textContent = 'Por favor, preencha nome e WhatsApp.';
+        return;
+      }
+      if (!nomeCompleto) {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Por favor, informe seu nome completo (nome e sobrenome).';
+        return;
+      }
+      if (!emailValido) {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'E-mail inválido. Verifique e tente novamente.';
         return;
       }
 
@@ -595,7 +633,9 @@
         tipo: 'cuidadora',
         nome: nome,
         whatsapp: whatsapp,
-        email: document.getElementById('email').value.trim(),
+        email: email,
+        cep: document.getElementById('cep').value.trim(),
+        endereco: document.getElementById('endereco').value.trim(),
         cidade: document.getElementById('cidade').value.trim(),
         estilo: getRadio('estilo'),
         resistente: getRadio('resistencia'),
