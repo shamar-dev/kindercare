@@ -386,6 +386,17 @@
       <h2>Cadastre seu perfil</h2>
       <p>Preencha com honestidade — quanto mais preciso seu perfil, melhor o match.</p>
 
+      <!-- BARRA DE PROGRESSO -->
+      <div style="margin-bottom:28px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:13px;color:#888;">Completude do perfil</span>
+          <span id="progresso-label" style="font-size:13px;font-weight:700;color:#4a5e3a;">0%</span>
+        </div>
+        <div style="background:#e8e8e8;border-radius:99px;height:8px;overflow:hidden;">
+          <div id="progresso-barra" style="height:100%;width:0%;background:linear-gradient(90deg,#6b7c52,#c8d8a0);border-radius:99px;transition:width 0.3s ease;"></div>
+        </div>
+      </div>
+
       <!-- DADOS PESSOAIS -->
       <div class="bloco">
         <h3>📋 Dados pessoais</h3>
@@ -624,6 +635,16 @@
         return;
       }
 
+      var cep = document.getElementById('cep').value.trim();
+      var endereco = document.getElementById('endereco').value.trim();
+      var cidade = document.getElementById('cidade').value.trim();
+
+      if (!cep || !endereco || !cidade) {
+        msg.style.color = '#c0392b';
+        msg.textContent = 'Por favor, preencha CEP, endereço e cidade.';
+        return;
+      }
+
       var btn = document.querySelector('.btn-enviar');
       btn.textContent = 'Enviando...';
       btn.disabled = true;
@@ -655,7 +676,36 @@
         btn.textContent = 'Cadastrado ✓';
       }
 
-      fetch('https://script.google.com/macros/s/AKfycbwgZeQX2e4PEsQgZveWPPyz5pN_ClhZYQ4IjAYUvveUe6xpMFh3yHMFvl1rm_Qi8tIToQ/exec', {
+      /* BARRA DE PROGRESSO */
+    function atualizarProgresso() {
+      var campos = [
+        document.getElementById('nome').value.trim(),
+        document.getElementById('whatsapp').value.trim(),
+        document.getElementById('email').value.trim(),
+        document.getElementById('cep').value.trim(),
+        document.getElementById('endereco').value.trim(),
+        document.getElementById('cidade').value.trim(),
+        getRadio('estilo'),
+        getRadio('resistencia'),
+        getRadio('rotina'),
+        getChecks('exp').length > 0 ? 'ok' : '',
+        getRadio('cuidados'),
+        getRadio('cozinha'),
+        getChecks('modal').length > 0 ? 'ok' : '',
+        getRadio('restricao')
+      ];
+      var preenchidos = campos.filter(function(v) { return v !== ''; }).length;
+      var pct = Math.round((preenchidos / campos.length) * 100);
+      document.getElementById('progresso-barra').style.width = pct + '%';
+      document.getElementById('progresso-label').textContent = pct + '%';
+    }
+
+    document.querySelectorAll('input, textarea, select').forEach(function(el) {
+      el.addEventListener('input', atualizarProgresso);
+      el.addEventListener('change', atualizarProgresso);
+    });
+
+    fetch('https://script.google.com/macros/s/AKfycbwgZeQX2e4PEsQgZveWPPyz5pN_ClhZYQ4IjAYUvveUe6xpMFh3yHMFvl1rm_Qi8tIToQ/exec', {
         method: 'POST',
         body: JSON.stringify(dados)
       })
