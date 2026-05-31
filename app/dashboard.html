@@ -299,6 +299,38 @@
     .feedback.ok    { background: #eef3e8; color: #3a4e2a; display: block; }
     .feedback.erro  { background: #fdecea; color: #c0392b; display: block; }
 
+    /* UPLOAD AREA */
+    .upload-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 1.5px dashed #ddd;
+      border-radius: 10px;
+      background: #fafafa;
+      cursor: not-allowed;
+      margin-top: 6px;
+      position: relative;
+    }
+
+    .upload-icone { font-size: 18px; }
+
+    .upload-texto {
+      font-size: 14px;
+      color: #bbb;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .upload-em-breve {
+      font-size: 11px;
+      font-weight: 700;
+      background: #f0f0f0;
+      color: #aaa;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+
     /* ZONA PERIGO */
     .zona-perigo {
       background: white;
@@ -521,6 +553,72 @@
 
       <button class="btn-salvar" onclick="salvarSecao('profissional')">Salvar perfil profissional</button>
       <div class="feedback" id="fb-profissional"></div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: DOCUMENTOS -->
+  <div class="secao" id="sec-documentos">
+    <div class="secao-header" onclick="toggleSecao('sec-documentos')">
+      <div class="secao-titulo"><span class="secao-icone">📎</span> Foto e documentos</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+
+      <div style="background:#f7faf3;border:1.5px solid #c8d8a0;border-radius:10px;padding:14px 16px;margin-top:14px;margin-bottom:20px;font-size:13px;color:#4a5e3a;line-height:1.6;">
+        🔒 Seus documentos ficam armazenados com segurança e são usados apenas para validação do cadastro. Nenhuma família tem acesso direto a eles.
+      </div>
+
+      <!-- FOTO DE PERFIL -->
+      <div class="campo">
+        <label>Foto de perfil</label>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:6px;">
+          <div id="foto-preview" style="width:72px;height:72px;border-radius:50%;background:#e8e8e8;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;">
+            👤
+          </div>
+          <div>
+            <div class="upload-area" data-campo="foto">
+              <span class="upload-icone">📷</span>
+              <span class="upload-texto">Escolher foto</span>
+              <span class="upload-em-breve">Em breve</span>
+            </div>
+            <div style="font-size:11px;color:#aaa;margin-top:6px;">JPG ou PNG · máx. 5MB</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RG -->
+      <div class="campo" style="margin-top:20px;">
+        <label>RG <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa;">frente e verso</span></label>
+        <div class="upload-area" data-campo="rg">
+          <span class="upload-icone">🪪</span>
+          <span class="upload-texto">Enviar RG</span>
+          <span class="upload-em-breve">Em breve</span>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-top:6px;">JPG, PNG ou PDF · máx. 10MB</div>
+      </div>
+
+      <!-- CPF -->
+      <div class="campo">
+        <label>CPF</label>
+        <div class="upload-area" data-campo="cpf">
+          <span class="upload-icone">📄</span>
+          <span class="upload-texto">Enviar CPF</span>
+          <span class="upload-em-breve">Em breve</span>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-top:6px;">JPG, PNG ou PDF · máx. 10MB</div>
+      </div>
+
+      <!-- ANTECEDENTES -->
+      <div class="campo">
+        <label>Certidão de antecedentes criminais</label>
+        <div class="upload-area" data-campo="antecedentes">
+          <span class="upload-icone">📋</span>
+          <span class="upload-texto">Enviar certidão</span>
+          <span class="upload-em-breve">Em breve</span>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-top:6px;">PDF · emitida há no máximo 90 dias · máx. 10MB</div>
+      </div>
+
     </div>
   </div>
 
