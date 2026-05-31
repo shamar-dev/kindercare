@@ -566,24 +566,35 @@
     if (!user) { window.location.href = './login.html'; return; }
     currentUser = user;
 
-    // Cria documento se não existir
-    const ref = doc(db, 'cuidadores', user.uid);
-    const snap = await getDoc(ref);
+    try {
+      const ref  = doc(db, 'cuidadores', user.uid);
+      const snap = await getDoc(ref);
 
-    if (!snap.exists()) {
-      await setDoc(ref, {
-        nome: user.displayName || '',
-        email: user.email,
-        status: 'pendente',
-        criadoEm: new Date().toISOString(),
-        perfil: {}
-      });
-      dadosFirestore = { nome: user.displayName || '', email: user.email, status: 'pendente', perfil: {} };
-    } else {
-      dadosFirestore = snap.data();
+      if (!snap.exists()) {
+        const novoDoc = {
+          nome: user.displayName || '',
+          email: user.email,
+          status: 'pendente',
+          criadoEm: new Date().toISOString(),
+          perfil: {}
+        };
+        await setDoc(ref, novoDoc);
+        dadosFirestore = novoDoc;
+      } else {
+        dadosFirestore = snap.data();
+      }
+
+      carregarUI(user, dadosFirestore);
+
+    } catch (e) {
+      console.error('Erro Firestore:', e.code, e.message);
+      document.getElementById('loading').innerHTML =
+        '<div style="text-align:center;padding:40px;">' +
+        '<p style="color:#c0392b;font-weight:700;margin-bottom:8px;">Erro ao carregar perfil</p>' +
+        '<p style="color:#888;font-size:13px;margin-bottom:16px;">' + (e.code || e.message) + '</p>' +
+        '<button onclick="location.reload()" style="padding:10px 20px;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer;">Tentar novamente</button>' +
+        '</div>';
     }
-
-    carregarUI(user, dadosFirestore);
   });
 
   function carregarUI(user, dados) {
