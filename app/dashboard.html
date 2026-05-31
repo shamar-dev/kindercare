@@ -647,11 +647,8 @@
     const nome     = document.getElementById('p-nome').value.trim();
     const whatsapp = document.getElementById('p-whatsapp').value.trim();
     const cep      = document.getElementById('p-cep').value.trim();
-    const endereco = document.getElementById('p-endereco').value.trim();
+    const numero   = document.getElementById('p-numero').value.trim();
     const cidade   = document.getElementById('p-cidade').value.trim();
-
-    const numero = document.getElementById('p-numero').value.trim();
-    const cidade = document.getElementById('p-cidade').value.trim();
 
     if (!nome) { mostrarFeedback(fb, 'erro', 'Nome é obrigatório.'); return false; }
     if (nome.split(' ').filter(p => p).length < 2) {
