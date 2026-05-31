@@ -438,8 +438,8 @@
         <label>Estilo de trabalho</label>
         <div class="opcoes" id="opc-estilo">
           <button class="opcao-btn" onclick="toggleOpcao(this,'estilo')">comunicativa</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'estilo')">tranquila</button>
           <button class="opcao-btn" onclick="toggleOpcao(this,'estilo')">adapto</button>
-          <button class="opcao-btn" onclick="toggleOpcao(this,'estilo')">reservada</button>
         </div>
       </div>
 
@@ -448,6 +448,7 @@
         <div class="opcoes" id="opc-resistente">
           <button class="opcao-btn" onclick="toggleOpcao(this,'resistente')">facilidade</button>
           <button class="opcao-btn" onclick="toggleOpcao(this,'resistente')">desafiador</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'resistente')">tranquilos</button>
         </div>
       </div>
 
@@ -463,7 +464,7 @@
       <div class="campo">
         <label>Experiência (pode marcar mais de um)</label>
         <div class="opcoes" id="opc-experiencia">
-          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">sem experiência</button>
+          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">nenhum</button>
           <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">alzheimer</button>
           <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">parkinson</button>
           <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">acamados</button>
@@ -505,8 +506,17 @@
       </div>
 
       <div class="campo">
-        <label>Restrição</label>
-        <input type="text" id="p-restricao" placeholder="Ex: fumantes, pets (ou deixe vazio)">
+        <label>Restrição de ambiente</label>
+        <div class="opcoes" id="opc-restricao">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'restricao')">nenhuma</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'restricao')">fumantes</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'restricao')">pets</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Não se sente preparado(a) para <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+        <input type="text" id="p-limite" placeholder="Ex: pacientes acamados, PCR...">
       </div>
 
       <button class="btn-salvar" onclick="salvarSecao('profissional')">Salvar perfil profissional</button>
@@ -633,8 +643,10 @@
     if (p.rotina)      marcarOpcao('opc-rotina', p.rotina);
     if (p.cuidados)    marcarOpcao('opc-cuidados', p.cuidados);
     if (p.cozinha)     marcarOpcao('opc-cozinha', p.cozinha);
+    if (p.restricao)   marcarOpcao('opc-restricao', p.restricao);
     if (p.experiencia) marcarMulti('opc-experiencia', p.experiencia);
     if (p.modalidade)  marcarMulti('opc-modalidade', p.modalidade);
+    document.getElementById('p-limite').value = p.limite || '';
 
     atualizarProgresso();
 
@@ -673,6 +685,7 @@
     if (!getOpcaoSelecionada('opc-cuidados'))   { mostrarFeedback(fb, 'erro', 'Selecione nível de cuidados físicos.'); return false; }
     if (!getOpcaoSelecionada('opc-cozinha'))    { mostrarFeedback(fb, 'erro', 'Selecione opção de cozinha.'); return false; }
     if (!getMultiSelecionados('opc-modalidade').length) { mostrarFeedback(fb, 'erro', 'Selecione ao menos uma modalidade.'); return false; }
+    if (!getOpcaoSelecionada('opc-restricao'))  { mostrarFeedback(fb, 'erro', 'Selecione sua restrição de ambiente.'); return false; }
     return true;
   }
 
@@ -716,7 +729,8 @@
           'perfil.cozinha':     getOpcaoSelecionada('opc-cozinha'),
           'perfil.experiencia': getMultiSelecionados('opc-experiencia'),
           'perfil.modalidade':  getMultiSelecionados('opc-modalidade'),
-          'perfil.restricao':   document.getElementById('p-restricao').value.trim(),
+          'perfil.restricao':   getOpcaoSelecionada('opc-restricao'),
+          'perfil.limite':      document.getElementById('p-limite').value.trim(),
         };
       }
 
