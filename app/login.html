@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — Área do Cuidador</title>
+  <link rel="icon" type="image/png" href="../Kinder_Coracao.png">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f0f2ec;
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #3a4e2a;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #c8d8a0;
+      letter-spacing: 3px;
+      text-decoration: none;
+    }
+
+    .logo span { margin-right: 8px; }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .card-titulo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #2d2d2d;
+      margin-bottom: 6px;
+    }
+
+    .card-sub {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 28px;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 28px;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #aaa;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .tab.ativo {
+      color: #3a4e2a;
+      border-bottom-color: #3a4e2a;
+    }
+
+    /* FORM */
+    .campo {
+      margin-bottom: 16px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .campo input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      color: #2d2d2d;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .campo input:focus { border-color: #6b7c52; }
+    .campo input.erro { border-color: #e74c3c; }
+
+    .btn-principal {
+      width: 100%;
+      padding: 14px;
+      background: #3a4e2a;
+      color: #c8d8a0;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-principal:hover { background: #2d3e20; }
+    .btn-principal:disabled { background: #aaa; cursor: not-allowed; }
+
+    .link-recuperar {
+      display: block;
+      text-align: right;
+      font-size: 13px;
+      color: #6b7c52;
+      text-decoration: none;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .link-recuperar:hover { text-decoration: underline; }
+
+    /* MENSAGENS */
+    .msg {
+      font-size: 13px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .msg.erro { background: #fdecea; color: #c0392b; display: block; }
+    .msg.ok   { background: #eef3e8; color: #3a4e2a; display: block; }
+
+    /* PAINEL RECUPERAR SENHA */
+    .painel { display: none; }
+    .painel.ativo { display: block; }
+    .form-section { display: none; }
+    .form-section.ativo { display: block; }
+
+    .btn-voltar {
+      background: none;
+      border: none;
+      color: #6b7c52;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-voltar:hover { text-decoration: underline; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    footer a { color: #6b7c52; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="logo"><span>🤍</span> KINDER</a>
+</header>
+
+<main>
+  <div class="card">
+
+    <!-- LOGIN / CADASTRO -->
+    <div class="form-section ativo" id="secao-auth">
+      <div class="card-titulo">Área do Cuidador</div>
+      <div class="card-sub">Acesse seu perfil ou crie sua conta</div>
+
+      <div class="tabs">
+        <div class="tab ativo" id="tab-login" onclick="mostrarTab('login')">Entrar</div>
+        <div class="tab" id="tab-cadastro" onclick="mostrarTab('cadastro')">Criar conta</div>
+      </div>
+
+      <div id="msg-auth" class="msg"></div>
+
+      <!-- LOGIN -->
+      <div id="form-login">
+        <div class="campo">
+          <label>E-mail</label>
+          <input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="campo">
+          <label>Senha</label>
+          <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <a href="#" class="link-recuperar" onclick="mostrarRecuperar(); return false;">Esqueci minha senha</a>
+        <button class="btn-principal" id="btn-login" onclick="fazerLogin()">Entrar →</button>
+      </div>
+
+      <!-- CADASTRO -->
+      <div id="form-cadastro" style="display:none;">
+        <div class="campo">
+          <label>Nome completo</label>
+          <input type="text" id="cad-nome" placeholder="Seu nome completo" autocomplete="name">
+        </div>
+        <div class="campo">
+          <label>E-mail</label>
+          <input type="email" id="cad-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="campo">
+          <label>Senha</label>
+          <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        </div>
+        <div class="campo">
+          <label>Confirmar senha</label>
+          <input type="password" id="cad-confirma" placeholder="Repita a senha" autocomplete="new-password">
+        </div>
+        <button class="btn-principal" id="btn-cadastro" onclick="criarConta()">Criar conta →</button>
+      </div>
+    </div>
+
+    <!-- RECUPERAR SENHA -->
+    <div class="form-section" id="secao-recuperar">
+      <button class="btn-voltar" onclick="voltarLogin()">← Voltar</button>
+      <div class="card-titulo">Recuperar senha</div>
+      <div class="card-sub" style="margin-bottom:24px;">Enviaremos um link para o seu e-mail</div>
+
+      <div id="msg-recuperar" class="msg"></div>
+
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="rec-email" placeholder="seu@email.com">
+      </div>
+      <button class="btn-principal" onclick="recuperarSenha()">Enviar link →</button>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <a href="/">kindercare.com.br</a> · Plataforma de cuidadores
+</footer>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+           sendPasswordResetEmail, updateProfile, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMe9GRhZyYOiDCVQBxMnu8MHjuaY1hY5Y",
+    authDomain: "kinder-4dd7b.firebaseapp.com",
+    projectId: "kinder-4dd7b",
+    storageBucket: "kinder-4dd7b.firebasestorage.app",
+    messagingSenderId: "874034411154",
+    appId: "1:874034411154:web:8fb0122f8b9750197dd84b",
+    measurementId: "G-KKN5D5NEK0"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Redireciona se já está logado (mas não durante o cadastro)
+  let criandoConta = false;
+  onAuthStateChanged(auth, (user) => {
+    if (user && !criandoConta) window.location.href = './dashboard.html';
+  });
+
+  // ── LOGIN ──────────────────────────────────────────
+  window.fazerLogin = async function() {
+    const email = document.getElementById('login-email').value.trim();
+    const senha = document.getElementById('login-senha').value;
+    const btn   = document.getElementById('btn-login');
+    const msg   = document.getElementById('msg-auth');
+
+    if (!email || !senha) { mostrarMsg(msg, 'erro', 'Preencha e-mail e senha.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+    esconderMsg(msg);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, senha);
+      // onAuthStateChanged redireciona
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Entrar →';
+      mostrarMsg(msg, 'erro', traduzirErro(e.code));
+    }
+  };
+
+  // ── CADASTRO ───────────────────────────────────────
+  window.criarConta = async function() {
+    const nome     = document.getElementById('cad-nome').value.trim();
+    const email    = document.getElementById('cad-email').value.trim();
+    const senha    = document.getElementById('cad-senha').value;
+    const confirma = document.getElementById('cad-confirma').value;
+    const btn      = document.getElementById('btn-cadastro');
+    const msg      = document.getElementById('msg-auth');
+
+    if (!nome || !email || !senha || !confirma) {
+      mostrarMsg(msg, 'erro', 'Preencha todos os campos.'); return;
+    }
+    if (senha !== confirma) {
+      mostrarMsg(msg, 'erro', 'As senhas não coincidem.'); return;
+    }
+    if (senha.length < 6) {
+      mostrarMsg(msg, 'erro', 'A senha precisa ter pelo menos 6 caracteres.'); return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Criando conta...';
+    esconderMsg(msg);
+    criandoConta = true;
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, senha);
+      await updateProfile(cred.user, { displayName: nome });
+
+      // Cria documento no Firestore com nome já salvo
+      await setDoc(doc(db, 'cuidadores', cred.user.uid), {
+        nome: nome,
+        email: email,
+        status: 'pendente',
+        criadoEm: new Date().toISOString(),
+        perfil: {}
+      });
+
+      // Redireciona só depois de tudo salvo
+      window.location.href = './dashboard.html';
+    } catch (e) {
+      criandoConta = false;
+      btn.disabled = false;
+      btn.textContent = 'Criar conta →';
+      mostrarMsg(msg, 'erro', traduzirErro(e.code));
+    }
+  };
+
+  // ── RECUPERAR SENHA ────────────────────────────────
+  window.recuperarSenha = async function() {
+    const email = document.getElementById('rec-email').value.trim();
+    const msg   = document.getElementById('msg-recuperar');
+
+    if (!email) { mostrarMsg(msg, 'erro', 'Digite seu e-mail.'); return; }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      mostrarMsg(msg, 'ok', 'Link enviado! Verifique sua caixa de entrada.');
+    } catch (e) {
+      mostrarMsg(msg, 'erro', traduzirErro(e.code));
+    }
+  };
+
+  // ── HELPERS ────────────────────────────────────────
+  function mostrarMsg(el, tipo, texto) {
+    el.className = 'msg ' + tipo;
+    el.textContent = texto;
+  }
+
+  function esconderMsg(el) {
+    el.className = 'msg';
+    el.textContent = '';
+  }
+
+  function traduzirErro(code) {
+    const erros = {
+      'auth/user-not-found':       'E-mail não encontrado.',
+      'auth/wrong-password':       'Senha incorreta.',
+      'auth/invalid-credential':   'E-mail ou senha incorretos.',
+      'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
+      'auth/invalid-email':        'E-mail inválido.',
+      'auth/weak-password':        'Senha muito fraca. Use pelo menos 6 caracteres.',
+      'auth/too-many-requests':    'Muitas tentativas. Aguarde alguns minutos.',
+      'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.'
+    };
+    return erros[code] || 'Ocorreu um erro. Tente novamente.';
+  }
+</script>
+
+<script>
+  function mostrarTab(tab) {
+    document.getElementById('tab-login').classList.toggle('ativo', tab === 'login');
+    document.getElementById('tab-cadastro').classList.toggle('ativo', tab === 'cadastro');
+    document.getElementById('form-login').style.display   = tab === 'login'    ? 'block' : 'none';
+    document.getElementById('form-cadastro').style.display = tab === 'cadastro' ? 'block' : 'none';
+    document.getElementById('msg-auth').className = 'msg';
+  }
+
+  function mostrarRecuperar() {
+    document.getElementById('secao-auth').classList.remove('ativo');
+    document.getElementById('secao-recuperar').classList.add('ativo');
+  }
+
+  function voltarLogin() {
+    document.getElementById('secao-recuperar').classList.remove('ativo');
+    document.getElementById('secao-auth').classList.add('ativo');
+  }
+
+  // Enter para submeter
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const loginAtivo = document.getElementById('form-login').style.display !== 'none';
+    if (loginAtivo) window.fazerLogin && window.fazerLogin();
+    else window.criarConta && window.criarConta();
+  });
+</script>
+
+</body>
+</html>

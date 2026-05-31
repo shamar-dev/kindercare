@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — Meu Perfil</title>
+  <link rel="icon" type="image/png" href="../Kinder_Coracao.png">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f0f2ec;
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: #3a4e2a;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: 700;
+      color: #c8d8a0;
+      letter-spacing: 3px;
+      text-decoration: none;
+    }
+
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-nome {
+      font-size: 13px;
+      color: #c8d8a0;
+      font-weight: 600;
+    }
+
+    .btn-sair {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #c8d8a0;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-sair:hover { background: rgba(255,255,255,0.2); }
+
+    /* LOADING */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      font-size: 14px;
+      color: #888;
+    }
+
+    /* CONTAINER */
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 16px 60px;
+      display: none;
+    }
+
+    /* STATUS BADGE */
+    .status-bar {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .status-info { flex: 1; }
+    .status-label {
+      font-size: 11px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .status-nome { font-size: 16px; font-weight: 700; color: #2d2d2d; }
+
+    .status-badge {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+
+    .status-pendente  { background: #fff3e8; color: #a05a3a; }
+    .status-analise   { background: #e8f0ff; color: #3a5aa0; }
+    .status-aprovado  { background: #eef3e8; color: #3a4e2a; }
+
+    /* PROGRESSO */
+    .progresso-box {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .prog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .prog-label { font-size: 13px; color: #888; }
+    .prog-pct   { font-size: 13px; font-weight: 700; color: #4a5e3a; }
+
+    .prog-barra {
+      background: #e8e8e8;
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6b7c52, #c8d8a0);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* SEÇÕES */
+    .secao {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .secao-header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .secao-header:hover { background: #fafafa; }
+
+    .secao-titulo {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2d2d2d;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .secao-icone { font-size: 18px; }
+
+    .secao-chevron {
+      font-size: 12px;
+      color: #aaa;
+      transition: transform 0.2s;
+    }
+
+    .secao.aberta .secao-chevron { transform: rotate(180deg); }
+
+    .secao-corpo {
+      display: none;
+      padding: 0 20px 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .secao.aberta .secao-corpo { display: block; }
+
+    /* CAMPOS DO FORM */
+    .campo {
+      margin-top: 14px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .campo input,
+    .campo select,
+    .campo textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      color: #2d2d2d;
+      outline: none;
+      background: #fafafa;
+      transition: border 0.2s, background 0.2s;
+    }
+
+    .campo input:focus,
+    .campo select:focus,
+    .campo textarea:focus {
+      border-color: #6b7c52;
+      background: white;
+    }
+
+    .campo textarea { resize: vertical; min-height: 80px; }
+
+    .campo-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .campo-row { grid-template-columns: 1fr; }
+    }
+
+    /* RADIO / CHECK */
+    .opcoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .opcao-btn {
+      padding: 7px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 99px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: white;
+      color: #555;
+      transition: all 0.15s;
+    }
+
+    .opcao-btn.selecionado {
+      background: #3a4e2a;
+      border-color: #3a4e2a;
+      color: #c8d8a0;
+    }
+
+    /* BTN SALVAR */
+    .btn-salvar {
+      margin-top: 20px;
+      width: 100%;
+      padding: 13px;
+      background: #3a4e2a;
+      color: #c8d8a0;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-salvar:hover { background: #2d3e20; }
+    .btn-salvar:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* FEEDBACK */
+    .feedback {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .feedback.ok    { background: #eef3e8; color: #3a4e2a; display: block; }
+    .feedback.erro  { background: #fdecea; color: #c0392b; display: block; }
+
+    /* ZONA PERIGO */
+    .zona-perigo {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1.5px solid #fee2e2;
+      margin-top: 8px;
+    }
+
+    .zona-perigo h4 {
+      font-size: 14px;
+      color: #c0392b;
+      margin-bottom: 8px;
+    }
+
+    .zona-perigo p {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .btn-excluir {
+      padding: 10px 20px;
+      background: #fdecea;
+      color: #c0392b;
+      border: 1.5px solid #f5c6c6;
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-excluir:hover { background: #c0392b; color: white; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/" class="logo">🤍 KINDER</a>
+  <div class="header-user">
+    <span class="header-nome" id="header-nome"></span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<div class="loading" id="loading">Carregando seu perfil...</div>
+
+<div class="container" id="container">
+
+  <!-- STATUS -->
+  <div class="status-bar">
+    <div class="status-info">
+      <div class="status-label">Bem-vindo(a) de volta</div>
+      <div class="status-nome" id="status-nome">—</div>
+    </div>
+    <div class="status-badge" id="status-badge">—</div>
+  </div>
+
+  <!-- PROGRESSO -->
+  <div class="progresso-box">
+    <div class="prog-header">
+      <span class="prog-label">Completude do perfil</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-barra">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: DADOS PESSOAIS -->
+  <div class="secao aberta" id="sec-pessoal">
+    <div class="secao-header" onclick="toggleSecao('sec-pessoal')">
+      <div class="secao-titulo"><span class="secao-icone">👤</span> Dados pessoais</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>Nome completo</label>
+        <input type="text" id="p-nome" placeholder="Seu nome completo">
+      </div>
+      <div class="campo">
+        <label>WhatsApp</label>
+        <input type="tel" id="p-whatsapp" placeholder="(11) 99999-9999">
+      </div>
+      <div class="campo">
+        <label>CEP</label>
+        <div style="position:relative;">
+          <input type="text" id="p-cep" placeholder="00000-000" maxlength="9">
+          <span id="cep-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#888;"></span>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Rua</label>
+        <input type="text" id="p-rua" placeholder="Preenchido pelo CEP">
+      </div>
+      <div class="campo-row">
+        <div class="campo">
+          <label>Número</label>
+          <input type="text" id="p-numero" placeholder="Ex: 123">
+        </div>
+        <div class="campo">
+          <label>Complemento <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input type="text" id="p-complemento" placeholder="Apto, bloco...">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Bairro</label>
+        <input type="text" id="p-bairro" placeholder="Preenchido pelo CEP">
+      </div>
+      <div class="campo-row">
+        <div class="campo">
+          <label>Cidade</label>
+          <input type="text" id="p-cidade" placeholder="Preenchido pelo CEP">
+        </div>
+        <div class="campo">
+          <label>Estado</label>
+          <input type="text" id="p-estado" placeholder="UF" maxlength="2">
+        </div>
+      </div>
+      <button class="btn-salvar" onclick="salvarSecao('pessoal')">Salvar dados pessoais</button>
+      <div class="feedback" id="fb-pessoal"></div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: PERFIL PROFISSIONAL -->
+  <div class="secao" id="sec-profissional">
+    <div class="secao-header" onclick="toggleSecao('sec-profissional')">
+      <div class="secao-titulo"><span class="secao-icone">🧑‍⚕️</span> Perfil profissional</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+
+      <div class="campo">
+        <label>Estilo de trabalho</label>
+        <div class="opcoes" id="opc-estilo">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'estilo')">comunicativa</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'estilo')">adapto</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'estilo')">reservada</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Resistência a desafios</label>
+        <div class="opcoes" id="opc-resistente">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'resistente')">facilidade</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'resistente')">desafiador</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Rotina</label>
+        <div class="opcoes" id="opc-rotina">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'rotina')">definidas</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'rotina')">flexíveis</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'rotina')">indiferente</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Experiência (pode marcar mais de um)</label>
+        <div class="opcoes" id="opc-experiencia">
+          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">sem experiência</button>
+          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">alzheimer</button>
+          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">parkinson</button>
+          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">acamados</button>
+          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">avc</button>
+          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">paliativos</button>
+          <button class="opcao-btn multi" onclick="toggleMultiExperiencia(this)">demência</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Cuidados físicos</label>
+        <div class="opcoes" id="opc-cuidados">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'cuidados')">todos</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'cuidados')">maioria</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'cuidados')">menor</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'cuidados')">básico</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Cozinha</label>
+        <div class="opcoes" id="opc-cozinha">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'cozinha')">sim</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'cozinha')">básico</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'cozinha')">não</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Modalidade (pode marcar mais de um)</label>
+        <div class="opcoes" id="opc-modalidade">
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">diurno</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">noturno</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">integral</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">pernoite</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">24h</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">fds</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Restrição</label>
+        <input type="text" id="p-restricao" placeholder="Ex: fumantes, pets (ou deixe vazio)">
+      </div>
+
+      <button class="btn-salvar" onclick="salvarSecao('profissional')">Salvar perfil profissional</button>
+      <div class="feedback" id="fb-profissional"></div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO: CONTA -->
+  <div class="secao" id="sec-conta">
+    <div class="secao-header" onclick="toggleSecao('sec-conta')">
+      <div class="secao-titulo"><span class="secao-icone">⚙️</span> Conta</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="p-email" disabled style="opacity:0.5;cursor:not-allowed;">
+      </div>
+
+      <div class="zona-perigo">
+        <h4>Excluir conta</h4>
+        <p>Esta ação remove permanentemente seus dados da plataforma. Não pode ser desfeita.</p>
+        <button class="btn-excluir" onclick="confirmarExclusao()">Excluir minha conta</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getAuth, signOut, onAuthStateChanged, deleteUser }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMe9GRhZyYOiDCVQBxMnu8MHjuaY1hY5Y",
+    authDomain: "kinder-4dd7b.firebaseapp.com",
+    projectId: "kinder-4dd7b",
+    storageBucket: "kinder-4dd7b.firebasestorage.app",
+    messagingSenderId: "874034411154",
+    appId: "1:874034411154:web:8fb0122f8b9750197dd84b",
+    measurementId: "G-KKN5D5NEK0"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let currentUser = null;
+  let dadosFirestore = {};
+
+  // ── AUTH STATE ─────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = './login.html'; return; }
+    currentUser = user;
+
+    // Cria documento se não existir
+    const ref = doc(db, 'cuidadores', user.uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        nome: user.displayName || '',
+        email: user.email,
+        status: 'pendente',
+        criadoEm: new Date().toISOString(),
+        perfil: {}
+      });
+      dadosFirestore = { nome: user.displayName || '', email: user.email, status: 'pendente', perfil: {} };
+    } else {
+      dadosFirestore = snap.data();
+    }
+
+    carregarUI(user, dadosFirestore);
+  });
+
+  function carregarUI(user, dados) {
+    // Header
+    document.getElementById('header-nome').textContent = dados.nome || user.email;
+
+    // Status
+    document.getElementById('status-nome').textContent = dados.nome || 'Cuidador(a)';
+    const statusMap = {
+      pendente: { label: '⏳ Pendente',    cls: 'status-pendente' },
+      analise:  { label: '🔍 Em análise', cls: 'status-analise'  },
+      aprovado: { label: '✅ Aprovado',   cls: 'status-aprovado' }
+    };
+    const s = statusMap[dados.status] || statusMap['pendente'];
+    const badge = document.getElementById('status-badge');
+    badge.textContent = s.label;
+    badge.className = 'status-badge ' + s.cls;
+
+    // Preenche campos pessoais
+    const p = dados.perfil || {};
+    document.getElementById('p-nome').value        = dados.nome || '';
+    document.getElementById('p-whatsapp').value    = p.whatsapp || '';
+    document.getElementById('p-cep').value         = p.cep || '';
+    document.getElementById('p-rua').value         = p.rua || '';
+    document.getElementById('p-numero').value      = p.numero || '';
+    document.getElementById('p-complemento').value = p.complemento || '';
+    document.getElementById('p-bairro').value      = p.bairro || '';
+    document.getElementById('p-cidade').value      = p.cidade || '';
+    document.getElementById('p-estado').value      = p.estado || '';
+    document.getElementById('p-email').value       = user.email;
+    document.getElementById('p-restricao').value   = p.restricao || '';
+
+    // Preenche opções
+    if (p.estilo)      marcarOpcao('opc-estilo', p.estilo);
+    if (p.resistente)  marcarOpcao('opc-resistente', p.resistente);
+    if (p.rotina)      marcarOpcao('opc-rotina', p.rotina);
+    if (p.cuidados)    marcarOpcao('opc-cuidados', p.cuidados);
+    if (p.cozinha)     marcarOpcao('opc-cozinha', p.cozinha);
+    if (p.experiencia) marcarMulti('opc-experiencia', p.experiencia);
+    if (p.modalidade)  marcarMulti('opc-modalidade', p.modalidade);
+
+    atualizarProgresso();
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('container').style.display = 'block';
+  }
+
+  // ── VALIDAÇÕES ─────────────────────────────────────
+  function validarPessoal(fb) {
+    const nome     = document.getElementById('p-nome').value.trim();
+    const whatsapp = document.getElementById('p-whatsapp').value.trim();
+    const cep      = document.getElementById('p-cep').value.trim();
+    const endereco = document.getElementById('p-endereco').value.trim();
+    const cidade   = document.getElementById('p-cidade').value.trim();
+
+    const numero = document.getElementById('p-numero').value.trim();
+    const cidade = document.getElementById('p-cidade').value.trim();
+
+    if (!nome) { mostrarFeedback(fb, 'erro', 'Nome é obrigatório.'); return false; }
+    if (nome.split(' ').filter(p => p).length < 2) {
+      mostrarFeedback(fb, 'erro', 'Informe nome e sobrenome.'); return false;
+    }
+    if (!whatsapp || whatsapp.replace(/\D/g,'').length < 10) {
+      mostrarFeedback(fb, 'erro', 'WhatsApp inválido.'); return false;
+    }
+    if (!cep || cep.replace(/\D/g,'').length !== 8) {
+      mostrarFeedback(fb, 'erro', 'CEP inválido.'); return false;
+    }
+    if (!numero)   { mostrarFeedback(fb, 'erro', 'Número é obrigatório.'); return false; }
+    if (!cidade)   { mostrarFeedback(fb, 'erro', 'Cidade é obrigatória.'); return false; }
+    return true;
+  }
+
+  function validarProfissional(fb) {
+    if (!getOpcaoSelecionada('opc-estilo'))     { mostrarFeedback(fb, 'erro', 'Selecione seu estilo de trabalho.'); return false; }
+    if (!getOpcaoSelecionada('opc-resistente')) { mostrarFeedback(fb, 'erro', 'Selecione resistência a desafios.'); return false; }
+    if (!getOpcaoSelecionada('opc-rotina'))     { mostrarFeedback(fb, 'erro', 'Selecione tipo de rotina.'); return false; }
+    if (!getMultiSelecionados('opc-experiencia').length) { mostrarFeedback(fb, 'erro', 'Selecione ao menos uma experiência.'); return false; }
+    if (!getOpcaoSelecionada('opc-cuidados'))   { mostrarFeedback(fb, 'erro', 'Selecione nível de cuidados físicos.'); return false; }
+    if (!getOpcaoSelecionada('opc-cozinha'))    { mostrarFeedback(fb, 'erro', 'Selecione opção de cozinha.'); return false; }
+    if (!getMultiSelecionados('opc-modalidade').length) { mostrarFeedback(fb, 'erro', 'Selecione ao menos uma modalidade.'); return false; }
+    return true;
+  }
+
+  // ── SALVAR ─────────────────────────────────────────
+  window.salvarSecao = async function(secao) {
+    const ref = doc(db, 'cuidadores', currentUser.uid);
+    const btn = document.querySelector(`#sec-${secao === 'pessoal' ? 'pessoal' : 'profissional'} .btn-salvar`);
+    const fb  = document.getElementById('fb-' + secao);
+
+    // Validação antes de salvar
+    if (secao === 'pessoal' && !validarPessoal(fb)) return;
+    if (secao === 'profissional' && !validarProfissional(fb)) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    try {
+      let update = {};
+
+      if (secao === 'pessoal') {
+        const nome = document.getElementById('p-nome').value.trim();
+        update = {
+          nome: nome,
+          'perfil.whatsapp':    document.getElementById('p-whatsapp').value.trim(),
+          'perfil.cep':         document.getElementById('p-cep').value.trim(),
+          'perfil.rua':         document.getElementById('p-rua').value.trim(),
+          'perfil.numero':      document.getElementById('p-numero').value.trim(),
+          'perfil.complemento': document.getElementById('p-complemento').value.trim(),
+          'perfil.bairro':      document.getElementById('p-bairro').value.trim(),
+          'perfil.cidade':      document.getElementById('p-cidade').value.trim(),
+          'perfil.estado':      document.getElementById('p-estado').value.trim(),
+        };
+        document.getElementById('status-nome').textContent = nome;
+        document.getElementById('header-nome').textContent = nome;
+      } else {
+        update = {
+          'perfil.estilo':      getOpcaoSelecionada('opc-estilo'),
+          'perfil.resistente':  getOpcaoSelecionada('opc-resistente'),
+          'perfil.rotina':      getOpcaoSelecionada('opc-rotina'),
+          'perfil.cuidados':    getOpcaoSelecionada('opc-cuidados'),
+          'perfil.cozinha':     getOpcaoSelecionada('opc-cozinha'),
+          'perfil.experiencia': getMultiSelecionados('opc-experiencia'),
+          'perfil.modalidade':  getMultiSelecionados('opc-modalidade'),
+          'perfil.restricao':   document.getElementById('p-restricao').value.trim(),
+        };
+      }
+
+      await updateDoc(ref, update);
+      mostrarFeedback(fb, 'ok', '✓ Salvo com sucesso!');
+      atualizarProgresso();
+    } catch (e) {
+      mostrarFeedback(fb, 'erro', 'Erro ao salvar. Tente novamente.');
+    }
+
+    btn.disabled = false;
+    btn.textContent = secao === 'pessoal' ? 'Salvar dados pessoais' : 'Salvar perfil profissional';
+  };
+
+  // ── SAIR ───────────────────────────────────────────
+  window.sair = async function() {
+    await signOut(auth);
+    window.location.href = './login.html';
+  };
+
+  // ── EXCLUIR CONTA ──────────────────────────────────
+  window.confirmarExclusao = async function() {
+    if (!confirm('Tem certeza? Esta ação remove sua conta permanentemente e não pode ser desfeita.')) return;
+    try {
+      await deleteDoc(doc(db, 'cuidadores', currentUser.uid));
+      await deleteUser(currentUser);
+      window.location.href = '../index.html';
+    } catch (e) {
+      if (e.code === 'auth/requires-recent-login') {
+        alert('Por segurança, faça logout e login novamente antes de excluir a conta.');
+      } else {
+        alert('Erro ao excluir. Tente novamente.');
+      }
+    }
+  };
+
+  // ── HELPERS ────────────────────────────────────────
+  function marcarOpcao(grupoId, valor) {
+    document.querySelectorAll('#' + grupoId + ' .opcao-btn').forEach(btn => {
+      btn.classList.toggle('selecionado', btn.textContent.trim() === valor);
+    });
+  }
+
+  function marcarMulti(grupoId, valores) {
+    const arr = Array.isArray(valores) ? valores : valores.split(/[,;]/).map(v => v.trim());
+    document.querySelectorAll('#' + grupoId + ' .opcao-btn').forEach(btn => {
+      btn.classList.toggle('selecionado', arr.includes(btn.textContent.trim()));
+    });
+  }
+
+  function getOpcaoSelecionada(grupoId) {
+    const sel = document.querySelector('#' + grupoId + ' .opcao-btn.selecionado');
+    return sel ? sel.textContent.trim() : '';
+  }
+
+  function getMultiSelecionados(grupoId) {
+    return Array.from(document.querySelectorAll('#' + grupoId + ' .opcao-btn.selecionado'))
+                .map(b => b.textContent.trim());
+  }
+
+  function mostrarFeedback(el, tipo, texto) {
+    el.className = 'feedback ' + tipo;
+    el.textContent = texto;
+    setTimeout(() => { el.className = 'feedback'; }, 3000);
+  }
+
+  function atualizarProgresso() {
+    const campos = [
+      document.getElementById('p-nome').value,
+      document.getElementById('p-whatsapp').value,
+      document.getElementById('p-cep').value,
+      document.getElementById('p-cidade').value,
+      getOpcaoSelecionada('opc-estilo'),
+      getOpcaoSelecionada('opc-resistente'),
+      getOpcaoSelecionada('opc-rotina'),
+      getMultiSelecionados('opc-experiencia').length > 0 ? 'ok' : '',
+      getOpcaoSelecionada('opc-cuidados'),
+      getOpcaoSelecionada('opc-cozinha'),
+      getMultiSelecionados('opc-modalidade').length > 0 ? 'ok' : '',
+    ];
+    const preenchidos = campos.filter(v => v && v.trim() !== '').length;
+    const pct = Math.round((preenchidos / campos.length) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct + '%';
+  }
+</script>
+
+<script>
+  function toggleSecao(id) {
+    document.getElementById(id).classList.toggle('aberta');
+  }
+
+  function toggleOpcao(btn, grupo) {
+    document.querySelectorAll('#opc-' + grupo + ' .opcao-btn').forEach(b => b.classList.remove('selecionado'));
+    btn.classList.add('selecionado');
+  }
+
+  function toggleMulti(btn) {
+    btn.classList.toggle('selecionado');
+  }
+
+  // ── MÁSCARAS ───────────────────────────────────────
+  document.getElementById('p-whatsapp').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length <= 10) {
+      v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    } else {
+      v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+    }
+    this.value = v;
+  });
+
+  document.getElementById('p-cep').addEventListener('input', async function() {
+    let v = this.value.replace(/\D/g, '').slice(0, 8);
+    v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
+    this.value = v;
+
+    const status = document.getElementById('cep-status');
+    if (v.replace(/\D/g,'').length === 8) {
+      status.textContent = '🔍';
+      try {
+        const res  = await fetch('https://brasilapi.com.br/api/cep/v1/' + v.replace(/\D/g,''));
+        const data = await res.json();
+        if (data.street !== undefined) {
+          document.getElementById('p-rua').value    = data.street    || '';
+          document.getElementById('p-bairro').value = data.neighborhood || '';
+          document.getElementById('p-cidade').value = data.city      || '';
+          document.getElementById('p-estado').value = data.state     || '';
+          status.textContent = '✓';
+          document.getElementById('p-numero').focus();
+        } else {
+          status.textContent = '✗ CEP não encontrado';
+        }
+      } catch(e) {
+        status.textContent = '';
+      }
+    } else {
+      status.textContent = '';
+    }
+  });
+
+  // Experiência: "sem experiência" é exclusivo (não combina com outros)
+  function toggleMultiExperiencia(btn) {
+    const semExp = 'sem experiência';
+    if (btn.textContent.trim() === semExp) {
+      // Se clicar em "sem experiência", desmarca todos os outros
+      document.querySelectorAll('#opc-experiencia .opcao-btn').forEach(b => b.classList.remove('selecionado'));
+      btn.classList.add('selecionado');
+    } else {
+      // Se clicar em outra opção, desmarca "sem experiência"
+      document.querySelectorAll('#opc-experiencia .opcao-btn').forEach(b => {
+        if (b.textContent.trim() === semExp) b.classList.remove('selecionado');
+      });
+      btn.classList.toggle('selecionado');
+    }
+  }
+</script>
+
+</body>
+</html>
