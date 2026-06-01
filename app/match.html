@@ -355,6 +355,7 @@
     familias = snapF.docs.map(d => {
       var data = d.data();
       var p = data.perfil || {};
+      var arr = function(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); };
       return {
         _id: d.id,
         nome: data.nome || '',
@@ -363,13 +364,13 @@
         whatsapp: p.whatsapp || '',
         nome_idoso: p.nome_idoso || '',
         idade: p.idade || '',
-        condicao: Array.isArray(p.condicao) ? p.condicao.join(', ') : (p.condicao || ''),
-        dependencia: p.dependencia || '',
-        rotina: p.rotina || '',
-        conversa: p.conversa || '',
-        ambiente: p.ambiente || '',
+        condicao:     arr(p.condicao),
+        dependencia:  p.dependencia || '',
+        rotina:       p.rotina || '',
+        conversa:     p.conversa || '',
+        ambiente:     arr(p.ambiente),
         nao_funcionou: p.nao_funcionou || '',
-        genero_pref: p.genero_pref || ''
+        genero_pref:  p.genero_pref || ''
       };
     });
 
