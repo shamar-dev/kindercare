@@ -340,11 +340,9 @@
     var antes  = FICTICIOS.slice(0, metade);
     var depois = FICTICIOS.slice(metade);
 
-    var html = antes.map(function(f) { return renderCard(f, false); }).join('') +
-      '<div class="divisor">SEU PERFIL</div>' +
-      renderCard(dados, true) +
+    var html = renderCard(dados, true) +
       '<div class="divisor">OUTROS CUIDADORES</div>' +
-      depois.map(function(f) { return renderCard(f, false); }).join('');
+      FICTICIOS.map(function(f) { return renderCard(f, false); }).join('');
 
     document.getElementById('lista').innerHTML = html;
   }
