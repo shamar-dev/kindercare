@@ -92,6 +92,13 @@
     .zona-perigo p { font-size: 13px; color: #888; margin-bottom: 14px; line-height: 1.5; }
     .btn-excluir { padding: 10px 20px; background: #fdecea; color: #c0392b; border: 1.5px solid #f5c6c6; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
     .btn-excluir:hover { background: #c0392b; color: white; }
+
+    .progresso-box { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+    .prog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .prog-label { font-size: 13px; color: #888; }
+    .prog-pct   { font-size: 13px; font-weight: 700; color: #4a5e3a; }
+    .prog-barra { background: #e8e8e8; border-radius: 99px; height: 8px; overflow: hidden; }
+    .prog-fill  { height: 100%; background: linear-gradient(90deg, #6b7c52, #c8d8a0); border-radius: 99px; transition: width 0.4s ease; }
   </style>
 </head>
 <body>
@@ -115,6 +122,17 @@
       <div class="status-nome" id="status-nome">—</div>
     </div>
     <div class="status-badge" id="status-badge">—</div>
+  </div>
+
+  <!-- PROGRESSO -->
+  <div class="progresso-box">
+    <div class="prog-header">
+      <span class="prog-label">Completude do perfil</span>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="prog-barra">
+      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
   </div>
 
   <!-- CUIDADORES SUGERIDOS -->
@@ -144,6 +162,41 @@
       <div class="campo">
         <label>Idade aproximada</label>
         <input type="number" id="p-idade" placeholder="Ex: 82" min="50" max="120">
+      </div>
+      <div class="campo">
+        <label>CEP</label>
+        <div style="position:relative;">
+          <input type="text" id="p-cep" placeholder="00000-000" maxlength="9">
+          <span id="cep-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#888;"></span>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Rua</label>
+        <input type="text" id="p-rua" placeholder="Preenchido pelo CEP">
+      </div>
+      <div class="campo-row">
+        <div class="campo">
+          <label>Número</label>
+          <input type="text" id="p-numero" placeholder="Ex: 123">
+        </div>
+        <div class="campo">
+          <label>Complemento <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input type="text" id="p-complemento" placeholder="Apto, bloco...">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Bairro</label>
+        <input type="text" id="p-bairro" placeholder="Preenchido pelo CEP">
+      </div>
+      <div class="campo-row">
+        <div class="campo">
+          <label>Cidade</label>
+          <input type="text" id="p-cidade" placeholder="Preenchido pelo CEP">
+        </div>
+        <div class="campo">
+          <label>Estado</label>
+          <input type="text" id="p-estado" placeholder="UF" maxlength="2">
+        </div>
       </div>
       <button class="btn-salvar" onclick="salvar('familiar')">Salvar</button>
       <div class="feedback" id="fb-familiar"></div>
@@ -391,8 +444,15 @@
     badge.className = 'status-badge ' + s.cls;
 
     const p = dados.perfil || {};
-    if (p.nome_idoso) document.getElementById('p-nome-idoso').value = p.nome_idoso;
-    if (p.idade)      document.getElementById('p-idade').value      = p.idade;
+    if (p.nome_idoso)   document.getElementById('p-nome-idoso').value  = p.nome_idoso;
+    if (p.idade)        document.getElementById('p-idade').value        = p.idade;
+    if (p.cep)          document.getElementById('p-cep').value          = p.cep;
+    if (p.rua)          document.getElementById('p-rua').value          = p.rua;
+    if (p.numero)       document.getElementById('p-numero').value       = p.numero;
+    if (p.complemento)  document.getElementById('p-complemento').value  = p.complemento;
+    if (p.bairro)       document.getElementById('p-bairro').value       = p.bairro;
+    if (p.cidade)       document.getElementById('p-cidade').value       = p.cidade;
+    if (p.estado)       document.getElementById('p-estado').value       = p.estado;
 
     if (p.reacao)      marcarOpcao('opc-reacao', p.reacao);
     if (p.conversa)    marcarOpcao('opc-conversa', p.conversa);
@@ -406,6 +466,7 @@
     if (p.ambiente)    marcarMulti('opc-ambiente', p.ambiente);
 
     renderSugeridos(dados.sugeridos || []);
+    atualizarProgresso();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('container').style.display = 'block';
@@ -440,8 +501,15 @@
       let update = {};
       if (secao === 'familiar') {
         update = {
-          'perfil.nome_idoso': document.getElementById('p-nome-idoso').value.trim(),
-          'perfil.idade':      document.getElementById('p-idade').value.trim(),
+          'perfil.nome_idoso':  document.getElementById('p-nome-idoso').value.trim(),
+          'perfil.idade':       document.getElementById('p-idade').value.trim(),
+          'perfil.cep':         document.getElementById('p-cep').value.trim(),
+          'perfil.rua':         document.getElementById('p-rua').value.trim(),
+          'perfil.numero':      document.getElementById('p-numero').value.trim(),
+          'perfil.complemento': document.getElementById('p-complemento').value.trim(),
+          'perfil.bairro':      document.getElementById('p-bairro').value.trim(),
+          'perfil.cidade':      document.getElementById('p-cidade').value.trim(),
+          'perfil.estado':      document.getElementById('p-estado').value.trim(),
         };
       } else if (secao === 'personalidade') {
         update = {
@@ -469,6 +537,7 @@
 
       await updateDoc(ref, update);
       mostrarFb(fb, 'ok', '✓ Salvo!');
+      atualizarProgresso();
     } catch(e) {
       mostrarFb(fb, 'erro', 'Erro ao salvar. Tente novamente.');
     }
@@ -530,10 +599,53 @@
     el.textContent = texto;
     setTimeout(() => { el.className = 'feedback'; }, 3000);
   }
+
+  function atualizarProgresso() {
+    var campos = [
+      document.getElementById('p-nome-idoso').value,
+      document.getElementById('p-idade').value,
+      document.getElementById('p-cep').value,
+      document.getElementById('p-cidade').value,
+      getOpcao('opc-reacao'),
+      getOpcao('opc-conversa'),
+      getOpcao('opc-lida'),
+      getOpcao('opc-rotina'),
+      getOpcao('opc-dependencia'),
+      getOpcao('opc-medicamento'),
+      getOpcao('opc-genero'),
+    ];
+    var preenchidos = campos.filter(function(v) { return v && v.trim() !== ''; }).length;
+    var pct = Math.round((preenchidos / campos.length) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct + '%';
+  }
 </script>
 
 <script>
   function toggleSecao(id) { document.getElementById(id).classList.toggle('aberta'); }
+
+  // CEP com BrasilAPI
+  document.getElementById('p-cep').addEventListener('input', async function() {
+    var v = this.value.replace(/\D/g,'').slice(0,8);
+    v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
+    this.value = v;
+    var st = document.getElementById('cep-status');
+    if (v.replace(/\D/g,'').length === 8) {
+      st.textContent = '🔍';
+      try {
+        var res  = await fetch('https://brasilapi.com.br/api/cep/v1/' + v.replace(/\D/g,''));
+        var data = await res.json();
+        if (data.street !== undefined) {
+          document.getElementById('p-rua').value    = data.street        || '';
+          document.getElementById('p-bairro').value = data.neighborhood  || '';
+          document.getElementById('p-cidade').value = data.city          || '';
+          document.getElementById('p-estado').value = data.state         || '';
+          st.textContent = '✓';
+          document.getElementById('p-numero').focus();
+        } else { st.textContent = '✗'; }
+      } catch(e) { st.textContent = ''; }
+    } else { st.textContent = ''; }
+  });
   function toggleOpcao(btn, grupo) {
     document.querySelectorAll('#opc-' + grupo + ' .opcao-btn').forEach(b => b.classList.remove('selecionado'));
     btn.classList.add('selecionado');
