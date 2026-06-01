@@ -125,6 +125,7 @@
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <span style="font-size:12px;color:#8a9e6a;" id="header-email"></span>
+    <button class="btn-sair" onclick="abrirModalSenha()">🔑 Senha</button>
     <button class="btn-sair" onclick="sair()">Sair</button>
   </div>
 </header>
@@ -202,9 +203,37 @@
 
 </div>
 
+<!-- MODAL TROCAR SENHA -->
+<div id="modal-senha" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:36px;width:100%;max-width:380px;margin:16px;">
+    <div style="font-size:18px;font-weight:700;color:#2d2d2d;margin-bottom:20px;">Alterar senha do admin</div>
+    <div id="msg-senha-modal" style="font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;"></div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Nova senha</label>
+      <input type="password" id="modal-nova-senha" placeholder="Mínimo 8 caracteres"
+        style="width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;outline:none;">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Confirmar senha</label>
+      <input type="password" id="modal-confirma-senha" placeholder="Repita a nova senha"
+        style="width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;outline:none;">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="fecharModalSenha()"
+        style="flex:1;padding:11px;background:#f0f0f0;color:#888;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">
+        Cancelar
+      </button>
+      <button onclick="salvarNovaSenha()" id="btn-salvar-senha"
+        style="flex:1;padding:11px;background:#2d3e20;color:#c8d8a0;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
   import { getFirestore, collection, getDocs, doc, updateDoc, getDoc }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -421,6 +450,56 @@
       alert('Erro ao salvar status: ' + e.message);
     }
   };
+
+  // ── TROCAR SENHA ───────────────────────────────────
+  window.abrirModalSenha = function() {
+    document.getElementById('modal-nova-senha').value    = '';
+    document.getElementById('modal-confirma-senha').value = '';
+    var msg = document.getElementById('msg-senha-modal');
+    msg.style.display = 'none';
+    document.getElementById('modal-senha').style.display = 'flex';
+  };
+
+  window.fecharModalSenha = function() {
+    document.getElementById('modal-senha').style.display = 'none';
+  };
+
+  window.salvarNovaSenha = async function() {
+    var nova     = document.getElementById('modal-nova-senha').value;
+    var confirma = document.getElementById('modal-confirma-senha').value;
+    var msg      = document.getElementById('msg-senha-modal');
+    var btn      = document.getElementById('btn-salvar-senha');
+
+    msg.style.display = 'none';
+
+    if (!nova)             { mostrarMsgModal('Digite a nova senha.', 'erro'); return; }
+    if (nova.length < 8)   { mostrarMsgModal('Mínimo 8 caracteres.', 'erro'); return; }
+    if (nova !== confirma) { mostrarMsgModal('As senhas não coincidem.', 'erro'); return; }
+
+    btn.disabled = true; btn.textContent = 'Salvando...';
+
+    try {
+      await updatePassword(auth.currentUser, nova);
+      mostrarMsgModal('✓ Senha alterada com sucesso!', 'ok');
+      setTimeout(fecharModalSenha, 1500);
+    } catch(e) {
+      if (e.code === 'auth/requires-recent-login') {
+        mostrarMsgModal('Faça logout e login novamente antes de alterar a senha.', 'erro');
+      } else {
+        mostrarMsgModal('Erro ao salvar: ' + e.message, 'erro');
+      }
+    }
+
+    btn.disabled = false; btn.textContent = 'Salvar';
+  };
+
+  function mostrarMsgModal(texto, tipo) {
+    var el = document.getElementById('msg-senha-modal');
+    el.textContent = texto;
+    el.style.display = 'block';
+    el.style.background = tipo === 'ok' ? '#eef3e8' : '#fdecea';
+    el.style.color      = tipo === 'ok' ? '#3a4e2a' : '#c0392b';
+  }
 
   // ── SAIR ───────────────────────────────────────────
   window.sair = async function() {
