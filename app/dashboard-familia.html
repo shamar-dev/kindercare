@@ -121,7 +121,16 @@
       <div class="status-label">Bem-vindo(a) de volta</div>
       <div class="status-nome" id="status-nome">—</div>
     </div>
-    <div class="status-badge" id="status-badge">—</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div id="toggle-disponivel" style="display:none;align-items:center;gap:8px;">
+        <span style="font-size:13px;color:#888;" id="label-disponivel">Disponível</span>
+        <div onclick="toggleDisponibilidade()" id="toggle-btn"
+          style="width:44px;height:24px;border-radius:99px;cursor:pointer;position:relative;transition:background 0.2s;">
+          <div style="width:18px;height:18px;background:white;border-radius:50%;position:absolute;top:3px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);" id="toggle-knob"></div>
+        </div>
+      </div>
+      <div class="status-badge" id="status-badge">—</div>
+    </div>
   </div>
 
   <!-- PROGRESSO -->
@@ -467,6 +476,12 @@
     badge.textContent = s.label;
     badge.className = 'status-badge ' + s.cls;
 
+    if (dados.status === 'match') {
+      const toggle = document.getElementById('toggle-disponivel');
+      toggle.style.display = 'flex';
+      atualizarToggle(dados.disponivel !== false);
+    }
+
     const p = dados.perfil || {};
     document.getElementById('p-nome-resp').value  = dados.nome || '';
     document.getElementById('p-email-resp').value = user.email;
@@ -601,6 +616,30 @@
   window.sair = async function() {
     await signOut(auth);
     window.location.href = './login-familia.html';
+  };
+
+  // ── DISPONIBILIDADE ───────────────────────────────
+  function atualizarToggle(disponivel) {
+    const btn   = document.getElementById('toggle-btn');
+    const knob  = document.getElementById('toggle-knob');
+    const label = document.getElementById('label-disponivel');
+    btn.style.background = disponivel ? '#3a4e2a' : '#ccc';
+    knob.style.left      = disponivel ? '23px' : '3px';
+    label.textContent    = disponivel ? 'Disponível' : 'Indisponível';
+    label.style.color    = disponivel ? '#3a4e2a' : '#aaa';
+  }
+
+  window.toggleDisponibilidade = async function() {
+    const ref   = doc(db, 'familias', currentUser.uid);
+    const atual = dadosFS.disponivel !== false;
+    const novo  = !atual;
+    try {
+      await updateDoc(ref, { disponivel: novo });
+      dadosFS.disponivel = novo;
+      atualizarToggle(novo);
+    } catch(e) {
+      alert('Erro ao salvar: ' + e.message);
+    }
   };
 
   window.confirmarExclusao = async function() {

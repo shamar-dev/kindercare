@@ -332,7 +332,7 @@
 
     // Achata perfil pra compatibilidade com motor de score
     cuidadores = snapC.docs
-      .filter(d => (d.data().status || 'pendente') === 'aprovado')
+      .filter(d => (d.data().status || 'pendente') === 'aprovado' && d.data().disponivel !== false)
       .map(d => {
         var data = d.data();
         var p = data.perfil || {};
