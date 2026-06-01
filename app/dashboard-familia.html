@@ -148,6 +148,30 @@
     </div>
   </div>
 
+  <!-- DADOS DO RESPONSÁVEL -->
+  <div class="secao aberta" id="sec-responsavel">
+    <div class="secao-header" onclick="toggleSecao('sec-responsavel')">
+      <div class="secao-titulo"><span class="secao-icone">👤</span> Seus dados</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>Nome completo</label>
+        <input type="text" id="p-nome-resp" placeholder="Seu nome completo">
+      </div>
+      <div class="campo">
+        <label>WhatsApp</label>
+        <input type="tel" id="p-whatsapp" placeholder="(11) 99999-9999">
+      </div>
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="p-email-resp" disabled style="opacity:0.5;cursor:not-allowed;">
+      </div>
+      <button class="btn-salvar" onclick="salvar('responsavel')">Salvar</button>
+      <div class="feedback" id="fb-responsavel"></div>
+    </div>
+  </div>
+
   <!-- PERFIL DO FAMILIAR -->
   <div class="secao" id="sec-familiar">
     <div class="secao-header" onclick="toggleSecao('sec-familiar')">
@@ -444,7 +468,10 @@
     badge.className = 'status-badge ' + s.cls;
 
     const p = dados.perfil || {};
-    if (p.nome_idoso)   document.getElementById('p-nome-idoso').value  = p.nome_idoso;
+    document.getElementById('p-nome-resp').value  = dados.nome || '';
+    document.getElementById('p-email-resp').value = user.email;
+    if (p.whatsapp)     document.getElementById('p-whatsapp').value     = p.whatsapp;
+    if (p.nome_idoso)   document.getElementById('p-nome-idoso').value   = p.nome_idoso;
     if (p.idade)        document.getElementById('p-idade').value        = p.idade;
     if (p.cep)          document.getElementById('p-cep').value          = p.cep;
     if (p.rua)          document.getElementById('p-rua').value          = p.rua;
@@ -499,7 +526,15 @@
 
     try {
       let update = {};
-      if (secao === 'familiar') {
+      if (secao === 'responsavel') {
+        const nome = document.getElementById('p-nome-resp').value.trim();
+        update = {
+          nome: nome,
+          'perfil.whatsapp': document.getElementById('p-whatsapp').value.trim(),
+        };
+        document.getElementById('status-nome').textContent = nome;
+        document.getElementById('header-nome').textContent = nome;
+      } else if (secao === 'familiar') {
         update = {
           'perfil.nome_idoso':  document.getElementById('p-nome-idoso').value.trim(),
           'perfil.idade':       document.getElementById('p-idade').value.trim(),
@@ -602,6 +637,8 @@
 
   function atualizarProgresso() {
     var campos = [
+      document.getElementById('p-nome-resp').value,
+      document.getElementById('p-whatsapp').value,
       document.getElementById('p-nome-idoso').value,
       document.getElementById('p-idade').value,
       document.getElementById('p-cep').value,
@@ -623,6 +660,14 @@
 
 <script>
   function toggleSecao(id) { document.getElementById(id).classList.toggle('aberta'); }
+
+  // Máscara WhatsApp
+  document.getElementById('p-whatsapp').addEventListener('input', function() {
+    var v = this.value.replace(/\D/g,'').slice(0,11);
+    if (v.length <= 10) v = v.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    else v = v.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+    this.value = v;
+  });
 
   // CEP com BrasilAPI
   document.getElementById('p-cep').addEventListener('input', async function() {
