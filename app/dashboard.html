@@ -889,7 +889,6 @@
     document.getElementById('p-limite').value = p.limite || '';
 
     atualizarProgresso();
-    renderVitrine(dados);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('container').style.display = 'block';
@@ -1050,7 +1049,6 @@
       });
       mostrarFeedback(fb, 'ok', '✓ Salvo com sucesso!');
       atualizarProgresso();
-      renderVitrine(dadosFirestore);
     } catch (e) {
       mostrarFeedback(fb, 'erro', 'Erro ao salvar. Tente novamente.');
     }
