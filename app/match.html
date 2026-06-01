@@ -654,7 +654,6 @@
     var f = familias[selF];
     var resultado = calcularScore(c, f);
     var top3 = resultado.detalhes
-      .filter(function(d) { return d.pts > 0; })
       .sort(function(a, b) { return (b.pts/b.max) - (a.pts/a.max); })
       .slice(0, 3)
       .map(function(d) { return d.label; });
