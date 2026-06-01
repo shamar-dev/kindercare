@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — Área da Família</title>
+  <link rel="icon" type="image/png" href="../Kinder_Coracao.png">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { background: #f9f8f5; font-family: 'Nunito', sans-serif; min-height: 100vh; }
+
+    header {
+      background: linear-gradient(135deg, #3a4e2a, #4a5e3a);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo { font-size: 18px; font-weight: 700; color: #c8d8a0; letter-spacing: 3px; text-decoration: none; }
+    .header-user { display: flex; align-items: center; gap: 12px; }
+    .header-nome { font-size: 13px; color: #c8d8a0; font-weight: 600; }
+    .btn-sair { background: rgba(255,255,255,0.12); border: none; color: #c8d8a0; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+    .btn-sair:hover { background: rgba(255,255,255,0.2); }
+
+    .loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; font-size: 14px; color: #888; }
+
+    .container { max-width: 720px; margin: 0 auto; padding: 28px 16px 60px; display: none; }
+
+    .status-bar { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .status-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .status-nome { font-size: 16px; font-weight: 700; color: #2d2d2d; }
+    .status-badge { font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 99px; white-space: nowrap; }
+    .status-pendente { background: #fff3e8; color: #a05a3a; }
+    .status-andamento { background: #e8f0ff; color: #3a5aa0; }
+    .status-match { background: #eef3e8; color: #3a4e2a; }
+
+    .secao { background: white; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+    .secao-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .secao-header:hover { background: #fafafa; }
+    .secao-titulo { font-size: 14px; font-weight: 700; color: #2d2d2d; display: flex; align-items: center; gap: 10px; }
+    .secao-icone { font-size: 18px; }
+    .secao-chevron { font-size: 12px; color: #aaa; transition: transform 0.2s; }
+    .secao.aberta .secao-chevron { transform: rotate(180deg); }
+    .secao-corpo { display: none; padding: 0 20px 20px; border-top: 1px solid #f0f0f0; }
+    .secao.aberta .secao-corpo { display: block; }
+
+    .campo { margin-top: 14px; }
+    .campo label { display: block; font-size: 11px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .campo input, .campo select, .campo textarea { width: 100%; padding: 11px 14px; border: 1.5px solid #e8e8e8; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; color: #2d2d2d; outline: none; background: #fafafa; transition: border 0.2s, background 0.2s; }
+    .campo input:focus, .campo select:focus { border-color: #6b7c52; background: white; }
+    .campo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .campo-row { grid-template-columns: 1fr; } }
+
+    .opcoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .opcao-btn { padding: 7px 14px; border: 1.5px solid #e0e0e0; border-radius: 99px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; background: white; color: #555; transition: all 0.15s; }
+    .opcao-btn.selecionado { background: #3a4e2a; border-color: #3a4e2a; color: #c8d8a0; }
+
+    .btn-salvar { margin-top: 20px; width: 100%; padding: 13px; background: #3a4e2a; color: #c8d8a0; border: none; border-radius: 10px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-salvar:hover { background: #2d3e20; }
+    .btn-salvar:disabled { background: #aaa; cursor: not-allowed; }
+
+    .feedback { font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-top: 12px; display: none; }
+    .feedback.ok   { background: #eef3e8; color: #3a4e2a; display: block; }
+    .feedback.erro { background: #fdecea; color: #c0392b; display: block; }
+
+    /* CUIDADORES SUGERIDOS */
+    .card-cuidador {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .card-cuidador:last-child { border-bottom: none; }
+    .cuid-foto { width: 56px; height: 56px; border-radius: 50%; background: #e8e8e8; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+    .cuid-info { flex: 1; }
+    .cuid-nome { font-size: 15px; font-weight: 700; color: #2d2d2d; margin-bottom: 3px; }
+    .cuid-cidade { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .cuid-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .cuid-tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 600; background: #eef3e8; color: #4a5e3a; }
+    .vazio-msg { text-align: center; padding: 32px; color: #bbb; font-size: 14px; }
+
+    /* CONTA */
+    .zona-perigo { background: white; border-radius: 12px; padding: 20px; border: 1.5px solid #fee2e2; margin-top: 8px; }
+    .zona-perigo h4 { font-size: 14px; color: #c0392b; margin-bottom: 8px; }
+    .zona-perigo p { font-size: 13px; color: #888; margin-bottom: 14px; line-height: 1.5; }
+    .btn-excluir { padding: 10px 20px; background: #fdecea; color: #c0392b; border: 1.5px solid #f5c6c6; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .btn-excluir:hover { background: #c0392b; color: white; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="logo">🤍 KINDER</a>
+  <div class="header-user">
+    <span class="header-nome" id="header-nome"></span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<div class="loading" id="loading">Carregando sua área...</div>
+
+<div class="container" id="container">
+
+  <!-- STATUS -->
+  <div class="status-bar">
+    <div>
+      <div class="status-label">Bem-vindo(a) de volta</div>
+      <div class="status-nome" id="status-nome">—</div>
+    </div>
+    <div class="status-badge" id="status-badge">—</div>
+  </div>
+
+  <!-- CUIDADORES SUGERIDOS -->
+  <div class="secao aberta" id="sec-sugeridos">
+    <div class="secao-header" onclick="toggleSecao('sec-sugeridos')">
+      <div class="secao-titulo"><span class="secao-icone">🤝</span> Cuidadores sugeridos</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div id="lista-sugeridos">
+        <div class="vazio-msg">Ainda não há sugestões.<br>Entraremos em contato em breve com perfis compatíveis.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERFIL DO FAMILIAR -->
+  <div class="secao" id="sec-familiar">
+    <div class="secao-header" onclick="toggleSecao('sec-familiar')">
+      <div class="secao-titulo"><span class="secao-icone">👴</span> Dados do familiar</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>Nome do familiar</label>
+        <input type="text" id="p-nome-idoso" placeholder="Primeiro nome">
+      </div>
+      <div class="campo">
+        <label>Idade aproximada</label>
+        <input type="number" id="p-idade" placeholder="Ex: 82" min="50" max="120">
+      </div>
+      <button class="btn-salvar" onclick="salvar('familiar')">Salvar</button>
+      <div class="feedback" id="fb-familiar"></div>
+    </div>
+  </div>
+
+  <!-- PERSONALIDADE -->
+  <div class="secao" id="sec-personalidade">
+    <div class="secao-header" onclick="toggleSecao('sec-personalidade')">
+      <div class="secao-titulo"><span class="secao-icone">💬</span> Personalidade</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>Como reage ao cuidado?</label>
+        <div class="opcoes" id="opc-reacao">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'reacao')">agitado</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'reacao')">adapta</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'reacao')">depende</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Conversa e interação?</label>
+        <div class="opcoes" id="opc-conversa">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'conversa')">muito</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'conversa')">moderado</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'conversa')">silencio</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Como lida com ajuda?</label>
+        <div class="opcoes" id="opc-lida">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'lida')">aceita</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'lida')">resistente</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'lida')">varia</button>
+        </div>
+      </div>
+      <button class="btn-salvar" onclick="salvar('personalidade')">Salvar</button>
+      <div class="feedback" id="fb-personalidade"></div>
+    </div>
+  </div>
+
+  <!-- ROTINA -->
+  <div class="secao" id="sec-rotina">
+    <div class="secao-header" onclick="toggleSecao('sec-rotina')">
+      <div class="secao-titulo"><span class="secao-icone">🗓️</span> Rotina</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>Rotina da casa</label>
+        <div class="opcoes" id="opc-rotina">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'rotina')">rigida</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'rotina')">semirigida</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'rotina')">flexivel</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Atividades (pode marcar mais de um)</label>
+        <div class="opcoes" id="opc-ativ">
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">tv</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">música</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">leitura</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">passeios</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">jogos</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">oração</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">cozinhar</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">pouco</button>
+        </div>
+      </div>
+      <button class="btn-salvar" onclick="salvar('rotina')">Salvar</button>
+      <div class="feedback" id="fb-rotina"></div>
+    </div>
+  </div>
+
+  <!-- CONDIÇÃO -->
+  <div class="secao" id="sec-condicao">
+    <div class="secao-header" onclick="toggleSecao('sec-condicao')">
+      <div class="secao-titulo"><span class="secao-icone">🏥</span> Condição e cuidados</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>Nível de dependência</label>
+        <div class="opcoes" id="opc-dependencia">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'dependencia')">independente</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'dependencia')">semi</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'dependencia')">dependente</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'dependencia')">acamado</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Diagnóstico (pode marcar mais de um)</label>
+        <div class="opcoes" id="opc-condicao">
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">alzheimer</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">parkinson</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">depressao</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">avc</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">nenhuma</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Medicamentos em horário fixo?</label>
+        <div class="opcoes" id="opc-medicamento">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'medicamento')">vários</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'medicamento')">poucos</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'medicamento')">não</button>
+        </div>
+      </div>
+      <button class="btn-salvar" onclick="salvar('condicao')">Salvar</button>
+      <div class="feedback" id="fb-condicao"></div>
+    </div>
+  </div>
+
+  <!-- PREFERÊNCIAS -->
+  <div class="secao" id="sec-preferencias">
+    <div class="secao-header" onclick="toggleSecao('sec-preferencias')">
+      <div class="secao-titulo"><span class="secao-icone">⭐</span> Preferências</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>Gênero preferido do cuidador</label>
+        <div class="opcoes" id="opc-genero">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'genero')">feminino</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'genero')">masculino</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'genero')">indiferente</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Ambiente da casa (pode marcar mais de um)</label>
+        <div class="opcoes" id="opc-ambiente">
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">pets</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">crianças</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">fumantes</button>
+          <button class="opcao-btn multi" onclick="toggleMulti(this)">tranquila</button>
+        </div>
+      </div>
+      <button class="btn-salvar" onclick="salvar('preferencias')">Salvar</button>
+      <div class="feedback" id="fb-preferencias"></div>
+    </div>
+  </div>
+
+  <!-- CONTA -->
+  <div class="secao" id="sec-conta">
+    <div class="secao-header" onclick="toggleSecao('sec-conta')">
+      <div class="secao-titulo"><span class="secao-icone">⚙️</span> Conta</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="p-email" disabled style="opacity:0.5;cursor:not-allowed;">
+      </div>
+      <div class="campo">
+        <label>Alterar senha</label>
+        <input type="password" id="senha-nova" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password">
+      </div>
+      <div class="campo">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="senha-confirma" placeholder="Repita a nova senha" autocomplete="new-password">
+      </div>
+      <button class="btn-salvar" onclick="alterarSenha()" style="margin-top:8px;">Alterar senha</button>
+      <div class="feedback" id="fb-senha"></div>
+
+      <div class="zona-perigo" style="margin-top:24px;">
+        <h4>Excluir conta</h4>
+        <p>Esta ação remove permanentemente seus dados. Não pode ser desfeita.</p>
+        <button class="btn-excluir" onclick="confirmarExclusao()">Excluir minha conta</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getAuth, signOut, onAuthStateChanged, deleteUser, updatePassword }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMe9GRhZyYOiDCVQBxMnu8MHjuaY1hY5Y",
+    authDomain: "kinder-4dd7b.firebaseapp.com",
+    projectId: "kinder-4dd7b",
+    storageBucket: "kinder-4dd7b.firebasestorage.app",
+    messagingSenderId: "874034411154",
+    appId: "1:874034411154:web:8fb0122f8b9750197dd84b",
+    measurementId: "G-KKN5D5NEK0"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let currentUser = null;
+  let dadosFS = {};
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = './login-familia.html'; return; }
+    currentUser = user;
+
+    try {
+      const ref  = doc(db, 'familias', user.uid);
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        const novo = { nome: user.displayName || '', email: user.email, status: 'pendente', criadoEm: new Date().toISOString(), perfil: {} };
+        await setDoc(ref, novo);
+        dadosFS = novo;
+      } else {
+        dadosFS = snap.data();
+      }
+
+      carregarUI(user, dadosFS);
+    } catch(e) {
+      console.error(e);
+      document.getElementById('loading').innerHTML =
+        '<div style="text-align:center;padding:40px;">' +
+        '<p style="color:#c0392b;font-weight:700;margin-bottom:8px;">Erro ao carregar</p>' +
+        '<p style="color:#888;font-size:13px;margin-bottom:16px;">' + (e.message || e.code) + '</p>' +
+        '<button onclick="location.reload()" style="padding:10px 20px;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer;">Tentar novamente</button>' +
+        '</div>';
+    }
+  });
+
+  function carregarUI(user, dados) {
+    document.getElementById('header-nome').textContent = dados.nome || user.email;
+    document.getElementById('status-nome').textContent = dados.nome || 'Família';
+    document.getElementById('p-email').value = user.email;
+
+    const statusMap = {
+      pendente:   { label: '⏳ Aguardando match',   cls: 'status-pendente'  },
+      andamento:  { label: '🔍 Match em andamento', cls: 'status-andamento' },
+      match:      { label: '✅ Match encontrado',   cls: 'status-match'     }
+    };
+    const s = statusMap[dados.status] || statusMap['pendente'];
+    const badge = document.getElementById('status-badge');
+    badge.textContent = s.label;
+    badge.className = 'status-badge ' + s.cls;
+
+    const p = dados.perfil || {};
+    if (p.nome_idoso) document.getElementById('p-nome-idoso').value = p.nome_idoso;
+    if (p.idade)      document.getElementById('p-idade').value      = p.idade;
+
+    if (p.reacao)      marcarOpcao('opc-reacao', p.reacao);
+    if (p.conversa)    marcarOpcao('opc-conversa', p.conversa);
+    if (p.lida)        marcarOpcao('opc-lida', p.lida);
+    if (p.rotina)      marcarOpcao('opc-rotina', p.rotina);
+    if (p.dependencia) marcarOpcao('opc-dependencia', p.dependencia);
+    if (p.medicamento) marcarOpcao('opc-medicamento', p.medicamento);
+    if (p.genero)      marcarOpcao('opc-genero', p.genero);
+    if (p.atividades)  marcarMulti('opc-ativ', p.atividades);
+    if (p.condicao)    marcarMulti('opc-condicao', p.condicao);
+    if (p.ambiente)    marcarMulti('opc-ambiente', p.ambiente);
+
+    renderSugeridos(dados.sugeridos || []);
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('container').style.display = 'block';
+  }
+
+  function renderSugeridos(lista) {
+    var el = document.getElementById('lista-sugeridos');
+    if (!lista.length) {
+      el.innerHTML = '<div class="vazio-msg">Ainda não há sugestões.<br>Entraremos em contato em breve com perfis compatíveis.</div>';
+      return;
+    }
+    el.innerHTML = lista.map(function(c) {
+      var tags = (c.experiencia || []).map(function(e) { return '<span class="cuid-tag">' + e + '</span>'; }).join('');
+      return '<div class="card-cuidador">' +
+        '<div class="cuid-foto">' + (c.foto || '🧑‍⚕️') + '</div>' +
+        '<div class="cuid-info">' +
+          '<div class="cuid-nome">' + (c.nome || '—') + '</div>' +
+          '<div class="cuid-cidade">📍 ' + (c.cidade || '—') + '</div>' +
+          '<div class="cuid-tags">' + tags + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.salvar = async function(secao) {
+    const ref = doc(db, 'familias', currentUser.uid);
+    const btn = document.querySelector('#sec-' + secao + ' .btn-salvar');
+    const fb  = document.getElementById('fb-' + secao);
+    btn.disabled = true; btn.textContent = 'Salvando...';
+
+    try {
+      let update = {};
+      if (secao === 'familiar') {
+        update = {
+          'perfil.nome_idoso': document.getElementById('p-nome-idoso').value.trim(),
+          'perfil.idade':      document.getElementById('p-idade').value.trim(),
+        };
+      } else if (secao === 'personalidade') {
+        update = {
+          'perfil.reacao':   getOpcao('opc-reacao'),
+          'perfil.conversa': getOpcao('opc-conversa'),
+          'perfil.lida':     getOpcao('opc-lida'),
+        };
+      } else if (secao === 'rotina') {
+        update = {
+          'perfil.rotina':     getOpcao('opc-rotina'),
+          'perfil.atividades': getMulti('opc-ativ'),
+        };
+      } else if (secao === 'condicao') {
+        update = {
+          'perfil.dependencia': getOpcao('opc-dependencia'),
+          'perfil.condicao':    getMulti('opc-condicao'),
+          'perfil.medicamento': getOpcao('opc-medicamento'),
+        };
+      } else if (secao === 'preferencias') {
+        update = {
+          'perfil.genero':   getOpcao('opc-genero'),
+          'perfil.ambiente': getMulti('opc-ambiente'),
+        };
+      }
+
+      await updateDoc(ref, update);
+      mostrarFb(fb, 'ok', '✓ Salvo!');
+    } catch(e) {
+      mostrarFb(fb, 'erro', 'Erro ao salvar. Tente novamente.');
+    }
+
+    btn.disabled = false; btn.textContent = 'Salvar';
+  };
+
+  window.alterarSenha = async function() {
+    const nova     = document.getElementById('senha-nova').value;
+    const confirma = document.getElementById('senha-confirma').value;
+    const fb       = document.getElementById('fb-senha');
+    if (!nova)             { mostrarFb(fb, 'erro', 'Digite a nova senha.'); return; }
+    if (nova.length < 6)   { mostrarFb(fb, 'erro', 'Mínimo 6 caracteres.'); return; }
+    if (nova !== confirma) { mostrarFb(fb, 'erro', 'As senhas não coincidem.'); return; }
+    try {
+      await updatePassword(currentUser, nova);
+      document.getElementById('senha-nova').value = '';
+      document.getElementById('senha-confirma').value = '';
+      mostrarFb(fb, 'ok', '✓ Senha alterada!');
+    } catch(e) {
+      if (e.code === 'auth/requires-recent-login') mostrarFb(fb, 'erro', 'Faça logout e login novamente antes de alterar a senha.');
+      else mostrarFb(fb, 'erro', 'Erro ao alterar senha.');
+    }
+  };
+
+  window.sair = async function() {
+    await signOut(auth);
+    window.location.href = './login-familia.html';
+  };
+
+  window.confirmarExclusao = async function() {
+    if (!confirm('Tem certeza? Ação irreversível.')) return;
+    try {
+      await deleteDoc(doc(db, 'familias', currentUser.uid));
+      await deleteUser(currentUser);
+      window.location.href = '../index.html';
+    } catch(e) {
+      if (e.code === 'auth/requires-recent-login') alert('Faça logout e login novamente antes de excluir.');
+      else alert('Erro ao excluir. Tente novamente.');
+    }
+  };
+
+  function marcarOpcao(id, val) {
+    document.querySelectorAll('#' + id + ' .opcao-btn').forEach(b => b.classList.toggle('selecionado', b.textContent.trim() === val));
+  }
+  function marcarMulti(id, vals) {
+    var arr = Array.isArray(vals) ? vals : (vals || '').split(/[,;]/).map(v => v.trim());
+    document.querySelectorAll('#' + id + ' .opcao-btn').forEach(b => b.classList.toggle('selecionado', arr.includes(b.textContent.trim())));
+  }
+  function getOpcao(id) {
+    var s = document.querySelector('#' + id + ' .opcao-btn.selecionado');
+    return s ? s.textContent.trim() : '';
+  }
+  function getMulti(id) {
+    return Array.from(document.querySelectorAll('#' + id + ' .opcao-btn.selecionado')).map(b => b.textContent.trim());
+  }
+  function mostrarFb(el, tipo, texto) {
+    el.className = 'feedback ' + tipo;
+    el.textContent = texto;
+    setTimeout(() => { el.className = 'feedback'; }, 3000);
+  }
+</script>
+
+<script>
+  function toggleSecao(id) { document.getElementById(id).classList.toggle('aberta'); }
+  function toggleOpcao(btn, grupo) {
+    document.querySelectorAll('#opc-' + grupo + ' .opcao-btn').forEach(b => b.classList.remove('selecionado'));
+    btn.classList.add('selecionado');
+  }
+  function toggleMulti(btn) { btn.classList.toggle('selecionado'); }
+</script>
+
+</body>
+</html>
