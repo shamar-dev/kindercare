@@ -367,6 +367,127 @@
     }
 
     .btn-excluir:hover { background: #c0392b; color: white; }
+
+    /* VITRINE */
+    .vitrine-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vitrine-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 4px 2px 12px;
+      scroll-snap-type: x mandatory;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .vitrine-scroll::-webkit-scrollbar { display: none; }
+
+    .card-vitrine {
+      min-width: 200px;
+      max-width: 200px;
+      background: white;
+      border-radius: 14px;
+      padding: 18px 16px;
+      border: 2px solid #e8e8e8;
+      scroll-snap-align: start;
+      flex-shrink: 0;
+      transition: border 0.2s;
+    }
+
+    .card-vitrine.destaque {
+      border-color: #3a4e2a;
+      box-shadow: 0 4px 20px rgba(58,78,42,0.15);
+      position: relative;
+    }
+
+    .card-vitrine.desbotado { opacity: 0.45; filter: blur(1px); }
+
+    .card-vitrine .badge-voce {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #3a4e2a;
+      color: #c8d8a0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 99px;
+      white-space: nowrap;
+      letter-spacing: 1px;
+    }
+
+    .card-vitrine .cv-foto {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #e8e8e8;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      overflow: hidden;
+    }
+
+    .card-vitrine .cv-nome {
+      font-size: 13px;
+      font-weight: 700;
+      color: #2d2d2d;
+      text-align: center;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-vitrine .cv-cidade {
+      font-size: 11px;
+      color: #aaa;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .card-vitrine .cv-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .card-vitrine .cv-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 600;
+      background: #eef3e8;
+      color: #4a5e3a;
+    }
+
+    .card-vitrine .cv-tag.vazio {
+      background: #f5f5f5;
+      color: #ccc;
+      font-style: italic;
+    }
+
+    .card-vitrine .cv-status {
+      font-size: 11px;
+      color: #888;
+      text-align: center;
+    }
+
+    .vitrine-dica {
+      font-size: 12px;
+      color: #aaa;
+      text-align: center;
+      margin-top: 10px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -400,6 +521,20 @@
     </div>
     <div class="prog-barra">
       <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- VITRINE -->
+  <div class="secao" id="sec-vitrine">
+    <div class="secao-header" onclick="toggleSecao('sec-vitrine')">
+      <div class="secao-titulo"><span class="secao-icone">👁️</span> Como vou aparecer para as famílias</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="vitrine-wrap">
+        <div class="vitrine-scroll" id="vitrine-scroll"></div>
+      </div>
+      <div class="vitrine-dica">Deslize para ver · Quanto mais completo seu perfil, mais você se destaca</div>
     </div>
   </div>
 
@@ -757,9 +892,72 @@
     document.getElementById('p-limite').value = p.limite || '';
 
     atualizarProgresso();
+    renderVitrine(dados);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('container').style.display = 'block';
+  }
+
+  // ── VITRINE ────────────────────────────────────────
+  var FICTICIOS = [
+    { nome: 'Ana Paula S.',    cidade: 'São Paulo', estilo: 'comunicativa', experiencia: ['alzheimer','parkinson'], cozinha: 'sim',   foto: '👩' },
+    { nome: 'Rosana M.',       cidade: 'São Paulo', estilo: 'tranquila',    experiencia: ['acamados'],              cozinha: 'básico', foto: '👩‍🦱' },
+    { nome: 'Claudete F.',     cidade: 'São Paulo', estilo: 'adapto',       experiencia: ['avc','paliativos'],      cozinha: 'sim',   foto: '👩‍🦳' },
+    { nome: 'Márcia T.',       cidade: 'São Paulo', estilo: 'comunicativa', experiencia: ['alzheimer'],             cozinha: 'não',   foto: '🧑‍⚕️' },
+    { nome: 'Silvia R.',       cidade: 'São Paulo', estilo: 'adapto',       experiencia: ['parkinson','acamados'],  cozinha: 'sim',   foto: '👩‍🦰' },
+  ];
+
+  function renderVitrine(dados) {
+    var p    = dados.perfil || {};
+    var nome = dados.nome || '';
+    var scroll = document.getElementById('vitrine-scroll');
+
+    function cardFicticio(c) {
+      var tags = (c.experiencia || []).slice(0,2).map(function(e) {
+        return '<span class="cv-tag">' + e + '</span>';
+      }).join('');
+      if (c.cozinha === 'sim') tags += '<span class="cv-tag">🍳 cozinha</span>';
+      return '<div class="card-vitrine desbotado">' +
+        '<div class="cv-foto">' + c.foto + '</div>' +
+        '<div class="cv-nome">' + c.nome + '</div>' +
+        '<div class="cv-cidade">📍 ' + c.cidade + '</div>' +
+        '<div class="cv-tags">' + tags + '</div>' +
+      '</div>';
+    }
+
+    function cardUsuario() {
+      var primeiroNome = nome.split(' ')[0] || 'Você';
+      var cidade = p.cidade || '';
+      var exps = Array.isArray(p.experiencia) ? p.experiencia : [];
+      var tags = exps.length
+        ? exps.slice(0,2).map(function(e) { return '<span class="cv-tag">' + e + '</span>'; }).join('')
+        : '<span class="cv-tag vazio">sem experiência</span>';
+      if (p.cozinha === 'sim') tags += '<span class="cv-tag">🍳 cozinha</span>';
+      if (p.estilo) tags += '<span class="cv-tag">' + p.estilo + '</span>';
+
+      return '<div class="card-vitrine destaque" style="position:relative;">' +
+        '<div class="badge-voce">✦ VOCÊ</div>' +
+        '<div class="cv-foto">👤</div>' +
+        '<div class="cv-nome">' + (primeiroNome || '—') + '</div>' +
+        '<div class="cv-cidade">' + (cidade ? '📍 ' + cidade : '<span style="color:#ddd">📍 cidade</span>') + '</div>' +
+        '<div class="cv-tags">' + tags + '</div>' +
+        '<div class="cv-status">' + (cidade && exps.length ? '✓ Pronto para match' : 'Complete o perfil') + '</div>' +
+      '</div>';
+    }
+
+    // Monta: 2 fictícios, VOCÊ, 3 fictícios
+    var html = FICTICIOS.slice(0,2).map(cardFicticio).join('') +
+               cardUsuario() +
+               FICTICIOS.slice(2).map(cardFicticio).join('');
+    scroll.innerHTML = html;
+
+    // Centraliza no card "você"
+    setTimeout(function() {
+      var destaque = scroll.querySelector('.destaque');
+      if (destaque) {
+        scroll.scrollLeft = destaque.offsetLeft - scroll.offsetWidth / 2 + destaque.offsetWidth / 2;
+      }
+    }, 100);
   }
 
   // ── VALIDAÇÕES ─────────────────────────────────────
@@ -843,8 +1041,19 @@
       }
 
       await updateDoc(ref, update);
+      // Atualiza dadosFirestore local
+      Object.keys(update).forEach(function(k) {
+        var parts = k.split('.');
+        if (parts.length === 2) {
+          if (!dadosFirestore[parts[0]]) dadosFirestore[parts[0]] = {};
+          dadosFirestore[parts[0]][parts[1]] = update[k];
+        } else {
+          dadosFirestore[k] = update[k];
+        }
+      });
       mostrarFeedback(fb, 'ok', '✓ Salvo com sucesso!');
       atualizarProgresso();
+      renderVitrine(dadosFirestore);
     } catch (e) {
       mostrarFeedback(fb, 'erro', 'Erro ao salvar. Tente novamente.');
     }
