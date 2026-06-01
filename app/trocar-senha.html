@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — Defina sua senha</title>
+  <link rel="icon" type="image/png" href="../Kinder_Coracao.png">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #f0f2ec;
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #3a4e2a;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #c8d8a0;
+      letter-spacing: 3px;
+      text-decoration: none;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .boas-vindas {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #6b7c52;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .titulo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #2d2d2d;
+      margin-bottom: 8px;
+    }
+
+    .subtitulo {
+      font-size: 14px;
+      color: #888;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .campo {
+      margin-bottom: 16px;
+    }
+
+    .campo label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .campo input {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      color: #2d2d2d;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .campo input:focus { border-color: #6b7c52; }
+
+    .requisitos {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: #3a4e2a;
+      color: #c8d8a0;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover { background: #2d3e20; }
+    .btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    .msg {
+      font-size: 13px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .msg.erro { background: #fdecea; color: #c0392b; display: block; }
+    .msg.ok   { background: #eef3e8; color: #3a4e2a; display: block; }
+
+    .nome-usuario {
+      font-weight: 700;
+      color: #3a4e2a;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span class="logo">🤍 KINDER</span>
+</header>
+
+<main>
+  <div class="card">
+    <div class="boas-vindas">Bem-vinda ao Kinder</div>
+    <div class="titulo">Defina sua senha</div>
+    <div class="subtitulo">
+      Olá, <span class="nome-usuario" id="nome-usuario">cuidadora</span>!<br>
+      Antes de acessar seu perfil, crie uma senha pessoal.
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <div class="campo">
+      <label>Nova senha</label>
+      <input type="password" id="senha-nova" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+      <div class="requisitos">Mínimo 6 caracteres. Use letras e números.</div>
+    </div>
+    <div class="campo">
+      <label>Confirmar senha</label>
+      <input type="password" id="senha-confirma" placeholder="Repita a senha" autocomplete="new-password">
+    </div>
+
+    <button class="btn" id="btn-definir" onclick="definirSenha()">Definir senha e entrar →</button>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, updatePassword }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getFirestore, doc, updateDoc }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMe9GRhZyYOiDCVQBxMnu8MHjuaY1hY5Y",
+    authDomain: "kinder-4dd7b.firebaseapp.com",
+    projectId: "kinder-4dd7b",
+    storageBucket: "kinder-4dd7b.firebasestorage.app",
+    messagingSenderId: "874034411154",
+    appId: "1:874034411154:web:8fb0122f8b9750197dd84b",
+    measurementId: "G-KKN5D5NEK0"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  let currentUser = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href = './login.html'; return; }
+    currentUser = user;
+    const primeiroNome = (user.displayName || '').split(' ')[0] || 'cuidadora';
+    document.getElementById('nome-usuario').textContent = primeiroNome;
+  });
+
+  window.definirSenha = async function() {
+    const nova     = document.getElementById('senha-nova').value;
+    const confirma = document.getElementById('senha-confirma').value;
+    const btn      = document.getElementById('btn-definir');
+    const msg      = document.getElementById('msg');
+
+    msg.className = 'msg';
+
+    if (!nova)             { mostrarMsg('erro', 'Digite uma senha.'); return; }
+    if (nova.length < 6)   { mostrarMsg('erro', 'A senha precisa ter pelo menos 6 caracteres.'); return; }
+    if (nova !== confirma) { mostrarMsg('erro', 'As senhas não coincidem.'); return; }
+    if (nova === 'Kinder@2026') { mostrarMsg('erro', 'Escolha uma senha diferente da inicial.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    try {
+      await updatePassword(currentUser, nova);
+      await updateDoc(doc(db, 'cuidadores', currentUser.uid), { senhaInicial: false });
+      mostrarMsg('ok', '✓ Senha definida! Redirecionando...');
+      setTimeout(() => { window.location.href = './dashboard.html'; }, 1500);
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Definir senha e entrar →';
+      if (e.code === 'auth/requires-recent-login') {
+        mostrarMsg('erro', 'Sessão expirada. Faça login novamente.');
+        setTimeout(() => { window.location.href = './login.html'; }, 2000);
+      } else {
+        mostrarMsg('erro', 'Erro ao salvar. Tente novamente.');
+      }
+    }
+  };
+
+  function mostrarMsg(tipo, texto) {
+    const el = document.getElementById('msg');
+    el.className = 'msg ' + tipo;
+    el.textContent = texto;
+  }
+
+  // Enter para submeter
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') window.definirSenha && window.definirSenha();
+  });
+</script>
+
+</body>
+</html>

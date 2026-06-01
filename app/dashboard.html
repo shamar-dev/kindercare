@@ -835,6 +835,12 @@
         dadosFirestore = snap.data();
       }
 
+      // Redireciona se ainda usa senha inicial
+      if (dadosFirestore.senhaInicial) {
+        window.location.href = './trocar-senha.html';
+        return;
+      }
+
       carregarUI(user, dadosFirestore);
 
     } catch (e) {
