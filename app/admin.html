@@ -204,6 +204,7 @@
       <option value="suspenso">Suspenso</option>
       <option value="andamento">Em andamento</option>
       <option value="match">Match encontrado</option>
+      <option value="excluido">🗑 Excluídos</option>
     </select>
   </div>
 
@@ -385,7 +386,11 @@
       var nome  = (item.nome || '').toLowerCase();
       var email = (item.email || '').toLowerCase();
       if (busca && nome.indexOf(busca) === -1 && email.indexOf(busca) === -1) return false;
-      if (status && item.status !== status) return false;
+      if (status) {
+        if (item.status !== status) return false;
+      } else {
+        if (item.status === 'excluido') return false;
+      }
       return true;
     });
   }
@@ -427,6 +432,7 @@
               '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
               '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
             '</select>' +
+            '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -470,6 +476,7 @@
               '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>🔍 Em andamento</option>' +
               '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>✅ Match encontrado</option>' +
             '</select>' +
+            '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -512,6 +519,21 @@
     document.getElementById('filtro-busca').value  = '';
     renderAtual();
     document.getElementById('container').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // ── EXCLUIR (soft delete) ──────────────────────────
+  window.excluirRegistro = async function(colecao, uid) {
+    if (!confirm('Excluir este registro? Ele ficará oculto mas pode ser recuperado pelo filtro "Excluídos".')) return;
+    try {
+      await updateDoc(doc(db, colecao, uid), { status: 'excluido' });
+      var lista = colecao === 'cuidadores' ? cuidadores : familias;
+      var item  = lista.find(function(i) { return i.uid === uid; });
+      if (item) item.status = 'excluido';
+      atualizarResumo();
+      renderAtual();
+    } catch(e) {
+      alert('Erro ao excluir: ' + e.message);
+    }
   };
 
   // ── MUDAR STATUS ───────────────────────────────────
