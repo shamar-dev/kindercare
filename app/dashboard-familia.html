@@ -655,7 +655,8 @@
             '<div style="flex:1;">' +
               '<div style="font-size:15px;font-weight:700;color:#2d2d2d;">' + abreviarNome(m.cuidador) + '</div>' +
               (score ? '<div style="font-size:12px;color:#6b7c52;font-weight:600;">' + score + '</div>' : '') +
-              '<div style="font-size:12px;color:#aaa;">' + label + '</div>' +
+              '<div style="font-size:12px;color:#aaa;margin-bottom:6px;">' + label + '</div>' +
+              (m.destaques && m.destaques.length ? '<div style="display:flex;flex-wrap:wrap;gap:4px;">' + m.destaques.map(function(d) { return '<span style="font-size:11px;background:#eef3e8;color:#3a4e2a;border-radius:99px;padding:2px 8px;font-weight:600;">' + d + '</span>'; }).join('') + '</div>' : '') +
             '</div>' +
             whats +
           '</div>' +
