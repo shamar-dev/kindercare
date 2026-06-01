@@ -628,7 +628,9 @@
         nao_deu:     '❌ Não deu certo'
       };
 
-      el.innerHTML = snap.docs.map(function(d) {
+      el.innerHTML = snap.docs.sort(function(a, b) {
+        return (b.data().score || 0) - (a.data().score || 0);
+      }).map(function(d) {
         var m = d.data();
         var label = statusLabel[m.status] || m.status;
         var score = m.score !== undefined ? m.score + '% compatibilidade' : '';
