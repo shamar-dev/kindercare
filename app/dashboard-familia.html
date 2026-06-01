@@ -352,6 +352,10 @@
       const snap = await getDoc(ref);
 
       if (!snap.exists()) {
+        // Verifica se não é um cuidador tentando acessar área errada
+        const cuidSnap = await getDoc(doc(db, 'cuidadores', user.uid));
+        if (cuidSnap.exists()) { window.location.href = './dashboard.html'; return; }
+
         const novo = { nome: user.displayName || '', email: user.email, status: 'pendente', criadoEm: new Date().toISOString(), perfil: {} };
         await setDoc(ref, novo);
         dadosFS = novo;

@@ -142,7 +142,7 @@
   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
            sendPasswordResetEmail, updateProfile, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc }
+  import { getFirestore, doc, setDoc, getDoc }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -161,8 +161,15 @@
 
   let criandoConta = false;
 
-  onAuthStateChanged(auth, (user) => {
-    if (user && !criandoConta) window.location.href = './dashboard-familia.html';
+  onAuthStateChanged(auth, async (user) => {
+    if (!user || criandoConta) return;
+    // Verifica se é família ou cuidador e redireciona corretamente
+    const snap = await getDoc(doc(db, 'familias', user.uid));
+    if (snap.exists()) {
+      window.location.href = './dashboard-familia.html';
+    } else {
+      window.location.href = './dashboard.html';
+    }
   });
 
   window.fazerLogin = async function() {

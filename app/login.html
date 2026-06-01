@@ -299,8 +299,15 @@
 
   // Redireciona se já está logado (mas não durante o cadastro)
   let criandoConta = false;
-  onAuthStateChanged(auth, (user) => {
-    if (user && !criandoConta) window.location.href = './dashboard.html';
+  onAuthStateChanged(auth, async (user) => {
+    if (!user || criandoConta) return;
+    // Verifica se é cuidador ou família e redireciona corretamente
+    const snap = await getDoc(doc(db, 'cuidadores', user.uid));
+    if (snap.exists()) {
+      window.location.href = './dashboard.html';
+    } else {
+      window.location.href = './dashboard-familia.html';
+    }
   });
 
   // ── LOGIN ──────────────────────────────────────────

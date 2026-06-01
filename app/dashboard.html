@@ -835,6 +835,12 @@
         dadosFirestore = snap.data();
       }
 
+      // Verifica se não é uma família tentando acessar área errada
+      if (!snap.exists()) {
+        const famSnap = await getDoc(doc(db, 'familias', user.uid));
+        if (famSnap.exists()) { window.location.href = './dashboard-familia.html'; return; }
+      }
+
       // Redireciona se ainda usa senha inicial
       if (dadosFirestore.senhaInicial) {
         window.location.href = './trocar-senha.html';
