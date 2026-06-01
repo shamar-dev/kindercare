@@ -634,7 +634,18 @@
         <input type="email" id="p-email" disabled style="opacity:0.5;cursor:not-allowed;">
       </div>
 
-      <div class="zona-perigo">
+      <div class="campo">
+        <label>Alterar senha</label>
+        <input type="password" id="senha-nova" placeholder="Nova senha (mín. 6 caracteres)" autocomplete="new-password">
+      </div>
+      <div class="campo">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="senha-confirma" placeholder="Repita a nova senha" autocomplete="new-password">
+      </div>
+      <button class="btn-salvar" onclick="alterarSenha()" style="margin-top:8px;">Alterar senha</button>
+      <div class="feedback" id="fb-senha"></div>
+
+      <div class="zona-perigo" style="margin-top:24px;">
         <h4>Excluir conta</h4>
         <p>Esta ação remove permanentemente seus dados da plataforma. Não pode ser desfeita.</p>
         <button class="btn-excluir" onclick="confirmarExclusao()">Excluir minha conta</button>
@@ -647,7 +658,7 @@
 <!-- FIREBASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getAuth, signOut, onAuthStateChanged, deleteUser }
+  import { getAuth, signOut, onAuthStateChanged, deleteUser, updatePassword }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -840,6 +851,30 @@
 
     btn.disabled = false;
     btn.textContent = secao === 'pessoal' ? 'Salvar dados pessoais' : 'Salvar perfil profissional';
+  };
+
+  // ── ALTERAR SENHA ──────────────────────────────────
+  window.alterarSenha = async function() {
+    const nova     = document.getElementById('senha-nova').value;
+    const confirma = document.getElementById('senha-confirma').value;
+    const fb       = document.getElementById('fb-senha');
+
+    if (!nova)            { mostrarFeedback(fb, 'erro', 'Digite a nova senha.'); return; }
+    if (nova.length < 6)  { mostrarFeedback(fb, 'erro', 'A senha precisa ter pelo menos 6 caracteres.'); return; }
+    if (nova !== confirma){ mostrarFeedback(fb, 'erro', 'As senhas não coincidem.'); return; }
+
+    try {
+      await updatePassword(currentUser, nova);
+      document.getElementById('senha-nova').value = '';
+      document.getElementById('senha-confirma').value = '';
+      mostrarFeedback(fb, 'ok', '✓ Senha alterada com sucesso!');
+    } catch (e) {
+      if (e.code === 'auth/requires-recent-login') {
+        mostrarFeedback(fb, 'erro', 'Por segurança, faça logout e login novamente antes de alterar a senha.');
+      } else {
+        mostrarFeedback(fb, 'erro', 'Erro ao alterar senha. Tente novamente.');
+      }
+    }
   };
 
   // ── SAIR ───────────────────────────────────────────
