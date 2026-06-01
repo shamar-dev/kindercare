@@ -431,59 +431,36 @@
 
     <p>Fazemos match entre idosos e cuidadores. Não o primeiro disponível — o certo para o seu familiar.</p>
 
-    <div class="form-box">
-      <h2>Seja o primeiro a saber</h2>
-      <p>O Kinder está chegando. Cadastre-se e receba acesso antecipado.</p>
-
-      <div class="form-group">
-        <input id="nome" type="text" placeholder="Seu nome" />
-      </div>
-      <div class="form-group">
-        <input id="email" type="email" placeholder="Seu e-mail" />
-      </div>
-      <div class="form-group">
-        <input id="whatsapp" type="tel" placeholder="WhatsApp (opcional)" />
-      </div>
-      <div class="form-group">
-        <select id="tipo">
-          <option value="" disabled selected>Você é...</option>
-          <option value="familia">Familiar de idoso</option>
-          <option value="cuidadora">Cuidadora profissional</option>
-          <option value="outro">Outro</option>
-        </select>
-      </div>
-
-      <button class="btn" onclick="enviarCadastro()">Quero acesso antecipado →</button>
-      <p id="msg-retorno" style="margin-top:14px;font-size:13px;text-align:center;min-height:18px;"></p>
-    </div>
-  </section>
-
-  <!-- ACESSO -->
-  <section style="background:#f0f2ec;padding:48px 24px;">
-    <div style="max-width:560px;margin:0 auto;text-align:center;">
-      <p style="font-size:12px;font-weight:700;letter-spacing:2px;color:#6b7c52;text-transform:uppercase;margin-bottom:10px;">Já faz parte do Kinder?</p>
-      <h2 style="font-size:22px;font-weight:700;color:#2d2d2d;margin-bottom:28px;">Acesse sua área</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-
-        <a href="./app/login.html" style="text-decoration:none;">
-          <div style="background:#3a4e2a;border-radius:14px;padding:28px 20px;text-align:center;transition:opacity 0.2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-            <div style="font-size:32px;margin-bottom:10px;">🧑‍⚕️</div>
-            <div style="font-size:15px;font-weight:700;color:#c8d8a0;margin-bottom:4px;">Área do Cuidador</div>
-            <div style="font-size:12px;color:#8a9e6a;">Acesse seu perfil</div>
-          </div>
-        </a>
+    <div class="form-box" style="padding:32px 28px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
 
         <a href="./app/login-familia.html" style="text-decoration:none;">
-          <div style="background:white;border:2px solid #dde4d4;border-radius:14px;padding:28px 20px;text-align:center;transition:all 0.2s;" onmouseover="this.style.borderColor='#6b7c52'" onmouseout="this.style.borderColor='#dde4d4'">
-            <div style="font-size:32px;margin-bottom:10px;">🏠</div>
-            <div style="font-size:15px;font-weight:700;color:#2d2d2d;margin-bottom:4px;">Área da Família</div>
-            <div style="font-size:12px;color:#888;">Encontre um cuidador</div>
+          <div style="background:#3a4e2a;border-radius:12px;padding:22px 16px;text-align:center;cursor:pointer;transition:opacity 0.2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <div style="font-size:28px;margin-bottom:8px;">🏠</div>
+            <div style="font-size:14px;font-weight:700;color:#c8d8a0;margin-bottom:3px;">Sou família</div>
+            <div style="font-size:11px;color:#8a9e6a;line-height:1.4;">Quero encontrar<br>um cuidador</div>
+          </div>
+        </a>
+
+        <a href="./app/login.html" style="text-decoration:none;">
+          <div style="background:rgba(255,255,255,0.12);border:1.5px solid rgba(200,216,160,0.4);border-radius:12px;padding:22px 16px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+            <div style="font-size:28px;margin-bottom:8px;">🧑‍⚕️</div>
+            <div style="font-size:14px;font-weight:700;color:white;margin-bottom:3px;">Sou cuidador</div>
+            <div style="font-size:11px;color:rgba(200,216,160,0.8);line-height:1.4;">Quero me cadastrar<br>ou acessar minha área</div>
           </div>
         </a>
 
       </div>
+      <p style="font-size:11px;color:rgba(255,255,255,0.4);text-align:center;">Plataforma gratuita para cuidadores e famílias</p>
     </div>
   </section>
+
+  <!-- PLACEHOLDER para manter compatibilidade com JS existente -->
+  <span id="msg-retorno" style="display:none;"></span>
+  <input id="nome" style="display:none;">
+  <input id="email" style="display:none;">
+  <input id="whatsapp" style="display:none;">
+  <select id="tipo" style="display:none;"></select>
 
   <!-- NÚMEROS -->
   <section class="numeros">
