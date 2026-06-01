@@ -129,7 +129,26 @@
   </div>
 </header>
 
-<div class="loading" id="loading">Carregando painel...</div>
+<!-- TELA DE LOGIN ADMIN -->
+<div id="tela-login" style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;">
+  <div style="background:white;border-radius:16px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+    <div style="font-size:13px;font-weight:700;color:#6b7c52;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Acesso restrito</div>
+    <div style="font-size:20px;font-weight:700;color:#2d2d2d;margin-bottom:24px;">Painel Admin</div>
+    <div id="msg-login" style="font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;background:#fdecea;color:#c0392b;"></div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Senha</label>
+      <input type="password" id="input-senha" placeholder="••••••••"
+        style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-family:Nunito,sans-serif;font-size:15px;outline:none;"
+        onkeydown="if(event.key==='Enter')entrarAdmin()">
+    </div>
+    <button onclick="entrarAdmin()" id="btn-entrar"
+      style="width:100%;padding:13px;background:#2d3e20;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">
+      Entrar →
+    </button>
+  </div>
+</div>
+
+<div class="loading" id="loading" style="display:none;">Carregando painel...</div>
 
 <div class="container" id="container">
 
@@ -205,7 +224,6 @@
   const db   = getFirestore(app);
 
   const ADMIN_EMAIL = 'admin@kindercare.com.br';
-  const ADMIN_SENHA = 'KinderAdmin@2026';
 
   var cuidadores = [];
   var familias   = [];
@@ -213,28 +231,45 @@
 
   // ── AUTH ────────────────────────────────────────────
   onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      // Auto-login silencioso com conta admin
-      try {
-        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_SENHA);
-      } catch(e) {
-        document.getElementById('loading').innerHTML =
-          '<div style="text-align:center;color:#c0392b;padding:40px;">Erro ao autenticar admin.<br>' + e.message + '</div>';
-      }
-      return;
-    }
+    if (!user) return; // aguarda login manual
 
-    // Verifica se é admin
     const adminSnap = await getDoc(doc(db, 'admins', user.uid));
     if (!adminSnap.exists()) {
-      document.getElementById('loading').innerHTML =
-        '<div style="text-align:center;color:#c0392b;padding:40px;">Acesso negado.</div>';
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('tela-login').style.display = 'flex';
+      mostrarErroLogin('Acesso negado para este usuário.');
+      await signOut(auth);
       return;
     }
 
-    document.getElementById('header-email').textContent = user.email;
+    document.getElementById('tela-login').style.display  = 'none';
+    document.getElementById('loading').style.display     = 'flex';
+    document.getElementById('header-email').textContent  = user.email;
     await carregarDados();
   });
+
+  window.entrarAdmin = async function() {
+    const senha = document.getElementById('input-senha').value;
+    const btn   = document.getElementById('btn-entrar');
+    if (!senha) { mostrarErroLogin('Digite a senha.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Entrando...';
+
+    try {
+      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, senha);
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = 'Entrar →';
+      mostrarErroLogin('Senha incorreta.');
+    }
+  };
+
+  function mostrarErroLogin(msg) {
+    var el = document.getElementById('msg-login');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
 
   // ── CARREGAR DADOS ─────────────────────────────────
   async function carregarDados() {
