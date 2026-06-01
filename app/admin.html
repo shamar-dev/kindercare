@@ -31,21 +31,24 @@
     .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; display: none; }
 
     /* RESUMO */
-    .resumo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 32px; }
+    .resumo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 32px; }
     @media (max-width: 600px) { .resumo { grid-template-columns: 1fr; } }
 
     .resumo-card {
       background: white;
       border-radius: 12px;
       padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
     }
 
+    .resumo-topo { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
     .resumo-icone { font-size: 32px; }
     .resumo-num { font-size: 28px; font-weight: 700; color: #2d2d2d; line-height: 1; }
     .resumo-label { font-size: 12px; color: #888; margin-top: 3px; }
+
+    .resumo-status { display: flex; flex-wrap: wrap; gap: 8px; }
+    .resumo-status-item { font-size: 12px; color: #555; background: #f5f5f5; border-radius: 8px; padding: 4px 10px; cursor: pointer; transition: background 0.15s; }
+    .resumo-status-item:hover { background: #e8edd8; color: #2d3e20; }
+    .resumo-status-item span { font-weight: 700; color: #2d2d2d; }
 
     /* TABS */
     .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; padding: 6px; border-radius: 12px; width: fit-content; }
@@ -162,25 +165,24 @@
   <!-- RESUMO -->
   <div class="resumo">
     <div class="resumo-card">
-      <div class="resumo-icone">🧑‍⚕️</div>
-      <div>
-        <div class="resumo-num" id="num-cuidadores">—</div>
-        <div class="resumo-label">Cuidadores</div>
+      <div class="resumo-topo" onclick="filtrarPorStatus('cuidadores','')" style="cursor:pointer;">
+        <div class="resumo-icone">🧑‍⚕️</div>
+        <div>
+          <div class="resumo-num" id="num-cuidadores">—</div>
+          <div class="resumo-label">Cuidadores</div>
+        </div>
       </div>
+      <div class="resumo-status" id="status-cuidadores"></div>
     </div>
     <div class="resumo-card">
-      <div class="resumo-icone">🏠</div>
-      <div>
-        <div class="resumo-num" id="num-familias">—</div>
-        <div class="resumo-label">Famílias</div>
+      <div class="resumo-topo" onclick="filtrarPorStatus('familias','')" style="cursor:pointer;">
+        <div class="resumo-icone">🏠</div>
+        <div>
+          <div class="resumo-num" id="num-familias">—</div>
+          <div class="resumo-label">Famílias</div>
+        </div>
       </div>
-    </div>
-    <div class="resumo-card">
-      <div class="resumo-icone">✅</div>
-      <div>
-        <div class="resumo-num" id="num-aprovados">—</div>
-        <div class="resumo-label">Cuidadores aprovados</div>
-      </div>
+      <div class="resumo-status" id="status-familias"></div>
     </div>
   </div>
 
@@ -351,7 +353,8 @@
     // Resumo
     document.getElementById('num-cuidadores').textContent = cuidadores.length;
     document.getElementById('num-familias').textContent   = familias.length;
-    document.getElementById('num-aprovados').textContent  = cuidadores.filter(c => c.status === 'aprovado').length;
+
+    atualizarResumo();
 
     document.getElementById('loading').style.display  = 'none';
     document.getElementById('container').style.display = 'block';
@@ -472,6 +475,44 @@
     }).join('');
   }
 
+  // ── RESUMO ─────────────────────────────────────────
+  function atualizarResumo() {
+    document.getElementById('num-cuidadores').textContent = cuidadores.length;
+    document.getElementById('num-familias').textContent   = familias.length;
+
+    var statusC = [
+      { key: 'pendente', label: '⏳ Pendente' },
+      { key: 'analise',  label: '🔍 Em análise' },
+      { key: 'aprovado', label: '✅ Aprovado' },
+      { key: 'suspenso', label: '🚫 Suspenso' }
+    ];
+    var statusF = [
+      { key: 'pendente',  label: '⏳ Aguardando' },
+      { key: 'andamento', label: '🔍 Em andamento' },
+      { key: 'match',     label: '✅ Match' }
+    ];
+
+    document.getElementById('status-cuidadores').innerHTML = statusC.map(function(s) {
+      var n = cuidadores.filter(function(c) { return (c.status || 'pendente') === s.key; }).length;
+      return '<div class="resumo-status-item" onclick="filtrarPorStatus(\'cuidadores\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
+    }).join('');
+
+    document.getElementById('status-familias').innerHTML = statusF.map(function(s) {
+      var n = familias.filter(function(f) { return (f.status || 'pendente') === s.key; }).length;
+      return '<div class="resumo-status-item" onclick="filtrarPorStatus(\'familias\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
+    }).join('');
+  }
+
+  window.filtrarPorStatus = function(tab, status) {
+    tabAtual = tab;
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('ativo'); });
+    document.querySelector('.tab[onclick*="' + tab + '"]').classList.add('ativo');
+    document.getElementById('filtro-status').value = status;
+    document.getElementById('filtro-busca').value  = '';
+    renderAtual();
+    document.getElementById('container').scrollIntoView({ behavior: 'smooth' });
+  };
+
   // ── MUDAR STATUS ───────────────────────────────────
   window.mudarStatus = async function(colecao, uid, selectEl) {
     var novoStatus = selectEl.value;
@@ -482,8 +523,7 @@
       var lista = colecao === 'cuidadores' ? cuidadores : familias;
       var item  = lista.find(function(i) { return i.uid === uid; });
       if (item) item.status = novoStatus;
-      // Atualiza contador aprovados
-      document.getElementById('num-aprovados').textContent = cuidadores.filter(function(c) { return c.status === 'aprovado'; }).length;
+      atualizarResumo();
     } catch(e) {
       alert('Erro ao salvar status: ' + e.message);
     }
