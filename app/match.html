@@ -668,10 +668,19 @@
     var c = cuidadores[selC];
     var f = familias[selF];
     var resultado = calcularScore(c, f);
+    var valoresDestaque = {
+      '📍 Cidade':      c.cidade || '',
+      '🏥 Experiência': c.experiencia || '',
+      '💪 Cuidado':     c.cuidados || '',
+      '⚠ Restrições':  (c.restricao && c.restricao.toLowerCase() !== 'nenhuma' ? c.restricao : 'Sem restrições'),
+      '🕐 Rotina':      c.rotina || '',
+      '💬 Conversa':    c.estilo || ''
+    };
     var top3 = resultado.detalhes
       .sort(function(a, b) { return (b.pts/b.max) - (a.pts/a.max); })
       .slice(0, 3)
-      .map(function(d) { return d.label; });
+      .map(function(d) { return valoresDestaque[d.label] || d.label; })
+      .filter(function(v) { return v; });
 
     var novoMatch = {
       cuidadorId: c._id, cuidador: c.nome, cuidadorWhats: c.whatsapp,
