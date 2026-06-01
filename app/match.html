@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — Painel de Match</title>
+  <link rel="icon" type="image/png" href="../Kinder_Coracao.png">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f0f2ec; font-family: 'Nunito', sans-serif; color: #2d2d2d; min-height: 100vh; }
+
+    header {
+      background: #2d3e20;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo { font-size: 16px; font-weight: 700; color: #c8d8a0; letter-spacing: 3px; }
+    .admin-badge { font-size: 11px; font-weight: 700; background: #c8d8a0; color: #2d3e20; padding: 3px 10px; border-radius: 99px; letter-spacing: 1px; }
+    .btn-sair { background: rgba(255,255,255,0.1); border: none; color: #c8d8a0; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+    .btn-sair:hover { background: rgba(255,255,255,0.2); }
+
+    .loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; font-size: 14px; color: #888; }
+
+    .container { max-width: 1300px; margin: 0 auto; padding: 28px 20px 140px; display: none; }
+
+    /* COLUNAS */
+    .colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+    @media (max-width: 768px) { .colunas { grid-template-columns: 1fr; } }
+
+    .coluna-titulo {
+      font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #6b7c52;
+      text-transform: uppercase; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .badge-count { background: #3a4e2a; color: #c8d8a0; font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 700; letter-spacing: 0; }
+
+    /* FILTROS */
+    .filtros { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .filtros input, .filtros select {
+      padding: 8px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px;
+      font-family: 'Nunito', sans-serif; font-size: 13px; outline: none; background: white; color: #2d2d2d;
+    }
+    .filtros input:focus, .filtros select:focus { border-color: #6b7c52; }
+    .filtros input { flex: 1; min-width: 120px; }
+
+    /* CARDS */
+    .card {
+      background: white; border-radius: 14px; padding: 18px 20px; margin-bottom: 12px;
+      border: 2px solid transparent; cursor: pointer; transition: all 0.2s ease; position: relative;
+    }
+    .card:hover { border-color: #c8d8a0; box-shadow: 0 4px 16px rgba(58,78,42,0.08); }
+    .card.selecionado { border-color: #3a4e2a; background: #f7faf3; }
+
+    .card-nome { font-size: 15px; font-weight: 700; color: #2d2d2d; margin-bottom: 2px; padding-right: 60px; }
+    .card-cidade { font-size: 12px; color: #888; margin-bottom: 12px; }
+    .card-contato { font-size: 12px; color: #aaa; display: flex; gap: 14px; flex-wrap: wrap; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .tag { font-size: 11px; padding: 3px 9px; border-radius: 99px; font-weight: 600; }
+    .tag-estilo { background: #eef3e8; color: #4a5e3a; }
+    .tag-exp { background: #e8f0ff; color: #3a5aa0; }
+    .tag-modal { background: #fff3e8; color: #a05a3a; }
+    .tag-cond { background: #f5e8ff; color: #6a3aa0; }
+    .tag-alerta { background: #fff0e8; color: #c04a1a; }
+
+    .check-btn {
+      position: absolute; top: 14px; right: 14px; width: 22px; height: 22px;
+      border-radius: 50%; border: 2px solid #ddd; background: white;
+      display: flex; align-items: center; justify-content: center; font-size: 11px;
+      transition: all 0.2s; pointer-events: none;
+    }
+    .card.selecionado .check-btn { background: #3a4e2a; border-color: #3a4e2a; color: white; }
+
+    .mini-score {
+      position: absolute; top: 14px; right: 14px; font-size: 12px; font-weight: 700;
+      padding: 3px 9px; border-radius: 99px; pointer-events: none;
+    }
+    .mini-score.alto  { background: #eef3e8; color: #3a4e2a; }
+    .mini-score.medio { background: #fff3e8; color: #a05a3a; }
+    .mini-score.baixo { background: #fee2e2; color: #c04a1a; }
+
+    .vazio { text-align: center; padding: 48px 32px; color: #bbb; font-size: 14px; background: white; border-radius: 14px; border: 2px dashed #e8e8e8; }
+    .vazio .emoji { font-size: 36px; display: block; margin-bottom: 10px; }
+
+    /* MATCHES */
+    .matches-section { padding-top: 32px; border-top: 2px solid #dde4d4; }
+    .matches-titulo { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #6b7c52; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+    .match-item {
+      background: white; border-radius: 10px; padding: 14px 20px; margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .match-item-nomes { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .match-item-data { font-size: 12px; color: #aaa; }
+    .match-item-whats { font-size: 12px; color: #6b7c52; margin-top: 4px; }
+
+    .status-select {
+      font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+      border: 1.5px solid #eee; border-radius: 8px; padding: 6px 10px; cursor: pointer; outline: none;
+    }
+
+    /* MATCH BAR */
+    .match-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white; border-top: 2px solid #e8e8e8;
+      padding: 14px 32px; display: flex; align-items: center; justify-content: space-between;
+      transform: translateY(100%); transition: transform 0.3s ease;
+      z-index: 100; box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+    }
+    .match-bar.visivel { transform: translateY(0); }
+
+    .match-nomes { font-size: 14px; color: #2d2d2d; }
+    .match-nomes strong { color: #3a4e2a; }
+    .match-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+
+    .score-badge { font-size: 22px; font-weight: 700; color: #3a4e2a; background: #eef3e8; padding: 6px 16px; border-radius: 99px; min-width: 70px; text-align: center; }
+
+    .breakdown { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+    .breakdown-item { font-size: 11px; padding: 3px 9px; border-radius: 99px; font-weight: 600; background: #f0f2ec; color: #555; }
+    .breakdown-item.cheio   { background: #eef3e8; color: #3a4e2a; }
+    .breakdown-item.parcial { background: #fff3e8; color: #a05a3a; }
+    .breakdown-item.zero    { background: #fee2e2; color: #c04a1a; }
+
+    .match-acoes { display: flex; gap: 10px; }
+    .btn { padding: 10px 22px; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-ok { background: #3a4e2a; color: #c8d8a0; }
+    .btn-ok:hover { background: #2d3e20; }
+    .btn-cancel { background: #f0f0f0; color: #888; }
+    .btn-cancel:hover { background: #e0e0e0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="logo">🤍 KINDER</span>
+    <span class="admin-badge">MATCH</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:12px;color:#8a9e6a;" id="header-email"></span>
+    <a href="admin.html" class="btn-sair">⬅ Admin</a>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<!-- LOGIN -->
+<div id="tela-login" style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;">
+  <div style="background:white;border-radius:16px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+    <div style="font-size:13px;font-weight:700;color:#6b7c52;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Acesso restrito</div>
+    <div style="font-size:20px;font-weight:700;color:#2d2d2d;margin-bottom:24px;">Painel de Match</div>
+    <div id="msg-login" style="font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;background:#fdecea;color:#c0392b;"></div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">E-mail</label>
+      <input type="email" id="input-email" placeholder="seu@email.com"
+        style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-family:Nunito,sans-serif;font-size:15px;outline:none;"
+        onkeydown="if(event.key==='Enter')entrarAdmin()">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Senha</label>
+      <input type="password" id="input-senha" placeholder="••••••••"
+        style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-family:Nunito,sans-serif;font-size:15px;outline:none;"
+        onkeydown="if(event.key==='Enter')entrarAdmin()">
+    </div>
+    <button onclick="entrarAdmin()" id="btn-entrar"
+      style="width:100%;padding:13px;background:#2d3e20;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">
+      Entrar →
+    </button>
+  </div>
+</div>
+
+<div class="loading" id="loading" style="display:none;">Carregando dados...</div>
+
+<div class="container" id="container">
+
+  <div class="colunas">
+
+    <!-- CUIDADORES -->
+    <div>
+      <div class="coluna-titulo">
+        Cuidadores
+        <span class="badge-count" id="count-cuidadores">0</span>
+      </div>
+      <div class="filtros">
+        <input type="text" id="filtro-c-nome" placeholder="Buscar nome..." oninput="renderCuidadores()">
+        <select id="filtro-c-cidade" onchange="renderCuidadores()">
+          <option value="">Todas as cidades</option>
+        </select>
+        <select id="filtro-c-modal" onchange="renderCuidadores()">
+          <option value="">Qualquer modalidade</option>
+          <option>Diurno</option>
+          <option>Noturno</option>
+          <option>Integral</option>
+        </select>
+      </div>
+      <div id="lista-cuidadores">
+        <div class="vazio"><span class="emoji">🧑‍⚕️</span>Carregando cuidadores...</div>
+      </div>
+    </div>
+
+    <!-- FAMÍLIAS -->
+    <div>
+      <div class="coluna-titulo">
+        Famílias
+        <span class="badge-count" id="count-familias">0</span>
+      </div>
+      <div class="filtros">
+        <input type="text" id="filtro-f-nome" placeholder="Buscar nome..." oninput="renderFamilias()">
+        <select id="filtro-f-cidade" onchange="renderFamilias()">
+          <option value="">Todas as cidades</option>
+        </select>
+      </div>
+      <div id="lista-familias">
+        <div class="vazio"><span class="emoji">🏠</span>Carregando famílias...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MATCHES -->
+  <div class="matches-section">
+    <div class="matches-titulo">
+      🤝 Matches registrados
+      <span class="badge-count" id="count-matches">0</span>
+    </div>
+    <div id="lista-matches">
+      <div class="vazio"><span class="emoji">🤝</span>Nenhum match registrado ainda.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MATCH BAR -->
+<div class="match-bar" id="match-bar">
+  <div style="display:flex;align-items:center;gap:20px;flex:1;">
+    <div style="flex:1;">
+      <div class="match-label">Selecionados para match</div>
+      <div class="match-nomes" id="match-nomes">—</div>
+      <div class="breakdown" id="match-breakdown" style="display:none;"></div>
+    </div>
+    <div class="score-badge" id="match-score" style="display:none;"></div>
+  </div>
+  <div class="match-acoes">
+    <button class="btn btn-cancel" onclick="limparSelecao()">Cancelar</button>
+    <button class="btn btn-ok" onclick="registrarMatch()">✓ Registrar match</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, getDoc, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMe9GRhZyYOiDCVQBxMnu8MHjuaY1hY5Y",
+    authDomain: "kinder-4dd7b.firebaseapp.com",
+    projectId: "kinder-4dd7b",
+    storageBucket: "kinder-4dd7b.firebasestorage.app",
+    messagingSenderId: "874034411154",
+    appId: "1:874034411154:web:8fb0122f8b9750197dd84b"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  var cuidadores = [];
+  var familias   = [];
+  var matchesDocs = [];
+  var selC = null;
+  var selF = null;
+
+  // ── AUTH ────────────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+    if (!adminSnap.exists()) {
+      await signOut(auth);
+      document.getElementById('tela-login').style.display = 'flex';
+      mostrarErroLogin('Acesso negado.');
+      return;
+    }
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('loading').style.display    = 'flex';
+    document.getElementById('header-email').textContent = user.email;
+    await carregarDados();
+  });
+
+  window.entrarAdmin = async function() {
+    var email = document.getElementById('input-email').value.trim();
+    var senha = document.getElementById('input-senha').value;
+    var btn   = document.getElementById('btn-entrar');
+    if (!email || !senha) { mostrarErroLogin('Preencha e-mail e senha.'); return; }
+    btn.disabled = true; btn.textContent = 'Entrando...';
+    try {
+      await signInWithEmailAndPassword(auth, email, senha);
+    } catch(e) {
+      btn.disabled = false; btn.textContent = 'Entrar →';
+      mostrarErroLogin('E-mail ou senha incorretos.');
+    }
+  };
+
+  function mostrarErroLogin(msg) {
+    var el = document.getElementById('msg-login');
+    el.textContent = msg; el.style.display = 'block';
+  }
+
+  window.sair = function() {
+    signOut(auth).then(function() {
+      window.location.reload();
+    }).catch(function() {
+      window.location.reload();
+    });
+  };
+
+  // ── CARREGAR DADOS ─────────────────────────────────
+  async function carregarDados() {
+    const [snapC, snapF, snapM] = await Promise.all([
+      getDocs(collection(db, 'cuidadores')),
+      getDocs(collection(db, 'familias')),
+      getDocs(query(collection(db, 'matches'), orderBy('data', 'desc')))
+    ]);
+
+    // Achata perfil pra compatibilidade com motor de score
+    cuidadores = snapC.docs
+      .filter(d => (d.data().status || 'pendente') === 'aprovado')
+      .map(d => {
+        var data = d.data();
+        var p = data.perfil || {};
+        return {
+          _id: d.id,
+          nome: data.nome || '',
+          email: data.email || '',
+          cidade: p.cidade || '',
+          whatsapp: p.whatsapp || '',
+          experiencia: Array.isArray(p.experiencia) ? p.experiencia.join(', ') : (p.experiencia || ''),
+          modalidade: Array.isArray(p.modalidade) ? p.modalidade.join(', ') : (p.modalidade || ''),
+          cuidados: p.cuidados || '',
+          rotina: p.rotina || '',
+          estilo: p.estilo || '',
+          restricao: p.restricao || '',
+          cozinha: p.cozinha || ''
+        };
+      });
+
+    familias = snapF.docs.map(d => {
+      var data = d.data();
+      var p = data.perfil || {};
+      return {
+        _id: d.id,
+        nome: data.nome || '',
+        email: data.email || '',
+        cidade: p.cidade || '',
+        whatsapp: p.whatsapp || '',
+        nome_idoso: p.nome_idoso || '',
+        idade: p.idade || '',
+        condicao: Array.isArray(p.condicao) ? p.condicao.join(', ') : (p.condicao || ''),
+        dependencia: p.dependencia || '',
+        rotina: p.rotina || '',
+        conversa: p.conversa || '',
+        ambiente: p.ambiente || '',
+        nao_funcionou: p.nao_funcionou || '',
+        genero_pref: p.genero_pref || ''
+      };
+    });
+
+    matchesDocs = snapM.docs.map(d => ({ _id: d.id, ...d.data() }));
+
+    atualizarFiltrosCidade('filtro-c-cidade', cuidadores);
+    atualizarFiltrosCidade('filtro-f-cidade', familias);
+
+    document.getElementById('loading').style.display   = 'none';
+    document.getElementById('container').style.display = 'block';
+
+    renderCuidadores();
+    renderFamilias();
+    renderMatches();
+  }
+
+  // ── FILTROS CIDADE ─────────────────────────────────
+  function atualizarFiltrosCidade(id, lista) {
+    var sel = document.getElementById(id);
+    var primeira = sel.options[0];
+    sel.innerHTML = '';
+    sel.appendChild(primeira);
+    var cidades = [];
+    lista.forEach(function(item) {
+      if (item.cidade && cidades.indexOf(item.cidade) === -1) cidades.push(item.cidade);
+    });
+    cidades.sort().forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    });
+  }
+
+  // ── RENDER CUIDADORES ──────────────────────────────
+  window.renderCuidadores = function() {
+    var filtroNome   = document.getElementById('filtro-c-nome').value.toLowerCase();
+    var filtroCidade = document.getElementById('filtro-c-cidade').value;
+    var filtroModal  = document.getElementById('filtro-c-modal').value.toLowerCase();
+
+    var lista = cuidadores.filter(function(c) {
+      if (filtroNome && c.nome.toLowerCase().indexOf(filtroNome) === -1) return false;
+      if (filtroCidade && c.cidade !== filtroCidade) return false;
+      if (filtroModal && c.modalidade.toLowerCase().indexOf(filtroModal) === -1) return false;
+      return true;
+    });
+
+    document.getElementById('count-cuidadores').textContent = lista.length;
+    var el = document.getElementById('lista-cuidadores');
+
+    if (!lista.length) { el.innerHTML = '<div class="vazio"><span class="emoji">🔍</span>Nenhum resultado.</div>'; return; }
+
+    el.innerHTML = lista.map(function(c) {
+      var i   = cuidadores.indexOf(c);
+      var sel = selC === i ? 'selecionado' : '';
+      var exps = c.experiencia ? c.experiencia.split(/[,;]/).map(function(e) {
+        return e.trim() ? '<span class="tag tag-exp">' + e.trim() + '</span>' : '';
+      }).join('') : '';
+      var mods = c.modalidade ? c.modalidade.split(/[,;]/).map(function(m) {
+        return m.trim() ? '<span class="tag tag-modal">' + m.trim() + '</span>' : '';
+      }).join('') : '';
+
+      var topDir = '';
+      if (selC === i) {
+        topDir = '<div class="check-btn">✓</div>';
+      } else if (selF !== null) {
+        var sc = calcularScore(c, familias[selF]);
+        topDir = '<span class="mini-score ' + miniScoreClass(sc.total) + '">' + sc.total + '%</span>';
+      } else {
+        topDir = '<div class="check-btn"></div>';
+      }
+
+      return '<div class="card ' + sel + '" onclick="selecionarCuidador(' + i + ')">' +
+        topDir +
+        '<div class="card-nome">' + c.nome + '</div>' +
+        '<div class="card-cidade">📍 ' + (c.cidade || '—') + '</div>' +
+        '<div class="tags">' + exps + mods + '</div>' +
+        '<div class="card-contato">' +
+          (c.whatsapp ? '<span>📱 ' + c.whatsapp + '</span>' : '') +
+          (c.email ? '<span>✉ ' + c.email + '</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  };
+
+  // ── RENDER FAMÍLIAS ────────────────────────────────
+  window.renderFamilias = function() {
+    var filtroNome   = document.getElementById('filtro-f-nome').value.toLowerCase();
+    var filtroCidade = document.getElementById('filtro-f-cidade').value;
+
+    var lista = familias.filter(function(f) {
+      if (filtroNome && f.nome.toLowerCase().indexOf(filtroNome) === -1) return false;
+      if (filtroCidade && f.cidade !== filtroCidade) return false;
+      return true;
+    });
+
+    document.getElementById('count-familias').textContent = lista.length;
+    var el = document.getElementById('lista-familias');
+
+    if (!lista.length) { el.innerHTML = '<div class="vazio"><span class="emoji">🔍</span>Nenhum resultado.</div>'; return; }
+
+    el.innerHTML = lista.map(function(f) {
+      var i   = familias.indexOf(f);
+      var sel = selF === i ? 'selecionado' : '';
+      var conds = f.condicao ? f.condicao.split(/[,;]/).map(function(c) {
+        return c.trim() ? '<span class="tag tag-cond">' + c.trim() + '</span>' : '';
+      }).join('') : '';
+      var idosoInfo = f.nome_idoso ? f.nome_idoso + (f.idade ? ', ' + f.idade + ' anos' : '') : '';
+
+      var topDir = '';
+      if (selF === i) {
+        topDir = '<div class="check-btn">✓</div>';
+      } else if (selC !== null) {
+        var sf = calcularScore(cuidadores[selC], f);
+        topDir = '<span class="mini-score ' + miniScoreClass(sf.total) + '">' + sf.total + '%</span>';
+      } else {
+        topDir = '<div class="check-btn"></div>';
+      }
+
+      return '<div class="card ' + sel + '" onclick="selecionarFamilia(' + i + ')">' +
+        topDir +
+        '<div class="card-nome">' + f.nome + '</div>' +
+        '<div class="card-cidade">📍 ' + (f.cidade || '—') + '</div>' +
+        (idosoInfo ? '<div style="font-size:13px;color:#555;margin-bottom:8px;">👴 ' + idosoInfo + '</div>' : '') +
+        '<div class="tags">' + conds + '</div>' +
+        '<div class="card-contato">' +
+          (f.whatsapp ? '<span>📱 ' + f.whatsapp + '</span>' : '') +
+          (f.email ? '<span>✉ ' + f.email + '</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  };
+
+  // ── MOTOR DE SCORE ─────────────────────────────────
+  function normalizar(str) {
+    return (str || '').toLowerCase().trim().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
+  function calcularScore(c, f) {
+    var pts = 0;
+    var detalhes = [];
+
+    // 1. LOCALIZAÇÃO (25 pts)
+    var ptsCidade = (c.cidade && f.cidade && normalizar(c.cidade) === normalizar(f.cidade)) ? 25 : 0;
+    pts += ptsCidade;
+    detalhes.push({ label: '📍 Cidade', pts: ptsCidade, max: 25 });
+
+    // 2. CONDIÇÃO / EXPERIÊNCIA (25 pts)
+    var ptsExp = 0;
+    var condicao = normalizar(f.condicao);
+    if (!condicao || condicao === 'nenhuma') {
+      ptsExp = 20;
+    } else {
+      var expCuid = normalizar(c.experiencia);
+      var achou = expCuid.split(/[,;]/).some(function(e) {
+        e = e.trim();
+        return e && (condicao.indexOf(e) !== -1 || e.indexOf(condicao) !== -1);
+      });
+      ptsExp = achou ? 25 : 0;
+    }
+    pts += ptsExp;
+    detalhes.push({ label: '🏥 Experiência', pts: ptsExp, max: 25 });
+
+    // 3. NÍVEL DE CUIDADO (20 pts)
+    var ptsCuidado = 10;
+    var dep = normalizar(f.dependencia);
+    var cui = normalizar(c.cuidados);
+    if (dep === 'dependente') {
+      if (cui === 'todos') ptsCuidado = 20;
+      else if (cui.indexOf('maioria') !== -1) ptsCuidado = 14;
+      else if (cui.indexOf('menor') !== -1) ptsCuidado = 6;
+      else if (cui.indexOf('basico') !== -1) ptsCuidado = 3;
+    } else if (dep === 'independente') {
+      ptsCuidado = 20;
+    }
+    pts += ptsCuidado;
+    detalhes.push({ label: '💪 Cuidado', pts: ptsCuidado, max: 20 });
+
+    // 4. RESTRIÇÕES (15 pts)
+    var ptsRest = 15;
+    var restricao = normalizar(c.restricao);
+    var ambiente  = normalizar(f.ambiente);
+    if (restricao && restricao !== 'nenhuma') {
+      restricao.split(/[,;]/).forEach(function(r) {
+        r = r.trim();
+        if (r && ambiente.indexOf(r) !== -1) ptsRest -= 10;
+      });
+    }
+    ptsRest = Math.max(0, ptsRest);
+    pts += ptsRest;
+    detalhes.push({ label: '⚠ Restrições', pts: ptsRest, max: 15 });
+
+    // 5. ROTINA (10 pts)
+    var ptsRotina = 5;
+    var rotFam  = normalizar(f.rotina);
+    var rotCuid = normalizar(c.rotina);
+    if (rotFam && rotCuid) {
+      if (rotFam === 'flexivel') {
+        if (rotCuid === 'flexiveis' || rotCuid === 'indiferente') ptsRotina = 10;
+        else if (rotCuid === 'definidas') ptsRotina = 5;
+      } else if (rotFam === 'semirigida') {
+        if (rotCuid === 'definidas') ptsRotina = 10;
+        else if (rotCuid === 'indiferente') ptsRotina = 8;
+        else if (rotCuid === 'flexiveis') ptsRotina = 6;
+      }
+    }
+    pts += ptsRotina;
+    detalhes.push({ label: '🕐 Rotina', pts: ptsRotina, max: 10 });
+
+    // 6. CONVERSA (5 pts)
+    var ptsConv = 5;
+    var conv   = normalizar(f.conversa);
+    var estilo = normalizar(c.estilo);
+    if (conv === 'muito') {
+      if (estilo.indexOf('comunicativa') !== -1) ptsConv = 5;
+      else if (estilo.indexOf('adapto') !== -1) ptsConv = 3;
+      else ptsConv = 2;
+    }
+    pts += ptsConv;
+    detalhes.push({ label: '💬 Conversa', pts: ptsConv, max: 5 });
+
+    return { total: Math.min(100, pts), detalhes: detalhes };
+  }
+
+  function miniScoreClass(total) {
+    return total >= 70 ? 'alto' : total >= 45 ? 'medio' : 'baixo';
+  }
+
+  // ── SELEÇÃO ────────────────────────────────────────
+  window.selecionarCuidador = function(i) {
+    selC = selC === i ? null : i;
+    renderCuidadores(); renderFamilias(); atualizarBar();
+  };
+
+  window.selecionarFamilia = function(i) {
+    selF = selF === i ? null : i;
+    renderFamilias(); renderCuidadores(); atualizarBar();
+  };
+
+  function atualizarBar() {
+    var bar        = document.getElementById('match-bar');
+    var nomes      = document.getElementById('match-nomes');
+    var scoreBadge = document.getElementById('match-score');
+    var breakdown  = document.getElementById('match-breakdown');
+    var c = selC !== null ? cuidadores[selC] : null;
+    var f = selF !== null ? familias[selF]   : null;
+
+    if (!c && !f) { bar.classList.remove('visivel'); return; }
+    bar.classList.add('visivel');
+
+    var nc = c ? '<strong>' + c.nome.split(' ')[0] + '</strong>' : '<span style="color:#aaa">← selecione cuidadora</span>';
+    var nf = f ? '<strong>' + f.nome.split(' ')[0] + '</strong>' : '<span style="color:#aaa">selecione família →</span>';
+    nomes.innerHTML = nc + ' ↔ ' + nf;
+
+    if (c && f) {
+      var resultado = calcularScore(c, f);
+      var pct = resultado.total;
+      scoreBadge.textContent = pct + '%';
+      scoreBadge.style.display = 'block';
+      scoreBadge.style.background = pct >= 70 ? '#eef3e8' : pct >= 45 ? '#fff3e8' : '#fee2e2';
+      scoreBadge.style.color      = pct >= 70 ? '#3a4e2a' : pct >= 45 ? '#a05a3a' : '#c04a1a';
+      breakdown.style.display = 'flex';
+      breakdown.innerHTML = resultado.detalhes.map(function(d) {
+        var cls = d.pts === d.max ? 'cheio' : d.pts > 0 ? 'parcial' : 'zero';
+        return '<span class="breakdown-item ' + cls + '">' + d.label + ' ' + d.pts + '/' + d.max + '</span>';
+      }).join('');
+    } else {
+      scoreBadge.style.display = 'none';
+      breakdown.style.display  = 'none';
+    }
+  }
+
+  window.limparSelecao = function() {
+    selC = null; selF = null;
+    renderCuidadores(); renderFamilias(); atualizarBar();
+  };
+
+  // ── REGISTRAR MATCH ────────────────────────────────
+  window.registrarMatch = async function() {
+    if (selC === null || selF === null) { alert('Selecione uma cuidadora e uma família.'); return; }
+    var c = cuidadores[selC];
+    var f = familias[selF];
+    var resultado = calcularScore(c, f);
+    var novoMatch = {
+      cuidadorId: c._id, cuidador: c.nome, cuidadorWhats: c.whatsapp,
+      familiaId:  f._id, familia:  f.nome, familiaWhats:  f.whatsapp,
+      score: resultado.total,
+      data: new Date().toISOString(),
+      status: 'apresentado'
+    };
+    try {
+      var ref = await addDoc(collection(db, 'matches'), novoMatch);
+      matchesDocs.unshift({ _id: ref.id, ...novoMatch });
+      limparSelecao();
+      renderMatches();
+    } catch(e) {
+      alert('Erro ao salvar match: ' + e.message);
+    }
+  };
+
+  // ── RENDER MATCHES ─────────────────────────────────
+  function renderMatches() {
+    var el = document.getElementById('lista-matches');
+    document.getElementById('count-matches').textContent = matchesDocs.length;
+    if (!matchesDocs.length) {
+      el.innerHTML = '<div class="vazio"><span class="emoji">🤝</span>Nenhum match registrado ainda.</div>';
+      return;
+    }
+    el.innerHTML = matchesDocs.map(function(m, i) {
+      var data = m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '—';
+      return '<div class="match-item">' +
+        '<div style="flex:1;">' +
+          '<div class="match-item-nomes">' + m.cuidador + ' ↔ ' + m.familia + '</div>' +
+          '<div class="match-item-whats">📱 ' + (m.cuidadorWhats || '—') + ' · ' + (m.familiaWhats || '—') + '</div>' +
+          '<div class="match-item-data">' + data + (m.score !== undefined ? ' · score ' + m.score + '%' : '') + '</div>' +
+        '</div>' +
+        '<select class="status-select" onchange="mudarStatusMatch(\'' + m._id + '\', this.value)">' +
+          '<option value="apresentado"' + (m.status==='apresentado'?' selected':'') + '>📋 Apresentado</option>' +
+          '<option value="conectado"'   + (m.status==='conectado'  ?' selected':'') + '>💬 Conectado</option>' +
+          '<option value="contratado"'  + (m.status==='contratado' ?' selected':'') + '>✅ Contratado</option>' +
+          '<option value="nao_deu"'     + (m.status==='nao_deu'    ?' selected':'') + '>❌ Não deu certo</option>' +
+        '</select>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.mudarStatusMatch = async function(id, novoStatus) {
+    try {
+      await updateDoc(doc(db, 'matches', id), { status: novoStatus });
+      var m = matchesDocs.find(function(m) { return m._id === id; });
+      if (m) m.status = novoStatus;
+    } catch(e) {
+      alert('Erro ao atualizar status: ' + e.message);
+    }
+  };
+</script>
+
+</body>
+</html>
