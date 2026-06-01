@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinder — Painel Admin</title>
+  <link rel="icon" type="image/png" href="../Kinder_Coracao.png">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f0f2ec; font-family: 'Nunito', sans-serif; min-height: 100vh; }
+
+    header {
+      background: #2d3e20;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo { font-size: 16px; font-weight: 700; color: #c8d8a0; letter-spacing: 3px; }
+    .admin-badge { font-size: 11px; font-weight: 700; background: #c8d8a0; color: #2d3e20; padding: 3px 10px; border-radius: 99px; letter-spacing: 1px; }
+    .btn-sair { background: rgba(255,255,255,0.1); border: none; color: #c8d8a0; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+    .btn-sair:hover { background: rgba(255,255,255,0.2); }
+
+    .loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; font-size: 14px; color: #888; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; display: none; }
+
+    /* RESUMO */
+    .resumo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 32px; }
+    @media (max-width: 600px) { .resumo { grid-template-columns: 1fr; } }
+
+    .resumo-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .resumo-icone { font-size: 32px; }
+    .resumo-num { font-size: 28px; font-weight: 700; color: #2d2d2d; line-height: 1; }
+    .resumo-label { font-size: 12px; color: #888; margin-top: 3px; }
+
+    /* TABS */
+    .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: white; padding: 6px; border-radius: 12px; width: fit-content; }
+    .tab { padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; color: #888; border: none; background: none; font-family: 'Nunito', sans-serif; transition: all 0.15s; }
+    .tab.ativo { background: #3a4e2a; color: #c8d8a0; }
+
+    /* FILTROS */
+    .filtros { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filtros input, .filtros select { padding: 9px 14px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 13px; outline: none; background: white; color: #2d2d2d; }
+    .filtros input:focus, .filtros select:focus { border-color: #6b7c52; }
+    .filtros input { min-width: 200px; flex: 1; }
+
+    /* CARDS */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      border: 2px solid #f0f0f0;
+      transition: border 0.2s;
+    }
+
+    .card:hover { border-color: #c8d8a0; }
+
+    .card-topo { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .card-foto { width: 52px; height: 52px; border-radius: 50%; background: #e8e8e8; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .card-nome { font-size: 15px; font-weight: 700; color: #2d2d2d; margin-bottom: 2px; }
+    .card-email { font-size: 12px; color: #aaa; }
+    .card-info { font-size: 13px; color: #555; margin-bottom: 10px; line-height: 1.6; }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+    .tag { font-size: 11px; padding: 3px 9px; border-radius: 99px; font-weight: 600; }
+    .tag-cidade { background: #eef3e8; color: #4a5e3a; }
+    .tag-exp { background: #e8f0ff; color: #3a5aa0; }
+    .tag-modal { background: #fff3e8; color: #a05a3a; }
+    .tag-cond { background: #f5e8ff; color: #6a3aa0; }
+
+    /* STATUS SELECT */
+    .status-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+    .status-label-txt { font-size: 12px; color: #888; font-weight: 600; }
+
+    .status-select {
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      outline: none;
+      color: #2d2d2d;
+      background: white;
+    }
+
+    .status-select.pendente   { border-color: #f0d080; color: #7a5a10; background: #fff8e8; }
+    .status-select.analise    { border-color: #a0b8f0; color: #1a3a80; background: #e8f0ff; }
+    .status-select.aprovado   { border-color: #90c880; color: #2a5a1a; background: #eef8e8; }
+    .status-select.suspenso   { border-color: #f0a0a0; color: #800000; background: #fee8e8; }
+    .status-select.andamento  { border-color: #a0b8f0; color: #1a3a80; background: #e8f0ff; }
+    .status-select.match      { border-color: #90c880; color: #2a5a1a; background: #eef8e8; }
+
+    .btn-whats { background: #25d366; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+
+    .vazio { text-align: center; padding: 48px; color: #bbb; font-size: 14px; background: white; border-radius: 14px; }
+
+    /* DATA */
+    .card-data { font-size: 11px; color: #ccc; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="logo">🤍 KINDER</span>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:12px;color:#8a9e6a;" id="header-email"></span>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+</header>
+
+<div class="loading" id="loading">Carregando painel...</div>
+
+<div class="container" id="container">
+
+  <!-- RESUMO -->
+  <div class="resumo">
+    <div class="resumo-card">
+      <div class="resumo-icone">🧑‍⚕️</div>
+      <div>
+        <div class="resumo-num" id="num-cuidadores">—</div>
+        <div class="resumo-label">Cuidadores</div>
+      </div>
+    </div>
+    <div class="resumo-card">
+      <div class="resumo-icone">🏠</div>
+      <div>
+        <div class="resumo-num" id="num-familias">—</div>
+        <div class="resumo-label">Famílias</div>
+      </div>
+    </div>
+    <div class="resumo-card">
+      <div class="resumo-icone">✅</div>
+      <div>
+        <div class="resumo-num" id="num-aprovados">—</div>
+        <div class="resumo-label">Cuidadores aprovados</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab ativo" onclick="mudarTab('cuidadores')">🧑‍⚕️ Cuidadores</button>
+    <button class="tab" onclick="mudarTab('familias')">🏠 Famílias</button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros">
+    <input type="text" id="filtro-busca" placeholder="Buscar por nome ou email..." oninput="renderAtual()">
+    <select id="filtro-status" onchange="renderAtual()">
+      <option value="">Todos os status</option>
+      <option value="pendente">Pendente</option>
+      <option value="analise">Em análise</option>
+      <option value="aprovado">Aprovado</option>
+      <option value="suspenso">Suspenso</option>
+      <option value="andamento">Em andamento</option>
+      <option value="match">Match encontrado</option>
+    </select>
+  </div>
+
+  <!-- LISTA -->
+  <div class="cards-grid" id="cards-grid"></div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, updateDoc, getDoc }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAMe9GRhZyYOiDCVQBxMnu8MHjuaY1hY5Y",
+    authDomain: "kinder-4dd7b.firebaseapp.com",
+    projectId: "kinder-4dd7b",
+    storageBucket: "kinder-4dd7b.firebasestorage.app",
+    messagingSenderId: "874034411154",
+    appId: "1:874034411154:web:8fb0122f8b9750197dd84b",
+    measurementId: "G-KKN5D5NEK0"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  const ADMIN_EMAIL = 'admin@kindercare.com.br';
+  const ADMIN_SENHA = 'KinderAdmin@2026';
+
+  var cuidadores = [];
+  var familias   = [];
+  var tabAtual   = 'cuidadores';
+
+  // ── AUTH ────────────────────────────────────────────
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      // Auto-login silencioso com conta admin
+      try {
+        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_SENHA);
+      } catch(e) {
+        document.getElementById('loading').innerHTML =
+          '<div style="text-align:center;color:#c0392b;padding:40px;">Erro ao autenticar admin.<br>' + e.message + '</div>';
+      }
+      return;
+    }
+
+    // Verifica se é admin
+    const adminSnap = await getDoc(doc(db, 'admins', user.uid));
+    if (!adminSnap.exists()) {
+      document.getElementById('loading').innerHTML =
+        '<div style="text-align:center;color:#c0392b;padding:40px;">Acesso negado.</div>';
+      return;
+    }
+
+    document.getElementById('header-email').textContent = user.email;
+    await carregarDados();
+  });
+
+  // ── CARREGAR DADOS ─────────────────────────────────
+  async function carregarDados() {
+    const [snapC, snapF] = await Promise.all([
+      getDocs(collection(db, 'cuidadores')),
+      getDocs(collection(db, 'familias'))
+    ]);
+
+    cuidadores = snapC.docs.map(d => ({ uid: d.id, ...d.data() }));
+    familias   = snapF.docs.map(d => ({ uid: d.id, ...d.data() }));
+
+    // Resumo
+    document.getElementById('num-cuidadores').textContent = cuidadores.length;
+    document.getElementById('num-familias').textContent   = familias.length;
+    document.getElementById('num-aprovados').textContent  = cuidadores.filter(c => c.status === 'aprovado').length;
+
+    document.getElementById('loading').style.display  = 'none';
+    document.getElementById('container').style.display = 'block';
+
+    renderAtual();
+  }
+
+  // ── RENDER ─────────────────────────────────────────
+  window.renderAtual = function() {
+    if (tabAtual === 'cuidadores') renderCuidadores();
+    else renderFamilias();
+  };
+
+  window.mudarTab = function(tab) {
+    tabAtual = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+    event.target.classList.add('ativo');
+    document.getElementById('filtro-status').value = '';
+    document.getElementById('filtro-busca').value  = '';
+    renderAtual();
+  };
+
+  function filtrar(lista) {
+    var busca  = document.getElementById('filtro-busca').value.toLowerCase();
+    var status = document.getElementById('filtro-status').value;
+    return lista.filter(function(item) {
+      var nome  = (item.nome || '').toLowerCase();
+      var email = (item.email || '').toLowerCase();
+      if (busca && nome.indexOf(busca) === -1 && email.indexOf(busca) === -1) return false;
+      if (status && item.status !== status) return false;
+      return true;
+    });
+  }
+
+  function renderCuidadores() {
+    var lista = filtrar(cuidadores);
+    var el    = document.getElementById('cards-grid');
+    if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhum cuidador encontrado.</div>'; return; }
+
+    el.innerHTML = lista.map(function(c) {
+      var p    = c.perfil || {};
+      var exps = Array.isArray(p.experiencia) ? p.experiencia.slice(0,3) : [];
+      var mods = Array.isArray(p.modalidade)  ? p.modalidade.slice(0,2)  : [];
+      var tags = '';
+      if (p.cidade)  tags += '<span class="tag tag-cidade">📍 ' + p.cidade + '</span>';
+      exps.forEach(function(e) { tags += '<span class="tag tag-exp">' + e + '</span>'; });
+      mods.forEach(function(m) { tags += '<span class="tag tag-modal">' + m + '</span>'; });
+
+      var statusCls = c.status || 'pendente';
+      var whatsLink = p.whatsapp ? 'https://wa.me/55' + p.whatsapp.replace(/\D/g,'') : '';
+
+      return '<div class="card">' +
+        '<div class="card-topo">' +
+          '<div class="card-foto">🧑‍⚕️</div>' +
+          '<div>' +
+            '<div class="card-nome">' + (c.nome || '—') + '</div>' +
+            '<div class="card-email">' + (c.email || '') + '</div>' +
+            '<div class="card-data">Cadastro: ' + formatarData(c.criadoEm) + '</div>' +
+          '</div>' +
+        '</div>' +
+        (tags ? '<div class="tags">' + tags + '</div>' : '') +
+        '<div class="status-row">' +
+          '<span class="status-label-txt">Status</span>' +
+          '<div style="display:flex;gap:8px;align-items:center;">' +
+            (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
+            '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'cuidadores\',\'' + c.uid + '\',this)">' +
+              '<option value="pendente"'  + (c.status==='pendente' ?' selected':'') + '>⏳ Pendente</option>' +
+              '<option value="analise"'   + (c.status==='analise'  ?' selected':'') + '>🔍 Em análise</option>' +
+              '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
+              '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
+            '</select>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderFamilias() {
+    var lista = filtrar(familias);
+    var el    = document.getElementById('cards-grid');
+    if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhuma família encontrada.</div>'; return; }
+
+    el.innerHTML = lista.map(function(f) {
+      var p    = f.perfil || {};
+      var conds = Array.isArray(p.condicao) ? p.condicao.slice(0,2) : [];
+      var tags = '';
+      if (p.cidade)    tags += '<span class="tag tag-cidade">📍 ' + p.cidade + '</span>';
+      if (p.dependencia) tags += '<span class="tag tag-modal">' + p.dependencia + '</span>';
+      conds.forEach(function(c) { tags += '<span class="tag tag-cond">' + c + '</span>'; });
+
+      var statusCls = f.status || 'pendente';
+      var whatsLink = p.whatsapp ? 'https://wa.me/55' + p.whatsapp.replace(/\D/g,'') : '';
+      var idosoInfo = p.nome_idoso ? p.nome_idoso + (p.idade ? ', ' + p.idade + ' anos' : '') : '';
+
+      return '<div class="card">' +
+        '<div class="card-topo">' +
+          '<div class="card-foto">🏠</div>' +
+          '<div>' +
+            '<div class="card-nome">' + (f.nome || '—') + '</div>' +
+            '<div class="card-email">' + (f.email || '') + '</div>' +
+            '<div class="card-data">Cadastro: ' + formatarData(f.criadoEm) + '</div>' +
+          '</div>' +
+        '</div>' +
+        (idosoInfo ? '<div class="card-info">👴 ' + idosoInfo + '</div>' : '') +
+        (tags ? '<div class="tags">' + tags + '</div>' : '') +
+        '<div class="status-row">' +
+          '<span class="status-label-txt">Status</span>' +
+          '<div style="display:flex;gap:8px;align-items:center;">' +
+            (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
+            '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
+              '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>⏳ Aguardando</option>' +
+              '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>🔍 Em andamento</option>' +
+              '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>✅ Match encontrado</option>' +
+            '</select>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ── MUDAR STATUS ───────────────────────────────────
+  window.mudarStatus = async function(colecao, uid, selectEl) {
+    var novoStatus = selectEl.value;
+    selectEl.className = 'status-select ' + novoStatus;
+    try {
+      await updateDoc(doc(db, colecao, uid), { status: novoStatus });
+      // Atualiza local
+      var lista = colecao === 'cuidadores' ? cuidadores : familias;
+      var item  = lista.find(function(i) { return i.uid === uid; });
+      if (item) item.status = novoStatus;
+      // Atualiza contador aprovados
+      document.getElementById('num-aprovados').textContent = cuidadores.filter(function(c) { return c.status === 'aprovado'; }).length;
+    } catch(e) {
+      alert('Erro ao salvar status: ' + e.message);
+    }
+  };
+
+  // ── SAIR ───────────────────────────────────────────
+  window.sair = async function() {
+    await signOut(auth);
+    window.location.href = '../index.html';
+  };
+
+  // ── HELPERS ────────────────────────────────────────
+  function formatarData(iso) {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('pt-BR');
+    } catch(e) { return iso; }
+  }
+</script>
+
+</body>
+</html>
