@@ -125,7 +125,7 @@
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <span style="font-size:12px;color:#8a9e6a;" id="header-email"></span>
-    <button class="btn-sair" onclick="abrirModalSenha()">🔑 Senha</button>
+    <button class="btn-sair" onclick="abrirModalConfig()">⚙️ Config</button>
     <button class="btn-sair" onclick="sair()">Sair</button>
   </div>
 </header>
@@ -209,39 +209,71 @@
 
 </div>
 
-<!-- MODAL TROCAR SENHA -->
-<div id="modal-senha" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;">
-  <div style="background:white;border-radius:16px;padding:36px;width:100%;max-width:380px;margin:16px;">
-    <div style="font-size:18px;font-weight:700;color:#2d2d2d;margin-bottom:20px;">Alterar senha do admin</div>
-    <div id="msg-senha-modal" style="font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;"></div>
-    <div style="margin-bottom:12px;">
-      <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Nova senha</label>
-      <input type="password" id="modal-nova-senha" placeholder="Mínimo 8 caracteres"
-        style="width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;outline:none;">
+<!-- MODAL CONFIGURAÇÕES -->
+<div id="modal-config" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:white;border-radius:16px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+
+    <!-- Header modal -->
+    <div style="background:#2d3e20;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:16px;font-weight:700;color:#c8d8a0;">⚙️ Configurações</div>
+      <button onclick="fecharModalConfig()" style="background:none;border:none;color:#8a9e6a;font-size:20px;cursor:pointer;line-height:1;">×</button>
     </div>
-    <div style="margin-bottom:20px;">
-      <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Confirmar senha</label>
-      <input type="password" id="modal-confirma-senha" placeholder="Repita a nova senha"
-        style="width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;outline:none;">
-    </div>
-    <div style="display:flex;gap:10px;">
-      <button onclick="fecharModalSenha()"
-        style="flex:1;padding:11px;background:#f0f0f0;color:#888;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">
-        Cancelar
+
+    <!-- Tabs do modal -->
+    <div style="display:flex;border-bottom:2px solid #f0f0f0;">
+      <button id="cfg-tab-conta" onclick="mudarCfgTab('conta')"
+        style="flex:1;padding:12px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;background:white;color:#2d2d2d;border-bottom:2px solid #2d3e20;margin-bottom:-2px;">
+        👤 Minha conta
       </button>
-      <button onclick="salvarNovaSenha()" id="btn-salvar-senha"
-        style="flex:1;padding:11px;background:#2d3e20;color:#c8d8a0;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">
-        Salvar
+      <button id="cfg-tab-admins" onclick="mudarCfgTab('admins')"
+        style="flex:1;padding:12px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;background:white;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        🛡️ Administradores
       </button>
     </div>
+
+    <!-- Aba: Minha conta -->
+    <div id="cfg-painel-conta" style="padding:24px;">
+      <div id="msg-conta" style="font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;"></div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:12px;color:#aaa;margin-bottom:4px;">Logado como</div>
+        <div style="font-size:14px;font-weight:700;color:#2d2d2d;" id="cfg-email-exibido"></div>
+      </div>
+
+      <div style="border-top:1px solid #f0f0f0;padding-top:20px;">
+        <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Alterar senha</div>
+        <div style="margin-bottom:12px;">
+          <input type="password" id="cfg-nova-senha" placeholder="Nova senha (mín. 8 caracteres)"
+            style="width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;outline:none;">
+        </div>
+        <div style="margin-bottom:16px;">
+          <input type="password" id="cfg-confirma-senha" placeholder="Confirmar nova senha"
+            style="width:100%;padding:11px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;outline:none;">
+        </div>
+        <button onclick="salvarNovaSenha()" id="btn-salvar-senha"
+          style="width:100%;padding:11px;background:#2d3e20;color:#c8d8a0;border:none;border-radius:8px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">
+          Salvar nova senha
+        </button>
+      </div>
+    </div>
+
+    <!-- Aba: Administradores -->
+    <div id="cfg-painel-admins" style="padding:24px;display:none;">
+      <div id="msg-admins" style="font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;"></div>
+
+      <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Admins cadastrados</div>
+      <div id="lista-admins" style="margin-bottom:20px;min-height:40px;"></div>
+
+    </div>
+
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword }
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, updateEmail, createUserWithEmailAndPassword }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, doc, updateDoc, getDoc }
+  import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, setDoc, deleteDoc }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -457,54 +489,125 @@
     }
   };
 
-  // ── TROCAR SENHA ───────────────────────────────────
-  window.abrirModalSenha = function() {
-    document.getElementById('modal-nova-senha').value    = '';
-    document.getElementById('modal-confirma-senha').value = '';
-    var msg = document.getElementById('msg-senha-modal');
-    msg.style.display = 'none';
-    document.getElementById('modal-senha').style.display = 'flex';
+  // ── MODAL CONFIG ───────────────────────────────────
+  window.abrirModalConfig = function() {
+    document.getElementById('cfg-email-exibido').textContent = auth.currentUser ? auth.currentUser.email : '';
+    document.getElementById('cfg-nova-senha').value    = '';
+    document.getElementById('cfg-confirma-senha').value = '';
+    esconderMsg('msg-conta');
+    esconderMsg('msg-admins');
+    document.getElementById('modal-config').style.display = 'flex';
+    mudarCfgTab('conta');
+    carregarAdmins();
   };
 
-  window.fecharModalSenha = function() {
-    document.getElementById('modal-senha').style.display = 'none';
+  window.fecharModalConfig = function() {
+    document.getElementById('modal-config').style.display = 'none';
+  };
+
+  window.mudarCfgTab = function(tab) {
+    var eConta  = tab === 'conta';
+    document.getElementById('cfg-painel-conta').style.display  = eConta ? 'block' : 'none';
+    document.getElementById('cfg-painel-admins').style.display = eConta ? 'none'  : 'block';
+    estilizarTabCfg('cfg-tab-conta',   eConta);
+    estilizarTabCfg('cfg-tab-admins',  !eConta);
+  };
+
+  function estilizarTabCfg(id, ativo) {
+    var el = document.getElementById(id);
+    el.style.background   = ativo ? 'white' : '#f0f0f0';
+    el.style.color        = ativo ? '#2d2d2d' : '#888';
+    el.style.borderBottom = ativo ? '2px solid #2d3e20' : '2px solid transparent';
+  }
+
+  // ── MINHA CONTA ────────────────────────────────────
+  window.salvarNovoEmail = async function() {
+    var novoEmail = document.getElementById('cfg-novo-email').value.trim();
+    var btn = document.getElementById('btn-salvar-email');
+    if (!novoEmail) { mostrarMsg('msg-conta', 'Digite o novo e-mail.', 'erro'); return; }
+    btn.disabled = true; btn.textContent = 'Salvando...';
+    try {
+      await updateEmail(auth.currentUser, novoEmail);
+      document.getElementById('header-email').textContent = novoEmail;
+      mostrarMsg('msg-conta', '✓ E-mail atualizado!', 'ok');
+    } catch(e) {
+      var txt = e.code === 'auth/requires-recent-login'
+        ? 'Faça logout e login novamente antes de alterar o e-mail.'
+        : 'Erro: ' + e.message;
+      mostrarMsg('msg-conta', txt, 'erro');
+    }
+    btn.disabled = false; btn.textContent = 'Atualizar e-mail';
   };
 
   window.salvarNovaSenha = async function() {
-    var nova     = document.getElementById('modal-nova-senha').value;
-    var confirma = document.getElementById('modal-confirma-senha').value;
-    var msg      = document.getElementById('msg-senha-modal');
+    var nova     = document.getElementById('cfg-nova-senha').value;
+    var confirma = document.getElementById('cfg-confirma-senha').value;
     var btn      = document.getElementById('btn-salvar-senha');
 
-    msg.style.display = 'none';
-
-    if (!nova)             { mostrarMsgModal('Digite a nova senha.', 'erro'); return; }
-    if (nova.length < 8)   { mostrarMsgModal('Mínimo 8 caracteres.', 'erro'); return; }
-    if (nova !== confirma) { mostrarMsgModal('As senhas não coincidem.', 'erro'); return; }
+    if (!nova)             { mostrarMsg('msg-conta', 'Digite a nova senha.', 'erro'); return; }
+    if (nova.length < 8)   { mostrarMsg('msg-conta', 'Mínimo 8 caracteres.', 'erro'); return; }
+    if (nova !== confirma) { mostrarMsg('msg-conta', 'As senhas não coincidem.', 'erro'); return; }
 
     btn.disabled = true; btn.textContent = 'Salvando...';
-
     try {
       await updatePassword(auth.currentUser, nova);
-      mostrarMsgModal('✓ Senha alterada com sucesso!', 'ok');
-      setTimeout(fecharModalSenha, 1500);
+      document.getElementById('cfg-nova-senha').value    = '';
+      document.getElementById('cfg-confirma-senha').value = '';
+      mostrarMsg('msg-conta', '✓ Senha alterada com sucesso!', 'ok');
     } catch(e) {
-      if (e.code === 'auth/requires-recent-login') {
-        mostrarMsgModal('Faça logout e login novamente antes de alterar a senha.', 'erro');
-      } else {
-        mostrarMsgModal('Erro ao salvar: ' + e.message, 'erro');
-      }
+      var txt = e.code === 'auth/requires-recent-login'
+        ? 'Faça logout e login novamente antes de alterar a senha.'
+        : 'Erro: ' + e.message;
+      mostrarMsg('msg-conta', txt, 'erro');
     }
-
-    btn.disabled = false; btn.textContent = 'Salvar';
+    btn.disabled = false; btn.textContent = 'Salvar nova senha';
   };
 
-  function mostrarMsgModal(texto, tipo) {
-    var el = document.getElementById('msg-senha-modal');
+  // ── ADMINISTRADORES ────────────────────────────────
+  async function carregarAdmins() {
+    var el = document.getElementById('lista-admins');
+    el.innerHTML = '<div style="font-size:13px;color:#aaa;">Carregando...</div>';
+    try {
+      var snap = await getDocs(collection(db, 'admins'));
+      if (snap.empty) { el.innerHTML = '<div style="font-size:13px;color:#aaa;">Nenhum admin cadastrado.</div>'; return; }
+      el.innerHTML = snap.docs.map(function(d) {
+        var data = d.data();
+        var email = data.email || d.id;
+        var isSelf = auth.currentUser && d.id === auth.currentUser.uid;
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;">' +
+          '<div style="font-size:13px;color:#2d2d2d;">🛡️ ' + email + (isSelf ? ' <span style="font-size:11px;color:#aaa;">(você)</span>' : '') + '</div>' +
+          (!isSelf ? '<button onclick="removerAdmin(\'' + d.id + '\',this)" style="background:none;border:none;color:#e57373;font-size:12px;cursor:pointer;font-weight:700;">Remover</button>' : '') +
+        '</div>';
+      }).join('');
+    } catch(e) {
+      el.innerHTML = '<div style="font-size:13px;color:#c0392b;">Erro ao carregar: ' + e.message + '</div>';
+    }
+  }
+
+
+  window.removerAdmin = async function(uid, btn) {
+    if (!confirm('Remover este admin?')) return;
+    btn.textContent = '...';
+    try {
+      await deleteDoc(doc(db, 'admins', uid));
+      carregarAdmins();
+    } catch(e) {
+      alert('Erro ao remover: ' + e.message);
+      btn.textContent = 'Remover';
+    }
+  };
+
+  // ── HELPERS MSG ────────────────────────────────────
+  function mostrarMsg(id, texto, tipo) {
+    var el = document.getElementById(id);
     el.textContent = texto;
     el.style.display = 'block';
     el.style.background = tipo === 'ok' ? '#eef3e8' : '#fdecea';
     el.style.color      = tipo === 'ok' ? '#3a4e2a' : '#c0392b';
+  }
+
+  function esconderMsg(id) {
+    document.getElementById(id).style.display = 'none';
   }
 
   // ── SAIR ───────────────────────────────────────────
