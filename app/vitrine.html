@@ -269,6 +269,14 @@
     }
   });
 
+  function formatarNome(nome) {
+    var partes = (nome || '').trim().split(' ').filter(function(p) { return p; });
+    if (partes.length <= 1) return nome;
+    var primeiro = partes[0];
+    var iniciais = partes.slice(1).map(function(p) { return p[0].toUpperCase() + '.'; }).join(' ');
+    return primeiro + ' ' + iniciais;
+  }
+
   var FICTICIOS = [
     { nome: 'Ana Paula Souza',    cidade: 'São Paulo',  estilo: 'comunicativa', experiencia: ['alzheimer','parkinson'], cozinha: 'sim',    modalidade: ['diurno','integral'], foto: '👩'    },
     { nome: 'Rosana Mendes',      cidade: 'São Paulo',  estilo: 'tranquila',    experiencia: ['acamados','avc'],        cozinha: 'básico', modalidade: ['pernoite','24h'],    foto: '👩‍🦱'  },
@@ -319,7 +327,7 @@
       badgeHtml +
       '<div class="foto-circulo">' + foto + '</div>' +
       '<div class="info">' +
-        '<div class="card-nome">' + (nome || '—') + '</div>' +
+        '<div class="card-nome">' + (nome ? formatarNome(nome) : '—') + '</div>' +
         '<div class="card-cidade">' + (cidade ? '📍 ' + cidade : '<span style="color:#ddd">📍 adicione sua cidade</span>') + '</div>' +
         '<div class="tags">' + (tags || '<span class="tag tag-vazio">perfil incompleto</span>') + '</div>' +
         statusHtml +
