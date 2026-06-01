@@ -433,7 +433,10 @@
         return m.trim() ? '<span class="tag tag-modal">' + m.trim() + '</span>' : '';
       }).join('') : '';
 
-      var jaTentado = naoDeramCerto.indexOf(c._id) !== -1;
+      var matchAnterior = matchesDocs.find(function(m) {
+        return selF !== null && m.familiaId === familias[selF]._id && m.cuidadorId === c._id && m.status === 'nao_deu';
+      });
+      var jaTentado = !!matchAnterior;
 
       var topDir = '';
       if (selC === i) {
@@ -447,7 +450,7 @@
 
       return '<div class="card ' + sel + '" onclick="selecionarCuidador(' + i + ')" style="' + (jaTentado ? 'opacity:0.5;' : '') + '">' +
         topDir +
-        (jaTentado ? '<div style="font-size:11px;color:#e57373;font-weight:700;margin-bottom:4px;">❌ Já tentado com esta família</div>' : '') +
+        (jaTentado ? '<div style="font-size:11px;color:#e57373;font-weight:700;margin-bottom:4px;">❌ Não deu certo · ' + (matchAnterior.score || 0) + '% · ' + (matchAnterior.destaques || []).join(' · ') + '</div>' : '') +
         '<div class="card-nome">' + c.nome + '</div>' +
         '<div class="card-cidade">📍 ' + (c.cidade || '—') + '</div>' +
         '<div class="tags">' + exps + mods + '</div>' +
