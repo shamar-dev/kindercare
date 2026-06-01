@@ -278,6 +278,7 @@
   var matchesDocs = [];
   var selC = null;
   var selF = null;
+  var naoDeramCerto = []; // cuidadorIds já tentados com a família selecionada
 
   // ── AUTH ────────────────────────────────────────────
   onAuthStateChanged(auth, async (user) => {
@@ -432,6 +433,8 @@
         return m.trim() ? '<span class="tag tag-modal">' + m.trim() + '</span>' : '';
       }).join('') : '';
 
+      var jaTentado = naoDeramCerto.indexOf(c._id) !== -1;
+
       var topDir = '';
       if (selC === i) {
         topDir = '<div class="check-btn">✓</div>';
@@ -442,8 +445,9 @@
         topDir = '<div class="check-btn"></div>';
       }
 
-      return '<div class="card ' + sel + '" onclick="selecionarCuidador(' + i + ')">' +
+      return '<div class="card ' + sel + '" onclick="selecionarCuidador(' + i + ')" style="' + (jaTentado ? 'opacity:0.5;' : '') + '">' +
         topDir +
+        (jaTentado ? '<div style="font-size:11px;color:#e57373;font-weight:700;margin-bottom:4px;">❌ Já tentado com esta família</div>' : '') +
         '<div class="card-nome">' + c.nome + '</div>' +
         '<div class="card-cidade">📍 ' + (c.cidade || '—') + '</div>' +
         '<div class="tags">' + exps + mods + '</div>' +
@@ -606,6 +610,14 @@
 
   window.selecionarFamilia = function(i) {
     selF = selF === i ? null : i;
+    if (selF !== null) {
+      var fId = familias[selF]._id;
+      naoDeramCerto = matchesDocs
+        .filter(function(m) { return m.familiaId === fId && m.status === 'nao_deu'; })
+        .map(function(m) { return m.cuidadorId; });
+    } else {
+      naoDeramCerto = [];
+    }
     renderFamilias(); renderCuidadores(); atualizarBar();
   };
 
