@@ -163,14 +163,22 @@
 
   onAuthStateChanged(auth, async (user) => {
     if (!user || criandoConta) return;
-    // Verifica se é família ou cuidador e redireciona corretamente
     const snap = await getDoc(doc(db, 'familias', user.uid));
     if (snap.exists()) {
       window.location.href = './dashboard-familia.html';
     } else {
-      window.location.href = './dashboard.html';
+      // Logado como cuidador tentando acessar área da família
+      const msg = document.getElementById('msg-auth');
+      msg.className = 'msg erro';
+      msg.innerHTML = 'Você está conectado como <strong>cuidador</strong>. <a href="#" onclick="sairEVoltar()" style="color:#c0392b;font-weight:700;">Sair e entrar como família →</a>';
     }
   });
+
+  window.sairEVoltar = async function() {
+    const { signOut } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js");
+    await signOut(auth);
+    location.reload();
+  };
 
   window.fazerLogin = async function() {
     const email = document.getElementById('login-email').value.trim();
