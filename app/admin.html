@@ -137,6 +137,12 @@
     <div style="font-size:20px;font-weight:700;color:#2d2d2d;margin-bottom:24px;">Painel Admin</div>
     <div id="msg-login" style="font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;background:#fdecea;color:#c0392b;"></div>
     <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">E-mail</label>
+      <input type="email" id="input-email" placeholder="seu@email.com"
+        style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-family:Nunito,sans-serif;font-size:15px;outline:none;"
+        onkeydown="if(event.key==='Enter')entrarAdmin()">
+    </div>
+    <div style="margin-bottom:20px;">
       <label style="display:block;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Senha</label>
       <input type="password" id="input-senha" placeholder="••••••••"
         style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-family:Nunito,sans-serif;font-size:15px;outline:none;"
@@ -252,8 +258,6 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  const ADMIN_EMAIL = 'admin@kindercare.com.br';
-
   var cuidadores = [];
   var familias   = [];
   var tabAtual   = 'cuidadores';
@@ -278,19 +282,21 @@
   });
 
   window.entrarAdmin = async function() {
+    const email = document.getElementById('input-email').value.trim();
     const senha = document.getElementById('input-senha').value;
     const btn   = document.getElementById('btn-entrar');
-    if (!senha) { mostrarErroLogin('Digite a senha.'); return; }
+
+    if (!email || !senha) { mostrarErroLogin('Preencha e-mail e senha.'); return; }
 
     btn.disabled = true;
     btn.textContent = 'Entrando...';
 
     try {
-      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, senha);
+      await signInWithEmailAndPassword(auth, email, senha);
     } catch(e) {
       btn.disabled = false;
       btn.textContent = 'Entrar →';
-      mostrarErroLogin('Senha incorreta.');
+      mostrarErroLogin('E-mail ou senha incorretos.');
     }
   };
 
