@@ -191,10 +191,16 @@
   <div class="tabs">
     <button class="tab ativo" onclick="mudarTab('cuidadores')">🧑‍⚕️ Cuidadores</button>
     <button class="tab" onclick="mudarTab('familias')">🏠 Famílias</button>
+    <button class="tab" onclick="mudarTab('interesses')">❤️ Interesses <span id="badge-interesses" style="display:none;background:#e57373;color:white;font-size:10px;padding:1px 6px;border-radius:99px;margin-left:4px;"></span></button>
+  </div>
+
+  <!-- PAINEL INTERESSES -->
+  <div id="painel-interesses" style="display:none;">
+    <div id="lista-interesses"><div class="vazio">Nenhum interesse pendente.</div></div>
   </div>
 
   <!-- FILTROS -->
-  <div class="filtros">
+  <div class="filtros" id="painel-filtros">
     <input type="text" id="filtro-busca" placeholder="Buscar por nome ou email..." oninput="renderAtual()">
     <select id="filtro-status" onchange="renderAtual()">
       <option value="">Todos os status</option>
@@ -277,7 +283,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, updateEmail, createUserWithEmailAndPassword }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, setDoc, deleteDoc }
+  import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, setDoc, deleteDoc, query, where, orderBy }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -315,6 +321,7 @@
     document.getElementById('loading').style.display     = 'flex';
     document.getElementById('header-email').textContent  = user.email;
     await carregarDados();
+    carregarBadgeInteresses();
   });
 
   window.entrarAdmin = async function() {
@@ -374,9 +381,17 @@
     tabAtual = tab;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
     event.target.classList.add('ativo');
-    document.getElementById('filtro-status').value = '';
-    document.getElementById('filtro-busca').value  = '';
-    renderAtual();
+    var isInteresses = tab === 'interesses';
+    document.getElementById('painel-interesses').style.display = isInteresses ? 'block' : 'none';
+    document.getElementById('painel-filtros').style.display    = isInteresses ? 'none' : 'flex';
+    document.getElementById('cards-grid').style.display        = isInteresses ? 'none' : 'grid';
+    if (isInteresses) {
+      renderInteresses();
+    } else {
+      document.getElementById('filtro-status').value = '';
+      document.getElementById('filtro-busca').value  = '';
+      renderAtual();
+    }
   };
 
   function filtrar(lista) {
@@ -516,6 +531,66 @@
       return '<div class="resumo-status-item" onclick="filtrarPorStatus(\'familias\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
     }).join('');
   }
+
+  // ── INTERESSES ─────────────────────────────────────
+  async function carregarBadgeInteresses() {
+    try {
+      var snap = await getDocs(query(collection(db, 'interesses'), where('status', '==', 'pendente')));
+      var badge = document.getElementById('badge-interesses');
+      if (snap.size > 0) {
+        badge.textContent = snap.size;
+        badge.style.display = 'inline';
+      } else {
+        badge.style.display = 'none';
+      }
+    } catch(e) {}
+  }
+
+  async function renderInteresses() {
+    var el = document.getElementById('lista-interesses');
+    el.innerHTML = '<div style="font-size:13px;color:#aaa;padding:16px;">Carregando...</div>';
+    try {
+      var snap = await getDocs(query(collection(db, 'interesses'), orderBy('data', 'desc')));
+      if (snap.empty) { el.innerHTML = '<div class="vazio">Nenhum interesse registrado.</div>'; return; }
+
+      var statusLabel = { pendente: '⏳ Pendente', aprovado: '✅ Aprovado', recusado: '❌ Recusado' };
+      el.innerHTML = snap.docs.map(function(d) {
+        var m = d.data(), id = d.id;
+        var data = m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '—';
+        var label = statusLabel[m.status] || m.status;
+        var btns = m.status === 'pendente'
+          ? '<button onclick="aprovarInteresse(\'' + id + '\')" style="background:#3a4e2a;color:#c8d8a0;border:none;padding:7px 14px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-right:6px;">✅ Aprovar</button>' +
+            '<button onclick="recusarInteresse(\'' + id + '\')" style="background:#f5e8e8;color:#c0392b;border:none;padding:7px 14px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">❌ Recusar</button>'
+          : '';
+        return '<div style="background:white;border-radius:12px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:16px;">' +
+          '<div>' +
+            '<div style="font-size:14px;font-weight:700;color:#2d2d2d;margin-bottom:2px;">❤️ ' + (m.familiaNome || '—') + ' → 🧑‍⚕️ ' + (m.cuidadorNome || '—') + '</div>' +
+            '<div style="font-size:12px;color:#aaa;">' + data + ' · ' + (m.score || 0) + '% compatibilidade · ' + label + '</div>' +
+            '<div style="font-size:12px;color:#888;">' + (m.familiaEmail || '') + '</div>' +
+          '</div>' +
+          '<div style="white-space:nowrap;">' + btns + '</div>' +
+        '</div>';
+      }).join('');
+    } catch(e) {
+      el.innerHTML = '<div style="font-size:13px;color:#c0392b;">Erro ao carregar: ' + e.message + '</div>';
+    }
+  }
+
+  window.aprovarInteresse = async function(id) {
+    try {
+      await updateDoc(doc(db, 'interesses', id), { status: 'aprovado' });
+      carregarBadgeInteresses();
+      renderInteresses();
+    } catch(e) { alert('Erro: ' + e.message); }
+  };
+
+  window.recusarInteresse = async function(id) {
+    try {
+      await updateDoc(doc(db, 'interesses', id), { status: 'recusado' });
+      carregarBadgeInteresses();
+      renderInteresses();
+    } catch(e) { alert('Erro: ' + e.message); }
+  };
 
   window.filtrarPorStatus = function(tab, status) {
     tabAtual = tab;

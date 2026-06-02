@@ -6,6 +6,8 @@
   <title>Kinder — Área da Família</title>
   <link rel="icon" type="image/png" href="../Kinder_Coracao.png">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init('sNQgEYMxGZ6_abMxT');</script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -409,7 +411,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { getAuth, signOut, onAuthStateChanged, deleteUser, updatePassword }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs }
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs, addDoc }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -428,6 +430,7 @@
 
   let currentUser = null;
   let dadosFS = {};
+  let interessesMap = {}; // cuidadorId -> { status, interesseId }
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) { window.location.href = './login-familia.html'; return; }
@@ -449,6 +452,7 @@
         dadosFS = snap.data();
       }
 
+      await carregarInteresses(user.uid);
       carregarUI(user, dadosFS);
       carregarSugeridos(user.uid);
     } catch(e) {
@@ -692,9 +696,17 @@
         '</div>'
       : '';
 
-    var btnWhats = c.whatsapp
-      ? '<a href="https://wa.me/55' + c.whatsapp.replace(/\D/g,'') + '" target="_blank" onclick="registrarContato(\'' + c._id + '\')" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#25d366;color:white;padding:11px 16px;border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">📱 WhatsApp</a>'
-      : '';
+    var interesse = interessesMap[c._id];
+    var btnAcao = '';
+    if (interesse && interesse.status === 'aprovado') {
+      btnAcao = c.whatsapp
+        ? '<a href="https://wa.me/55' + c.whatsapp.replace(/\D/g,'') + '" target="_blank" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#25d366;color:white;padding:11px 16px;border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">📱 WhatsApp</a>'
+        : '';
+    } else if (interesse && interesse.status === 'pendente') {
+      btnAcao = '<div style="flex:1;text-align:center;font-size:12px;color:#6b7c52;font-weight:700;padding:11px 14px;background:#eef3e8;border-radius:8px;">⏳ Aguardando aprovação</div>';
+    } else {
+      btnAcao = '<button onclick="manifestarInteresse(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\',' + c._score + ')" style="flex:1;background:#3a4e2a;color:#c8d8a0;border:none;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:11px 16px;border-radius:8px;cursor:pointer;">❤️ Tenho interesse</button>';
+    }
 
     var btnRejeitar = '<button onclick="rejeitarCuidadora(\'' + c._id + '\')" style="flex:1;background:none;border:1.5px solid #e0e0e0;color:#aaa;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;padding:11px 14px;border-radius:8px;cursor:pointer;">Não tenho interesse</button>';
 
@@ -708,7 +720,7 @@
             tagsHtml +
           '</div>' +
         '</div>' +
-        '<div style="display:flex;gap:8px;">' + btnRejeitar + btnWhats + '</div>' +
+        '<div style="display:flex;gap:8px;">' + btnRejeitar + btnAcao + '</div>' +
       '</div>';
   }
 
@@ -729,6 +741,51 @@
   }
 
   window.renderSugeridos = renderSugeridos;
+
+  async function carregarInteresses(uid) {
+    try {
+      var snap = await getDocs(query(collection(db, 'interesses'), where('familiaId', '==', uid)));
+      interessesMap = {};
+      snap.docs.forEach(function(d) {
+        var data = d.data();
+        interessesMap[data.cuidadorId] = { status: data.status, interesseId: d.id };
+      });
+    } catch(e) { /* silencioso */ }
+  }
+
+  window.manifestarInteresse = async function(cuidadorId, cuidadorNome, score) {
+    var btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    try {
+      var ref = await addDoc(collection(db, 'interesses'), {
+        familiaId:    currentUser.uid,
+        familiaNome:  dadosFS.nome || '',
+        familiaEmail: currentUser.email,
+        cuidadorId:   cuidadorId,
+        cuidadorNome: cuidadorNome,
+        score:        score,
+        data:         new Date().toISOString(),
+        status:       'pendente'
+      });
+
+      await emailjs.send('service_l99a8hr', 'template_okh47ic', {
+        familia_nome:    dadosFS.nome || currentUser.email,
+        cuidadora_nome:  cuidadorNome,
+        score:           score,
+        familia_email:   currentUser.email,
+        name:            dadosFS.nome || 'Família',
+        email:           currentUser.email
+      });
+
+      interessesMap[cuidadorId] = { status: 'pendente', interesseId: ref.id };
+      renderSugeridos(false);
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = '❤️ Tenho interesse';
+      alert('Erro ao enviar interesse. Tente novamente.');
+    }
+  };
 
   window.rejeitarCuidadora = function(id) {
     var rejeitados = getRejeitados();
