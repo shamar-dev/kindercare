@@ -508,30 +508,10 @@
     if (p.condicao)    marcarMulti('opc-condicao', p.condicao);
     if (p.ambiente)    marcarMulti('opc-ambiente', p.ambiente);
 
-    renderSugeridos(dados.sugeridos || []);
     atualizarProgresso();
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('container').style.display = 'block';
-  }
-
-  function renderSugeridos(lista) {
-    var el = document.getElementById('lista-sugeridos');
-    if (!lista.length) {
-      el.innerHTML = '<div class="vazio-msg">Ainda não há sugestões.<br>Entraremos em contato em breve com perfis compatíveis.</div>';
-      return;
-    }
-    el.innerHTML = lista.map(function(c) {
-      var tags = (c.experiencia || []).map(function(e) { return '<span class="cuid-tag">' + e + '</span>'; }).join('');
-      return '<div class="card-cuidador">' +
-        '<div class="cuid-foto">' + (c.foto || '🧑‍⚕️') + '</div>' +
-        '<div class="cuid-info">' +
-          '<div class="cuid-nome">' + (c.nome || '—') + '</div>' +
-          '<div class="cuid-cidade">📍 ' + (c.cidade || '—') + '</div>' +
-          '<div class="cuid-tags">' + tags + '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
   }
 
   window.salvar = async function(secao) {
