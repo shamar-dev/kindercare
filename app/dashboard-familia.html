@@ -741,13 +741,11 @@
     try {
       var c = sugestoesList.find(function(c) { return c._id === cuidadorId; });
       if (!c) return;
-      await fetch; // só registra se ainda não tiver match
       var q = query(collection(db, 'matches'),
         where('familiaId', '==', currentUser.uid),
         where('cuidadorId', '==', cuidadorId));
       var snap = await getDocs(q);
       if (snap.empty) {
-        // Cria o match como conectado
         var { addDoc } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
         await addDoc(collection(db, 'matches'), {
           cuidadorId: c._id, cuidador: c.nome, cuidadorWhats: c.whatsapp,
