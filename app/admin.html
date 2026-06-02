@@ -6,6 +6,8 @@
   <title>Kinder — Painel Admin</title>
   <link rel="icon" type="image/png" href="../Kinder_Coracao.png">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init('sNQgEYMxGZ6_abMxT');</script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #f0f2ec; font-family: 'Nunito', sans-serif; min-height: 100vh; }
@@ -441,6 +443,12 @@
           (p.docUrl ? '<a href="' + p.docUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#e8f0ff;color:#3a5aa0;border-radius:8px;text-decoration:none;">🪪 Documento</a>' : '') +
           (p.antecedentesUrl ? '<a href="' + p.antecedentesUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#fff3e8;color:#a05a3a;border-radius:8px;text-decoration:none;">📋 Antecedentes</a>' : '') +
         '</div>' : '') +
+        (c.status !== 'excluido' ? '<div style="margin:8px 0 4px;">' +
+          '<button id="btn-email-' + c.uid + '" onclick="enviarEmailDocs(\'' + c.uid + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\',\'' + (c.email||'') + '\')" ' +
+          (c.emailDocsSolicitado ? 'disabled style="font-size:11px;font-weight:700;padding:4px 12px;background:#f0f0f0;color:#aaa;border:none;border-radius:8px;cursor:not-allowed;"' : 'style="font-size:11px;font-weight:700;padding:4px 12px;background:#eef3e8;color:#3a4e2a;border:none;border-radius:8px;cursor:pointer;"') + '>' +
+          (c.emailDocsSolicitado ? '✓ Email enviado' : '📧 Solicitar docs') +
+          '</button>' +
+        '</div>' : '') +
         '<div class="status-row">' +
           '<span class="status-label-txt">Status</span>' +
           '<div style="display:flex;gap:8px;align-items:center;">' +
@@ -579,6 +587,28 @@
       el.innerHTML = '<div style="font-size:13px;color:#c0392b;">Erro ao carregar: ' + e.message + '</div>';
     }
   }
+
+  window.enviarEmailDocs = async function(uid, nome, email) {
+    var btn = document.getElementById('btn-email-' + uid);
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    try {
+      await emailjs.send('service_l99a8hr', 'template_4s63nga', {
+        para_email: email,
+        nome: nome.split(' ')[0],
+        email: email
+      });
+      await updateDoc(doc(db, 'cuidadores', uid), { emailDocsSolicitado: true });
+      btn.textContent = '✓ Email enviado';
+      btn.style.background = '#f0f0f0';
+      btn.style.color = '#aaa';
+      btn.style.cursor = 'not-allowed';
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = '📧 Solicitar docs';
+      alert('Erro ao enviar email: ' + e.text || e.message);
+    }
+  };
 
   window.aprovarInteresse = async function(id) {
     try {
