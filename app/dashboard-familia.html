@@ -601,52 +601,111 @@
     return partes[0] + ' ' + partes.slice(1).map(function(p) { return p[0].toUpperCase() + '.'; }).join(' ');
   }
 
-  var matchesFamilia = [];
-  var rejeitadosKey  = '';
-
-  function getRejeitados() {
-    return JSON.parse(localStorage.getItem(rejeitadosKey) || '[]');
-  }
-  function setRejeitados(ids) {
-    localStorage.setItem(rejeitadosKey, JSON.stringify(ids));
+  // ── MOTOR DE SCORE ─────────────────────────────────
+  function normalizar(str) {
+    return (str || '').toLowerCase().trim().normalize('NFD').replace(/[̀-ͯ]/g, '');
   }
 
-  function proximoNaoRejeitado(verTodos) {
+  function calcularScore(c, f) {
+    var pts = 0, detalhes = [];
+    var ptsCidade = (c.cidade && f.cidade && normalizar(c.cidade) === normalizar(f.cidade)) ? 25 : 0;
+    pts += ptsCidade; detalhes.push({ label: '📍 Cidade', pts: ptsCidade, max: 25 });
+
+    var ptsExp = 0, condicao = normalizar(f.condicao);
+    if (!condicao || condicao === 'nenhuma') { ptsExp = 20; }
+    else {
+      var achou = normalizar(c.experiencia).split(/[,;]/).some(function(e) {
+        e = e.trim(); return e && (condicao.indexOf(e) !== -1 || e.indexOf(condicao) !== -1);
+      });
+      ptsExp = achou ? 25 : 0;
+    }
+    pts += ptsExp; detalhes.push({ label: '🏥 Experiência', pts: ptsExp, max: 25 });
+
+    var ptsCuidado = 10, dep = normalizar(f.dependencia), cui = normalizar(c.cuidados);
+    if (dep === 'dependente') {
+      if (cui === 'todos') ptsCuidado = 20;
+      else if (cui.indexOf('maioria') !== -1) ptsCuidado = 14;
+      else if (cui.indexOf('menor') !== -1) ptsCuidado = 6;
+      else if (cui.indexOf('basico') !== -1) ptsCuidado = 3;
+    } else if (dep === 'independente') { ptsCuidado = 20; }
+    pts += ptsCuidado; detalhes.push({ label: '💪 Cuidado', pts: ptsCuidado, max: 20 });
+
+    var ptsRest = 15, restricao = normalizar(c.restricao), ambiente = normalizar(f.ambiente);
+    if (restricao && restricao !== 'nenhuma') {
+      restricao.split(/[,;]/).forEach(function(r) { r = r.trim(); if (r && ambiente.indexOf(r) !== -1) ptsRest -= 10; });
+    }
+    ptsRest = Math.max(0, ptsRest);
+    pts += ptsRest; detalhes.push({ label: '⚠ Restrições', pts: ptsRest, max: 15 });
+
+    var ptsRotina = 5, rotFam = normalizar(f.rotina), rotCuid = normalizar(c.rotina);
+    if (rotFam && rotCuid) {
+      if (rotFam === 'flexivel') { ptsRotina = (rotCuid === 'flexiveis' || rotCuid === 'indiferente') ? 10 : 5; }
+      else if (rotFam === 'semirigida') { ptsRotina = rotCuid === 'definidas' ? 10 : rotCuid === 'indiferente' ? 8 : 6; }
+    }
+    pts += ptsRotina; detalhes.push({ label: '🕐 Rotina', pts: ptsRotina, max: 10 });
+
+    var ptsConv = 5, conv = normalizar(f.conversa), estilo = normalizar(c.estilo);
+    if (conv === 'muito') { ptsConv = estilo.indexOf('comunicativa') !== -1 ? 5 : estilo.indexOf('adapto') !== -1 ? 3 : 2; }
+    pts += ptsConv; detalhes.push({ label: '💬 Conversa', pts: ptsConv, max: 5 });
+
+    return { total: Math.min(100, pts), detalhes: detalhes };
+  }
+
+  // ── SUGESTÕES ───────────────────────────────────────
+  var sugestoesList = [];
+  var rejeitadosKey = '';
+
+  function getRejeitados() { return JSON.parse(localStorage.getItem(rejeitadosKey) || '[]'); }
+  function setRejeitados(ids) { localStorage.setItem(rejeitadosKey, JSON.stringify(ids)); }
+
+  function proximaNaoRejeitada(verTodos) {
     var rejeitados = verTodos ? [] : getRejeitados();
-    return matchesFamilia.find(function(m) { return rejeitados.indexOf(m._id) === -1; }) || null;
+    return sugestoesList.find(function(c) { return rejeitados.indexOf(c._id) === -1; }) || null;
   }
 
-  function renderCard(m) {
-    var statusLabel = { apresentado: '📋 Apresentado', conectado: '💬 Em contato', contratado: '✅ Contratado' };
-    var score  = m.score !== undefined ? m.score + '% compatibilidade' : '';
-    var label  = statusLabel[m.status] || '';
-    var total  = matchesFamilia.length;
-    var visto  = getRejeitados().length;
-    var progresso = total > 1 ? '<div style="font-size:11px;color:#bbb;margin-bottom:12px;">' + (visto + 1) + ' de ' + total + ' perfis</div>' : '';
-
-    var fotoEl = m.cuidadorFoto
-      ? '<img src="' + m.cuidadorFoto + '" style="width:104px;height:104px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
-      : '<div style="width:104px;height:104px;border-radius:50%;background:#e8edd8;display:flex;align-items:center;justify-content:center;font-size:48px;flex-shrink:0;">🧑‍⚕️</div>';
-
-    var btnWhats = m.cuidadorWhats
-      ? '<a href="https://wa.me/55' + m.cuidadorWhats.replace(/\D/g,'') + '" target="_blank" onclick="marcarConectado(\'' + m._id + '\')" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#25d366;color:white;padding:11px 16px;border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">📱 WhatsApp</a>'
+  function renderCardCuidadora(c, verTodos) {
+    var rejeitados = verTodos ? [] : getRejeitados();
+    var total  = sugestoesList.length;
+    var visto  = rejeitados.length;
+    var progresso = total > 1
+      ? '<div style="font-size:11px;color:#bbb;margin-bottom:12px;">' + (visto + 1) + ' de ' + total + ' perfis</div>'
       : '';
 
-    var btnRejeitar = '<button onclick="rejeitarMatch(\'' + m._id + '\')" style="flex:1;background:none;border:1.5px solid #e0e0e0;color:#aaa;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;padding:11px 14px;border-radius:8px;cursor:pointer;">Não tenho interesse</button>';
+    var fotoEl = c.fotoUrl
+      ? '<img src="' + c.fotoUrl + '" style="width:104px;height:104px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+      : '<div style="width:104px;height:104px;border-radius:50%;background:#e8edd8;display:flex;align-items:center;justify-content:center;font-size:48px;flex-shrink:0;">🧑‍⚕️</div>';
+
+    // Todos os atributos preenchidos
+    var tags = [];
+    if (c.cidade)      tags.push('📍 ' + c.cidade);
+    if (c.experiencia) c.experiencia.forEach(function(e) { if(e) tags.push(e); });
+    if (c.modalidade)  c.modalidade.forEach(function(m) { if(m) tags.push(m); });
+    if (c.cuidados)    tags.push(c.cuidados);
+    if (c.rotina)      tags.push('Rotina: ' + c.rotina);
+    if (c.estilo)      tags.push(c.estilo);
+    if (c.cozinha && normalizar(c.cozinha).indexOf('sim') !== -1) tags.push('🍳 Cozinha');
+    if (c.restricao && normalizar(c.restricao) !== 'nenhuma' && c.restricao) tags.push('⚠ ' + c.restricao);
+
+    var tagsHtml = tags.length
+      ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">' +
+          tags.map(function(t) { return '<span style="font-size:11px;background:#eef3e8;color:#3a4e2a;border-radius:99px;padding:3px 9px;font-weight:600;">' + t + '</span>'; }).join('') +
+        '</div>'
+      : '';
+
+    var btnWhats = c.whatsapp
+      ? '<a href="https://wa.me/55' + c.whatsapp.replace(/\D/g,'') + '" target="_blank" onclick="registrarContato(\'' + c._id + '\')" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#25d366;color:white;padding:11px 16px;border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">📱 WhatsApp</a>'
+      : '';
+
+    var btnRejeitar = '<button onclick="rejeitarCuidadora(\'' + c._id + '\')" style="flex:1;background:none;border:1.5px solid #e0e0e0;color:#aaa;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;padding:11px 14px;border-radius:8px;cursor:pointer;">Não tenho interesse</button>';
 
     return progresso +
       '<div style="background:#f8f9f5;border-radius:10px;padding:16px;border:1.5px solid #e8edd8;">' +
         '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">' +
           fotoEl +
           '<div style="flex:1;">' +
-            '<div style="font-size:15px;font-weight:700;color:#2d2d2d;">' + abreviarNome(m.cuidador) + '</div>' +
-            (score ? '<div style="font-size:12px;color:#6b7c52;font-weight:600;">' + score + '</div>' : '') +
-            (label ? '<div style="font-size:12px;color:#aaa;margin-bottom:4px;">' + label + '</div>' : '') +
-            (m.destaques && m.destaques.length
-              ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">' +
-                  m.destaques.map(function(d) { return '<span style="font-size:11px;background:#eef3e8;color:#3a4e2a;border-radius:99px;padding:2px 8px;font-weight:600;">' + d + '</span>'; }).join('') +
-                '</div>'
-              : '') +
+            '<div style="font-size:15px;font-weight:700;color:#2d2d2d;">' + abreviarNome(c.nome) + '</div>' +
+            '<div style="font-size:12px;color:#6b7c52;font-weight:600;">' + c._score + '% compatibilidade</div>' +
+            tagsHtml +
           '</div>' +
         '</div>' +
         '<div style="display:flex;gap:8px;">' + btnRejeitar + btnWhats + '</div>' +
@@ -656,33 +715,49 @@
   function renderSugeridos(verTodos) {
     var el = document.getElementById('lista-sugeridos');
     if (verTodos) setRejeitados([]);
-    var proximo = proximoNaoRejeitado(verTodos);
+    var proximo = proximaNaoRejeitada(verTodos);
     if (!proximo) {
       el.innerHTML =
         '<div style="text-align:center;padding:32px 16px;">' +
           '<div style="font-size:32px;margin-bottom:10px;">🔍</div>' +
           '<div style="font-size:14px;color:#888;margin-bottom:16px;">Estamos buscando mais perfis compatíveis para você.</div>' +
-          (matchesFamilia.length ? '<button onclick="renderSugeridos(true)" style="background:none;border:1.5px solid #c8d8a0;color:#3a4e2a;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:8px 18px;border-radius:8px;cursor:pointer;">Ver todos novamente</button>' : '') +
+          (sugestoesList.length ? '<button onclick="renderSugeridos(true)" style="background:none;border:1.5px solid #c8d8a0;color:#3a4e2a;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:8px 18px;border-radius:8px;cursor:pointer;">Ver todos novamente</button>' : '') +
         '</div>';
       return;
     }
-    el.innerHTML = renderCard(proximo);
+    el.innerHTML = renderCardCuidadora(proximo, verTodos);
   }
 
   window.renderSugeridos = renderSugeridos;
 
-  window.rejeitarMatch = function(id) {
+  window.rejeitarCuidadora = function(id) {
     var rejeitados = getRejeitados();
     if (rejeitados.indexOf(id) === -1) rejeitados.push(id);
     setRejeitados(rejeitados);
     renderSugeridos(false);
   };
 
-  window.marcarConectado = async function(id) {
+  window.registrarContato = async function(cuidadorId) {
     try {
-      await updateDoc(doc(db, 'matches', id), { status: 'conectado' });
-      var m = matchesFamilia.find(function(m) { return m._id === id; });
-      if (m) m.status = 'conectado';
+      var c = sugestoesList.find(function(c) { return c._id === cuidadorId; });
+      if (!c) return;
+      await fetch; // só registra se ainda não tiver match
+      var q = query(collection(db, 'matches'),
+        where('familiaId', '==', currentUser.uid),
+        where('cuidadorId', '==', cuidadorId));
+      var snap = await getDocs(q);
+      if (snap.empty) {
+        // Cria o match como conectado
+        var { addDoc } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+        await addDoc(collection(db, 'matches'), {
+          cuidadorId: c._id, cuidador: c.nome, cuidadorWhats: c.whatsapp,
+          familiaId: currentUser.uid, familia: dadosFS.nome || '',
+          score: c._score, destaques: c._destaques,
+          data: new Date().toISOString(), status: 'conectado'
+        });
+      } else {
+        await updateDoc(snap.docs[0].ref, { status: 'conectado' });
+      }
     } catch(e) { /* silencioso */ }
   };
 
@@ -690,13 +765,66 @@
     rejeitadosKey = 'kinder-rejeitados-' + uid;
     var el = document.getElementById('lista-sugeridos');
     try {
-      const q    = query(collection(db, 'matches'), where('familiaId', '==', uid));
-      const snap = await getDocs(q);
-      matchesFamilia = snap.docs
-        .filter(function(d) { return d.data().status !== 'nao_deu'; })
-        .sort(function(a, b) { return (b.data().score || 0) - (a.data().score || 0); })
-        .map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
-      if (!matchesFamilia.length) return;
+      var snap = await getDocs(query(
+        collection(db, 'cuidadores'),
+        where('status', '==', 'aprovado')
+      ));
+
+      var p = dadosFS.perfil || {};
+      var arr = function(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); };
+      var familia = {
+        cidade: p.cidade || '',
+        condicao: arr(p.condicao),
+        dependencia: p.dependencia || '',
+        rotina: p.rotina || '',
+        conversa: p.conversa || '',
+        ambiente: arr(p.ambiente)
+      };
+
+      sugestoesList = snap.docs
+        .filter(function(d) { return d.data().disponivel !== false; })
+        .map(function(d) {
+          var data = d.data(), pr = data.perfil || {};
+          var c = {
+            _id: d.id,
+            nome: data.nome || '',
+            whatsapp: pr.whatsapp || '',
+            fotoUrl: pr.fotoUrl || '',
+            cidade: pr.cidade || '',
+            experiencia: Array.isArray(pr.experiencia) ? pr.experiencia : [],
+            modalidade: Array.isArray(pr.modalidade) ? pr.modalidade : [],
+            cuidados: pr.cuidados || '',
+            rotina: pr.rotina || '',
+            estilo: pr.estilo || '',
+            restricao: pr.restricao || '',
+            cozinha: pr.cozinha || '',
+            // para o score engine
+            experiencia_str: Array.isArray(pr.experiencia) ? pr.experiencia.join(', ') : (pr.experiencia || '')
+          };
+          var resultado = calcularScore(
+            Object.assign({}, c, { experiencia: c.experiencia_str }),
+            familia
+          );
+          c._score = resultado.total;
+          // destaques: top 3 valores reais
+          var valoresMap = {
+            '📍 Cidade': c.cidade,
+            '🏥 Experiência': c.experiencia_str,
+            '💪 Cuidado': c.cuidados,
+            '⚠ Restrições': (c.restricao && normalizar(c.restricao) !== 'nenhuma' ? c.restricao : 'Sem restrições'),
+            '🕐 Rotina': c.rotina,
+            '💬 Conversa': c.estilo
+          };
+          c._destaques = resultado.detalhes
+            .sort(function(a, b) { return (b.pts/b.max) - (a.pts/a.max); })
+            .slice(0, 3)
+            .map(function(d) { return valoresMap[d.label] || ''; })
+            .filter(function(v) { return v; });
+          return c;
+        })
+        .sort(function(a, b) { return b._score - a._score; });
+
+      if (!sugestoesList.length) return;
       renderSugeridos(false);
     } catch(e) {
       el.innerHTML = '<div style="font-size:13px;color:#aaa;">Erro ao carregar sugestões.</div>';
