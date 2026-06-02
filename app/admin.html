@@ -431,7 +431,7 @@
 
       return '<div class="card">' +
         '<div class="card-topo">' +
-          '<div class="card-foto">🧑‍⚕️</div>' +
+          '<div class="card-foto">' + (p.fotoUrl ? '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' : '🧑‍⚕️') + '</div>' +
           '<div>' +
             '<div class="card-nome">' + (c.nome || '—') + '</div>' +
             '<div class="card-email">' + (c.email || '') + '</div>' +
