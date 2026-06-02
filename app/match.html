@@ -428,6 +428,12 @@
 
     if (!lista.length) { el.innerHTML = '<div class="vazio"><span class="emoji">🔍</span>Nenhum resultado.</div>'; return; }
 
+    if (selF !== null) {
+      lista.sort(function(a, b) {
+        return calcularScore(b, familias[selF]).total - calcularScore(a, familias[selF]).total;
+      });
+    }
+
     el.innerHTML = lista.map(function(c) {
       var i   = cuidadores.indexOf(c);
       var sel = selC === i ? 'selecionado' : '';
