@@ -299,7 +299,10 @@
     var modalidade = isVoce
       ? (Array.isArray(p.modalidade) ? p.modalidade : [])
       : (dados.modalidade || []);
-    var foto = isVoce ? '👤' : dados.foto;
+    var fotoUrl = isVoce ? (p.fotoUrl || '') : (dados.fotoUrl || dados.foto || '');
+    var foto = fotoUrl
+      ? '<img src="' + fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
+      : '👤';
 
     var tags = '';
     if (exps.length) {

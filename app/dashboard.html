@@ -713,13 +713,14 @@
         <div id="foto-preview" style="width:80px;height:80px;border-radius:50%;background:#e8e8e8;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;overflow:hidden;">
           👤
         </div>
-        <div>
-          <div class="upload-area" data-campo="foto">
+        <div style="flex:1;">
+          <input type="file" id="input-foto" accept="image/jpeg,image/png" style="display:none;" onchange="uploadFoto(this)">
+          <div class="upload-area" style="cursor:pointer;" onclick="document.getElementById('input-foto').click()">
             <span class="upload-icone">📷</span>
-            <span class="upload-texto">Escolher foto</span>
-            <span class="upload-em-breve">Em breve</span>
+            <span class="upload-texto" id="upload-foto-texto">Escolher foto</span>
           </div>
           <div style="font-size:11px;color:#aaa;margin-top:6px;">JPG ou PNG · máx. 5MB</div>
+          <div class="feedback" id="fb-foto" style="margin-top:8px;"></div>
         </div>
       </div>
 
@@ -803,6 +804,8 @@
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAMe9GRhZyYOiDCVQBxMnu8MHjuaY1hY5Y",
@@ -814,9 +817,10 @@
     measurementId: "G-KKN5D5NEK0"
   };
 
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
+  const app     = initializeApp(firebaseConfig);
+  const auth    = getAuth(app);
+  const db      = getFirestore(app);
+  const storage = getStorage(app);
 
   let currentUser = null;
   let dadosFirestore = {};
@@ -916,6 +920,13 @@
     if (p.modalidade)  marcarMulti('opc-modalidade', p.modalidade);
     document.getElementById('p-limite').value = p.limite || '';
 
+    // Foto existente
+    if (p.fotoUrl) {
+      const preview = document.getElementById('foto-preview');
+      preview.innerHTML = '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+      document.getElementById('upload-foto-texto').textContent = 'Trocar foto';
+    }
+
     atualizarProgresso();
 
     document.getElementById('loading').style.display = 'none';
@@ -959,9 +970,12 @@
       if (p.cozinha === 'sim') tags += '<span class="cv-tag">🍳 cozinha</span>';
       if (p.estilo) tags += '<span class="cv-tag">' + p.estilo + '</span>';
 
+      var fotoHtml = p.fotoUrl
+        ? '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;">'
+        : '👤';
       return '<div class="card-vitrine destaque" style="position:relative;">' +
         '<div class="badge-voce">✦ VOCÊ</div>' +
-        '<div class="cv-foto">👤</div>' +
+        '<div class="cv-foto">' + fotoHtml + '</div>' +
         '<div class="cv-nome">' + (primeiroNome || '—') + '</div>' +
         '<div class="cv-cidade">' + (cidade ? '📍 ' + cidade : '<span style="color:#ddd">📍 cidade</span>') + '</div>' +
         '<div class="cv-tags">' + tags + '</div>' +
@@ -1131,6 +1145,42 @@
     } catch(e) {
       alert('Erro ao salvar: ' + e.message);
     }
+  };
+
+  // ── UPLOAD FOTO ────────────────────────────────────
+  window.uploadFoto = async function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      mostrarFeedback(document.getElementById('fb-foto'), 'erro', 'Arquivo muito grande. Máx. 5MB.');
+      return;
+    }
+    const texto = document.getElementById('upload-foto-texto');
+    const fb    = document.getElementById('fb-foto');
+    texto.textContent = 'Enviando...';
+
+    try {
+      const ref  = storageRef(storage, 'fotos/' + currentUser.uid + '/perfil.jpg');
+      await uploadBytes(ref, file, { contentType: file.type });
+      const url  = await getDownloadURL(ref);
+
+      // Salva URL no Firestore
+      await updateDoc(doc(db, 'cuidadores', currentUser.uid), { 'perfil.fotoUrl': url });
+      dadosFirestore.perfil = dadosFirestore.perfil || {};
+      dadosFirestore.perfil.fotoUrl = url;
+
+      // Atualiza preview
+      const preview = document.getElementById('foto-preview');
+      preview.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;">';
+
+      texto.textContent = 'Trocar foto';
+      mostrarFeedback(fb, 'ok', '✓ Foto atualizada!');
+    } catch (e) {
+      texto.textContent = 'Escolher foto';
+      mostrarFeedback(fb, 'erro', 'Erro ao enviar. Tente novamente.');
+      console.error(e);
+    }
+    input.value = '';
   };
 
   // ── SAIR ───────────────────────────────────────────
