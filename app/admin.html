@@ -425,14 +425,17 @@
         '<div class="status-row">' +
           '<span class="status-label-txt">Status</span>' +
           '<div style="display:flex;gap:8px;align-items:center;">' +
-            (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
-            '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'cuidadores\',\'' + c.uid + '\',this)">' +
-              '<option value="pendente"'  + (c.status==='pendente' ?' selected':'') + '>⏳ Pendente</option>' +
-              '<option value="analise"'   + (c.status==='analise'  ?' selected':'') + '>🔍 Em análise</option>' +
-              '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
-              '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
-            '</select>' +
-            '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>' +
+            (c.status === 'excluido'
+              ? '<button onclick="restaurarRegistro(\'cuidadores\',\'' + c.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
+              : (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
+                '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'cuidadores\',\'' + c.uid + '\',this)">' +
+                  '<option value="pendente"'  + (c.status==='pendente' ?' selected':'') + '>⏳ Pendente</option>' +
+                  '<option value="analise"'   + (c.status==='analise'  ?' selected':'') + '>🔍 Em análise</option>' +
+                  '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
+                  '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
+                '</select>' +
+                '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+            ) +
           '</div>' +
         '</div>' +
       '</div>';
@@ -470,13 +473,16 @@
         '<div class="status-row">' +
           '<span class="status-label-txt">Status</span>' +
           '<div style="display:flex;gap:8px;align-items:center;">' +
-            (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
-            '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
-              '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>⏳ Aguardando</option>' +
-              '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>🔍 Em andamento</option>' +
-              '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>✅ Match encontrado</option>' +
-            '</select>' +
-            '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>' +
+            (f.status === 'excluido'
+              ? '<button onclick="restaurarRegistro(\'familias\',\'' + f.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
+              : (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
+                '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
+                  '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>⏳ Aguardando</option>' +
+                  '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>🔍 Em andamento</option>' +
+                  '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>✅ Match encontrado</option>' +
+                '</select>' +
+                '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+            ) +
           '</div>' +
         '</div>' +
       '</div>';
@@ -519,6 +525,20 @@
     document.getElementById('filtro-busca').value  = '';
     renderAtual();
     document.getElementById('container').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // ── RESTAURAR ──────────────────────────────────────
+  window.restaurarRegistro = async function(colecao, uid) {
+    try {
+      await updateDoc(doc(db, colecao, uid), { status: 'pendente' });
+      var lista = colecao === 'cuidadores' ? cuidadores : familias;
+      var item  = lista.find(function(i) { return i.uid === uid; });
+      if (item) item.status = 'pendente';
+      atualizarResumo();
+      renderAtual();
+    } catch(e) {
+      alert('Erro ao restaurar: ' + e.message);
+    }
   };
 
   // ── EXCLUIR (soft delete) ──────────────────────────
