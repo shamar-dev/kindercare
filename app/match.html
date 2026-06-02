@@ -353,7 +353,10 @@
         };
       });
 
-    familias = snapF.docs.map(d => {
+    familias = snapF.docs.filter(d => {
+      var s = d.data().status || 'pendente';
+      return s !== 'suspenso' && s !== 'excluido';
+    }).map(d => {
       var data = d.data();
       var p = data.perfil || {};
       var arr = function(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); };
