@@ -741,15 +741,26 @@
 
       <!-- DOCUMENTO COM FOTO -->
       <div class="campo" style="margin-top:4px;">
-        <label>Documento com foto <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa;">RG frente e verso</span></label>
-        <input type="file" id="input-documento" accept="image/jpeg,image/png,application/pdf" style="display:none;" onchange="uploadDocumento(this,'documento')">
-        <div class="upload-area" style="cursor:pointer;" onclick="document.getElementById('input-documento').click()">
+        <label>Documento com foto — frente <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#aaa;">RG, CPF ou CNH</span></label>
+        <input type="file" id="input-documento-frente" accept="image/jpeg,image/png,application/pdf" style="display:none;" onchange="uploadDocumento(this,'documento-frente')">
+        <div class="upload-area" style="cursor:pointer;" onclick="document.getElementById('input-documento-frente').click()">
           <span class="upload-icone">🪪</span>
-          <span class="upload-texto" id="upload-doc-texto">Enviar documento</span>
-          <span id="doc-ok" style="display:none;font-size:11px;font-weight:700;background:#eef3e8;color:#3a4e2a;padding:3px 10px;border-radius:99px;">✓ Enviado</span>
+          <span class="upload-texto" id="upload-doc-frente-texto">Enviar frente</span>
+          <span id="doc-frente-ok" style="display:none;font-size:11px;font-weight:700;background:#eef3e8;color:#3a4e2a;padding:3px 10px;border-radius:99px;">✓ Enviado</span>
         </div>
-        <div style="font-size:11px;color:#aaa;margin-top:6px;">JPG, PNG ou PDF · frente e verso obrigatório · máx. 10MB</div>
-        <div class="feedback" id="fb-documento" style="margin-top:8px;"></div>
+        <div class="feedback" id="fb-documento-frente" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="campo">
+        <label>Documento com foto — verso</label>
+        <input type="file" id="input-documento-verso" accept="image/jpeg,image/png,application/pdf" style="display:none;" onchange="uploadDocumento(this,'documento-verso')">
+        <div class="upload-area" style="cursor:pointer;" onclick="document.getElementById('input-documento-verso').click()">
+          <span class="upload-icone">🪪</span>
+          <span class="upload-texto" id="upload-doc-verso-texto">Enviar verso</span>
+          <span id="doc-verso-ok" style="display:none;font-size:11px;font-weight:700;background:#eef3e8;color:#3a4e2a;padding:3px 10px;border-radius:99px;">✓ Enviado</span>
+        </div>
+        <div style="font-size:11px;color:#aaa;margin-top:6px;">JPG, PNG ou PDF · máx. 10MB</div>
+        <div class="feedback" id="fb-documento-verso" style="margin-top:8px;"></div>
       </div>
 
       <!-- ANTECEDENTES -->
@@ -926,9 +937,13 @@
     document.getElementById('p-limite').value = p.limite || '';
 
     // Documentos já enviados
-    if (p.docUrl) {
-      document.getElementById('upload-doc-texto').textContent = 'Substituir';
-      document.getElementById('doc-ok').style.display = 'inline';
+    if (p.docFrenteUrl) {
+      document.getElementById('upload-doc-frente-texto').textContent = 'Substituir';
+      document.getElementById('doc-frente-ok').style.display = 'inline';
+    }
+    if (p.docVersoUrl) {
+      document.getElementById('upload-doc-verso-texto').textContent = 'Substituir';
+      document.getElementById('doc-verso-ok').style.display = 'inline';
     }
     if (p.antecedentesUrl) {
       document.getElementById('upload-ant-texto').textContent = 'Substituir';
@@ -1163,6 +1178,12 @@
   };
 
   // ── UPLOAD DOCUMENTOS ──────────────────────────────
+  var docConfig = {
+    'documento-frente': { texto: 'upload-doc-frente-texto', ok: 'doc-frente-ok', campo: 'perfil.docFrenteUrl', firestoreKey: 'docFrenteUrl', label: 'Enviar frente' },
+    'documento-verso':  { texto: 'upload-doc-verso-texto',  ok: 'doc-verso-ok',  campo: 'perfil.docVersoUrl',  firestoreKey: 'docVersoUrl',  label: 'Enviar verso' },
+    'antecedentes':     { texto: 'upload-ant-texto',         ok: 'ant-ok',        campo: 'perfil.antecedentesUrl', firestoreKey: 'antecedentesUrl', label: 'Enviar certidão' }
+  };
+
   window.uploadDocumento = async function(input, tipo) {
     const file = input.files[0];
     if (!file) return;
@@ -1170,28 +1191,27 @@
       mostrarFeedback(document.getElementById('fb-' + tipo), 'erro', 'Arquivo muito grande. Máx. 10MB.');
       return;
     }
-    const isDoc = tipo === 'documento';
-    const textoEl = document.getElementById(isDoc ? 'upload-doc-texto' : 'upload-ant-texto');
-    const okEl    = document.getElementById(isDoc ? 'doc-ok' : 'ant-ok');
+    const cfg     = docConfig[tipo];
+    const textoEl = document.getElementById(cfg.texto);
+    const okEl    = document.getElementById(cfg.ok);
     const fb      = document.getElementById('fb-' + tipo);
     textoEl.textContent = 'Enviando...';
 
     try {
-      const ext  = file.name.split('.').pop();
-      const ref  = storageRef(storage, 'documentos/' + currentUser.uid + '/' + tipo + '.' + ext);
+      const ext = file.name.split('.').pop();
+      const ref = storageRef(storage, 'documentos/' + currentUser.uid + '/' + tipo + '.' + ext);
       await uploadBytes(ref, file, { contentType: file.type });
-      const url  = await getDownloadURL(ref);
+      const url = await getDownloadURL(ref);
 
-      const campo = isDoc ? 'perfil.docUrl' : 'perfil.antecedentesUrl';
-      await updateDoc(doc(db, 'cuidadores', currentUser.uid), { [campo]: url });
+      await updateDoc(doc(db, 'cuidadores', currentUser.uid), { [cfg.campo]: url });
       dadosFirestore.perfil = dadosFirestore.perfil || {};
-      dadosFirestore.perfil[isDoc ? 'docUrl' : 'antecedentesUrl'] = url;
+      dadosFirestore.perfil[cfg.firestoreKey] = url;
 
       textoEl.textContent = 'Substituir';
       okEl.style.display = 'inline';
       mostrarFeedback(fb, 'ok', '✓ Enviado com sucesso!');
     } catch (e) {
-      textoEl.textContent = isDoc ? 'Enviar documento' : 'Enviar certidão';
+      textoEl.textContent = cfg.label;
       mostrarFeedback(fb, 'erro', 'Erro ao enviar. Tente novamente.');
       console.error(e);
     }

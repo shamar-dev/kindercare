@@ -439,8 +439,9 @@
           '</div>' +
         '</div>' +
         (tags ? '<div class="tags">' + tags + '</div>' : '') +
-        ((p.docUrl || p.antecedentesUrl) ? '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px;">' +
-          (p.docUrl ? '<a href="' + p.docUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#1a3a6b;color:white;border-radius:8px;text-decoration:none;">🪪 Documento</a>' : '') +
+        ((p.docFrenteUrl || p.docVersoUrl || p.antecedentesUrl) ? '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px;">' +
+          (p.docFrenteUrl ? '<a href="' + p.docFrenteUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#1a3a6b;color:white;border-radius:8px;text-decoration:none;">🪪 Frente</a>' : '') +
+          (p.docVersoUrl ? '<a href="' + p.docVersoUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#1a3a6b;color:white;border-radius:8px;text-decoration:none;">🪪 Verso</a>' : '') +
           (p.antecedentesUrl ? '<a href="' + p.antecedentesUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#e67e22;color:white;border-radius:8px;text-decoration:none;">📋 Antecedentes</a>' : '') +
         '</div>' : '') +
         (c.status !== 'excluido' ? '<div style="margin:8px 0 4px;">' +
