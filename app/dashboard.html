@@ -544,63 +544,13 @@
     </div>
   </a>
 
-  <!-- SEÇÃO: DADOS PESSOAIS -->
-  <div class="secao aberta" id="sec-pessoal">
-    <div class="secao-header" onclick="toggleSecao('sec-pessoal')">
-      <div class="secao-titulo"><span class="secao-icone">👤</span> Dados pessoais</div>
-      <span class="secao-chevron">▼</span>
-    </div>
-    <div class="secao-corpo">
-      <div class="campo">
-        <label>Nome completo</label>
-        <input type="text" id="p-nome" placeholder="Seu nome completo">
-      </div>
-      <div class="campo">
-        <label>WhatsApp</label>
-        <input type="tel" id="p-whatsapp" placeholder="(11) 99999-9999">
-      </div>
-      <div class="campo">
-        <label>CEP</label>
-        <div style="position:relative;">
-          <input type="text" id="p-cep" placeholder="00000-000" maxlength="9">
-          <span id="cep-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#888;"></span>
-        </div>
-      </div>
-      <div class="campo">
-        <label>Rua</label>
-        <input type="text" id="p-rua" placeholder="Preenchido pelo CEP">
-      </div>
-      <div class="campo-row">
-        <div class="campo">
-          <label>Número</label>
-          <input type="text" id="p-numero" placeholder="Ex: 123">
-        </div>
-        <div class="campo">
-          <label>Complemento <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
-          <input type="text" id="p-complemento" placeholder="Apto, bloco...">
-        </div>
-      </div>
-      <div class="campo">
-        <label>Bairro</label>
-        <input type="text" id="p-bairro" placeholder="Preenchido pelo CEP">
-      </div>
-      <div class="campo-row">
-        <div class="campo">
-          <label>Cidade</label>
-          <input type="text" id="p-cidade" placeholder="Preenchido pelo CEP">
-        </div>
-        <div class="campo">
-          <label>Estado</label>
-          <input type="text" id="p-estado" placeholder="UF" maxlength="2">
-        </div>
-      </div>
-      <button class="btn-salvar" onclick="salvarSecao('pessoal')">Salvar dados pessoais</button>
-      <div class="feedback" id="fb-pessoal"></div>
-    </div>
+  <!-- AVISO CERTIDÃO -->
+  <div style="background:#fff8e8;border:1.5px solid #f0d080;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#7a5a10;line-height:1.6;">
+    📋 <strong>Atenção:</strong> para aprovação você precisará de uma <strong>Certidão de Antecedentes Criminais</strong> válida por 30 dias, do estado onde reside. Providencie com antecedência — em SP é gratuita pelo <a href="https://www.poupatempo.sp.gov.br" target="_blank" style="color:#7a5a10;font-weight:700;">Poupatempo</a>.
   </div>
 
   <!-- SEÇÃO: PERFIL PROFISSIONAL -->
-  <div class="secao" id="sec-profissional">
+  <div class="secao aberta" id="sec-profissional">
     <div class="secao-header" onclick="toggleSecao('sec-profissional')">
       <div class="secao-titulo"><span class="secao-icone">🧑‍⚕️</span> Perfil profissional</div>
       <span class="secao-chevron">▼</span>
@@ -697,6 +647,61 @@
     </div>
   </div>
 
+  <!-- SEÇÃO: DADOS PESSOAIS -->
+  <div class="secao" id="sec-pessoal">
+    <div class="secao-header" onclick="toggleSecao('sec-pessoal')">
+      <div class="secao-titulo"><span class="secao-icone">👤</span> Dados pessoais</div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div class="campo">
+        <label>Nome completo</label>
+        <input type="text" id="p-nome" placeholder="Seu nome completo">
+      </div>
+      <div class="campo">
+        <label>WhatsApp</label>
+        <input type="tel" id="p-whatsapp" placeholder="(11) 99999-9999">
+      </div>
+      <div class="campo">
+        <label>CEP</label>
+        <div style="position:relative;">
+          <input type="text" id="p-cep" placeholder="00000-000" maxlength="9">
+          <span id="cep-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#888;"></span>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Rua</label>
+        <input type="text" id="p-rua" placeholder="Preenchido pelo CEP">
+      </div>
+      <div class="campo-row">
+        <div class="campo">
+          <label>Número</label>
+          <input type="text" id="p-numero" placeholder="Ex: 123">
+        </div>
+        <div class="campo">
+          <label>Complemento <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+          <input type="text" id="p-complemento" placeholder="Apto, bloco...">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Bairro</label>
+        <input type="text" id="p-bairro" placeholder="Preenchido pelo CEP">
+      </div>
+      <div class="campo-row">
+        <div class="campo">
+          <label>Cidade</label>
+          <input type="text" id="p-cidade" placeholder="Preenchido pelo CEP">
+        </div>
+        <div class="campo">
+          <label>Estado</label>
+          <input type="text" id="p-estado" placeholder="UF" maxlength="2">
+        </div>
+      </div>
+      <button class="btn-salvar" onclick="salvarSecao('pessoal')">Salvar dados pessoais</button>
+      <div class="feedback" id="fb-pessoal"></div>
+    </div>
+  </div>
+
   <!-- SEÇÃO: FOTO -->
   <div class="secao" id="sec-foto">
     <div class="secao-header" onclick="toggleSecao('sec-foto')">
@@ -706,7 +711,8 @@
     <div class="secao-corpo">
 
       <div style="background:#f7faf3;border:1.5px solid #c8d8a0;border-radius:10px;padding:14px 16px;margin-top:14px;margin-bottom:20px;font-size:13px;color:#4a5e3a;line-height:1.6;">
-        🖼️ Sua foto será exibida para as famílias durante o processo de match. Uma boa foto aumenta suas chances de conexão.
+        🖼️ Sua foto será exibida para as famílias durante o match. <strong>Uma boa foto aumenta muito suas chances de conexão.</strong><br><br>
+        Dicas: fundo claro ou neutro · rosto visível e centralizado · boa iluminação · sorriso natural · sem filtros excessivos.
       </div>
 
       <div style="display:flex;align-items:center;gap:16px;margin-top:6px;">
@@ -806,11 +812,24 @@
       <div class="zona-perigo" style="margin-top:24px;">
         <h4>Excluir conta</h4>
         <p>Esta ação remove permanentemente seus dados da plataforma. Não pode ser desfeita.</p>
-        <button class="btn-excluir" onclick="confirmarExclusao()">Excluir minha conta</button>
+        <button class="btn-excluir" onclick="abrirModalExclusao()">Excluir minha conta</button>
       </div>
     </div>
   </div>
 
+</div>
+
+<!-- MODAL EXCLUSÃO -->
+<div id="modal-exclusao" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:white;border-radius:16px;padding:28px 24px;max-width:360px;width:100%;text-align:center;">
+    <div style="font-size:36px;margin-bottom:12px;">⚠️</div>
+    <h3 style="font-size:16px;color:#2d2d2d;margin-bottom:10px;">Excluir conta?</h3>
+    <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:20px;">Esta ação é <strong>permanente</strong> e não pode ser desfeita. Todos os seus dados serão removidos da plataforma.</p>
+    <div style="display:flex;gap:10px;">
+      <button onclick="fecharModalExclusao()" style="flex:1;padding:12px;background:#f0f0f0;color:#555;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Cancelar</button>
+      <button onclick="confirmarExclusao()" style="flex:1;padding:12px;background:#c0392b;color:white;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Sim, excluir</button>
+    </div>
+  </div>
 </div>
 
 <!-- FIREBASE -->
@@ -1328,6 +1347,14 @@
 </script>
 
 <script>
+  function abrirModalExclusao() {
+    document.getElementById('modal-exclusao').style.display = 'flex';
+  }
+
+  function fecharModalExclusao() {
+    document.getElementById('modal-exclusao').style.display = 'none';
+  }
+
   function toggleSecao(id) {
     document.getElementById(id).classList.toggle('aberta');
   }
