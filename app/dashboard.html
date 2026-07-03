@@ -1066,9 +1066,13 @@
 
     // Salva conversas globalmente para o modal acessar
     window._conversas = conversas;
+    renderListaMensagens();
+  }
 
-    // Renderiza lista estilo inbox
-    var abrevNome = function(n) { if (!n) return '—'; var p = n.trim().split(/\s+/); return p.length <= 1 ? p[0] : p[0] + ' ' + p[p.length-1][0] + '.'; };
+  var abrevNome = function(n) { if (!n) return '—'; var p = n.trim().split(/\s+/); return p.length <= 1 ? p[0] : p[0] + ' ' + p[p.length-1][0] + '.'; };
+
+  function renderListaMensagens() {
+    var conversas = window._conversas || {};
     var html = Object.entries(conversas).map(function(entry) {
       var fid = entry[0], c = entry[1];
       var ultima = c.msgs[c.msgs.length - 1];
@@ -1105,6 +1109,7 @@
       try { await updateDoc(doc(db, 'mensagens', m.id), { lida: true }); m.lida = true; } catch(e) {}
     });
     c.naoLidas = 0;
+    renderListaMensagens();
 
     var msgsHtml = c.msgs.map(function(m) {
       var deFamilia = m.de === 'familia';
