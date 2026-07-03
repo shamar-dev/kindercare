@@ -388,11 +388,14 @@
   var paresNaoLidos = new Set(); // "familiaId_cuidadorId"
 
   async function carregarDados() {
-    const [snapC, snapF, snapM] = await Promise.all([
+    const [snapC, snapF] = await Promise.all([
       getDocs(collection(db, 'cuidadores')),
-      getDocs(collection(db, 'familias')),
-      getDocs(collection(db, 'mensagens'))
+      getDocs(collection(db, 'familias'))
     ]);
+    var snapM = await getDocs(collection(db, 'mensagens')).catch(function(e) {
+      console.warn('Admin: sem permissão para ler mensagens —', e.message);
+      return { docs: [] };
+    });
 
     cuidadores = snapC.docs.map(d => ({ uid: d.id, ...d.data() }));
     familias   = snapF.docs.map(d => ({ uid: d.id, ...d.data() }));
