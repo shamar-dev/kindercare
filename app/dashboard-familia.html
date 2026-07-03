@@ -859,6 +859,10 @@
   var _msgCuidadorId = null;
 
   window.abrirModalMensagem = function(cuidadorId, cuidadorNome) {
+    if (window._conversasFamilia && window._conversasFamilia[cuidadorId]) {
+      abrirConversaFamilia(cuidadorId);
+      return;
+    }
     _msgCuidadorId = cuidadorId;
     document.getElementById('modal-msg-nome').textContent = abreviarNome(cuidadorNome);
     document.getElementById('modal-msg-texto').value = '';
