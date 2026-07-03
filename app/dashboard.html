@@ -1073,6 +1073,17 @@
 
   function renderListaMensagens() {
     var conversas = window._conversas || {};
+    var totalNaoLidas = Object.values(conversas).reduce(function(acc, c) { return acc + c.naoLidas; }, 0);
+    var badgeHeader = document.getElementById('badge-msgs');
+    var badgeCount = document.getElementById('badge-count');
+    var badgeSecao = document.getElementById('badge-msgs-secao');
+    if (totalNaoLidas > 0) {
+      if (badgeHeader) { badgeHeader.style.display = 'block'; badgeCount.textContent = totalNaoLidas; }
+      if (badgeSecao) { badgeSecao.style.display = 'inline'; badgeSecao.textContent = totalNaoLidas; }
+    } else {
+      if (badgeHeader) badgeHeader.style.display = 'none';
+      if (badgeSecao) badgeSecao.style.display = 'none';
+    }
     var html = Object.entries(conversas).map(function(entry) {
       var fid = entry[0], c = entry[1];
       var ultima = c.msgs[c.msgs.length - 1];
