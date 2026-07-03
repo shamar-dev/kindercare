@@ -840,11 +840,20 @@
         '</div>';
       return;
     }
-    el.innerHTML = '<div id="card-swipe-wrapper" style="touch-action:pan-y;">' + renderCardCuidadora(proximo, verTodos) + '</div>';
-    iniciarSwipe();
+    _indiceAtual = sugestoesList.indexOf(proximo);
+    if (_indiceAtual < 0) _indiceAtual = 0;
+    renderCardNoIndice();
   }
 
   var _indiceAtual = 0;
+
+  function renderCardNoIndice() {
+    var c = sugestoesList[_indiceAtual];
+    if (!c) return;
+    var el = document.getElementById('lista-sugeridos');
+    el.innerHTML = '<div id="card-swipe-wrapper" style="touch-action:pan-y;">' + renderCardCuidadora(c, true) + '</div>';
+    iniciarSwipe();
+  }
 
   function iniciarSwipe() {
     var wrapper = document.getElementById('card-swipe-wrapper');
@@ -876,25 +885,30 @@
         wrapper.style.transform = '';
         return;
       }
+      var proximo = dx < 0 ? _indiceAtual + 1 : _indiceAtual - 1;
+      if (proximo < 0 || proximo >= sugestoesList.length) {
+        wrapper.style.transition = 'transform 0.2s';
+        wrapper.style.transform = '';
+        return;
+      }
       animating = true;
-      var dir = dx > 0 ? 1 : -1; // direita = anterior, esquerda = próximo
-      wrapper.style.transition = 'transform 0.25s, opacity 0.25s';
-      wrapper.style.transform = 'translateX(' + (dir * 120) + 'px)';
+      var sairDir = dx < 0 ? -300 : 300;
+      var entrarDir = dx < 0 ? 300 : -300;
+      wrapper.style.transition = 'transform 0.22s, opacity 0.22s';
+      wrapper.style.transform = 'translateX(' + sairDir + 'px)';
       wrapper.style.opacity = '0';
       setTimeout(function() {
-        var total = sugestoesList.length;
-        _indiceAtual = (_indiceAtual - dir + total) % total;
-        var c = sugestoesList[_indiceAtual];
+        _indiceAtual = proximo;
         var el = document.getElementById('lista-sugeridos');
-        el.innerHTML = '<div id="card-swipe-wrapper" style="touch-action:pan-y;transform:translateX(' + (-dir * 120) + 'px);opacity:0;">' + renderCardCuidadora(c, true) + '</div>';
-        var nw = document.getElementById('card-swipe-wrapper');
+        el.innerHTML = '<div id="card-swipe-wrapper" style="touch-action:pan-y;transform:translateX(' + entrarDir + 'px);opacity:0;">' + renderCardCuidadora(sugestoesList[_indiceAtual], true) + '</div>';
         requestAnimationFrame(function() {
-          nw.style.transition = 'transform 0.25s, opacity 0.25s';
+          var nw = document.getElementById('card-swipe-wrapper');
+          nw.style.transition = 'transform 0.22s, opacity 0.22s';
           nw.style.transform = '';
           nw.style.opacity = '';
-          setTimeout(function() { iniciarSwipe(); }, 260);
+          setTimeout(function() { iniciarSwipe(); }, 230);
         });
-      }, 260);
+      }, 230);
     });
   }
 
