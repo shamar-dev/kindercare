@@ -860,7 +860,7 @@
 
   window.abrirModalMensagem = function(cuidadorId, cuidadorNome) {
     _msgCuidadorId = cuidadorId;
-    document.getElementById('modal-msg-nome').textContent = cuidadorNome;
+    document.getElementById('modal-msg-nome').textContent = abreviarNome(cuidadorNome);
     document.getElementById('modal-msg-texto').value = '';
     document.getElementById('modal-msg-contador').textContent = '0';
     document.getElementById('modal-msg-btn').disabled = false;
