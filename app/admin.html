@@ -33,8 +33,7 @@
     .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; display: none; }
 
     /* RESUMO */
-    .resumo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 32px; }
-    @media (max-width: 600px) { .resumo { grid-template-columns: 1fr; } }
+    .resumo { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
 
     .resumo-card {
       background: white;
@@ -42,7 +41,7 @@
       padding: 20px 24px;
     }
 
-    .resumo-topo { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .resumo-topo { display: flex; align-items: center; gap: 14px; justify-content: space-between; }
     .resumo-icone { font-size: 32px; }
     .resumo-num { font-size: 28px; font-weight: 700; color: #2d2d2d; line-height: 1; }
     .resumo-label { font-size: 12px; color: #888; margin-top: 3px; }
@@ -64,7 +63,7 @@
     .filtros input { min-width: 200px; flex: 1; }
 
     /* CARDS */
-    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+    .cards-grid { display: flex; flex-direction: column; gap: 12px; }
 
     .card {
       background: white;
@@ -119,6 +118,14 @@
 
     /* DATA */
     .card-data { font-size: 11px; color: #ccc; margin-top: 6px; }
+  @keyframes pulse-borda {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(58,78,42,0.5); border-color: #c8d8a0; }
+    50%       { box-shadow: 0 0 0 5px rgba(58,78,42,0);  border-color: #3a4e2a; }
+  }
+  .btn-msgs-novo {
+    animation: pulse-borda 1.4s ease-in-out infinite;
+    border-color: #3a4e2a !important;
+  }
   </style>
 </head>
 <body>
@@ -167,25 +174,29 @@
 
   <!-- RESUMO -->
   <div class="resumo">
-    <div class="resumo-card">
-      <div class="resumo-topo" onclick="filtrarPorStatus('cuidadores','')" style="cursor:pointer;">
-        <div class="resumo-icone">🧑‍⚕️</div>
-        <div>
-          <div class="resumo-num" id="num-cuidadores">—</div>
-          <div class="resumo-label">Cuidadores</div>
+    <div class="resumo-card" onclick="abrirAba('familias')" style="cursor:pointer;">
+      <div class="resumo-topo">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="resumo-icone">🏠</div>
+          <div>
+            <div class="resumo-num" id="num-familias">—</div>
+            <div class="resumo-label">Famílias</div>
+          </div>
         </div>
+        <div class="resumo-status" id="status-familias"></div>
       </div>
-      <div class="resumo-status" id="status-cuidadores"></div>
     </div>
-    <div class="resumo-card">
-      <div class="resumo-topo" onclick="filtrarPorStatus('familias','')" style="cursor:pointer;">
-        <div class="resumo-icone">🏠</div>
-        <div>
-          <div class="resumo-num" id="num-familias">—</div>
-          <div class="resumo-label">Famílias</div>
+    <div class="resumo-card" onclick="abrirAba('cuidadores')" style="cursor:pointer;">
+      <div class="resumo-topo">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div class="resumo-icone">🧑‍⚕️</div>
+          <div>
+            <div class="resumo-num" id="num-cuidadores">—</div>
+            <div class="resumo-label">Cuidadores</div>
+          </div>
         </div>
+        <div class="resumo-status" id="status-cuidadores"></div>
       </div>
-      <div class="resumo-status" id="status-familias"></div>
     </div>
   </div>
 
@@ -204,6 +215,11 @@
   <!-- FILTROS -->
   <div class="filtros" id="painel-filtros">
     <input type="text" id="filtro-busca" placeholder="Buscar por nome ou email..." oninput="renderAtual()">
+    <select id="filtro-ordem" onchange="renderAtual()" style="width:auto;">
+      <option value="">Nome (padrão)</option>
+      <option value="az">A → Z</option>
+      <option value="za">Z → A</option>
+    </select>
     <select id="filtro-status" onchange="renderAtual()">
       <option value="">Todos os status</option>
       <option value="pendente">Pendente</option>
@@ -219,6 +235,22 @@
   <!-- LISTA -->
   <div class="cards-grid" id="cards-grid"></div>
 
+</div>
+
+<!-- MODAL MENSAGENS ADMIN -->
+<div id="modal-msgs-admin" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:24px 16px;">
+  <div style="background:white;border-radius:16px;padding:24px 20px 28px;max-width:520px;width:100%;max-height:85vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#2d2d2d;" id="admin-msgs-titulo">Conversas</div>
+        <div style="font-size:11px;color:#aaa;" id="admin-msgs-sub"></div>
+      </div>
+      <button onclick="document.getElementById('modal-msgs-admin').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;">✕</button>
+    </div>
+    <div id="admin-msgs-corpo" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
+      <div style="text-align:center;color:#bbb;font-size:13px;padding:24px;">Carregando...</div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL CONFIGURAÇÕES -->
@@ -352,14 +384,28 @@
   }
 
   // ── CARREGAR DADOS ─────────────────────────────────
+  var uidsComMsgs = { cuidadores: new Set(), familias: new Set() };
+  var paresNaoLidos = new Set(); // "familiaId_cuidadorId"
+
   async function carregarDados() {
-    const [snapC, snapF] = await Promise.all([
+    const [snapC, snapF, snapM] = await Promise.all([
       getDocs(collection(db, 'cuidadores')),
-      getDocs(collection(db, 'familias'))
+      getDocs(collection(db, 'familias')),
+      getDocs(collection(db, 'mensagens'))
     ]);
 
     cuidadores = snapC.docs.map(d => ({ uid: d.id, ...d.data() }));
     familias   = snapF.docs.map(d => ({ uid: d.id, ...d.data() }));
+
+    uidsComMsgs.cuidadores = new Set();
+    uidsComMsgs.familias   = new Set();
+    paresNaoLidos = new Set();
+    snapM.docs.forEach(function(d) {
+      var m = d.data();
+      if (m.cuidadorId) uidsComMsgs.cuidadores.add(m.cuidadorId);
+      if (m.familiaId)  uidsComMsgs.familias.add(m.familiaId);
+      if (!m.lida) paresNaoLidos.add(m.familiaId + '_' + m.cuidadorId);
+    });
 
     // Resumo
     document.getElementById('num-cuidadores').textContent = cuidadores.length;
@@ -386,7 +432,7 @@
     var isInteresses = tab === 'interesses';
     document.getElementById('painel-interesses').style.display = isInteresses ? 'block' : 'none';
     document.getElementById('painel-filtros').style.display    = isInteresses ? 'none' : 'flex';
-    document.getElementById('cards-grid').style.display        = isInteresses ? 'none' : 'grid';
+    document.getElementById('cards-grid').style.display        = isInteresses ? 'none' : 'flex';
     if (isInteresses) {
       renderInteresses();
     } else {
@@ -399,7 +445,8 @@
   function filtrar(lista) {
     var busca  = document.getElementById('filtro-busca').value.toLowerCase();
     var status = document.getElementById('filtro-status').value;
-    return lista.filter(function(item) {
+    var ordem  = document.getElementById('filtro-ordem').value;
+    var resultado = lista.filter(function(item) {
       var nome  = (item.nome || '').toLowerCase();
       var email = (item.email || '').toLowerCase();
       if (busca && nome.indexOf(busca) === -1 && email.indexOf(busca) === -1) return false;
@@ -410,6 +457,9 @@
       }
       return true;
     });
+    if (ordem === 'az') resultado.sort(function(a, b) { return (a.nome||'').localeCompare(b.nome||'', 'pt'); });
+    if (ordem === 'za') resultado.sort(function(a, b) { return (b.nome||'').localeCompare(a.nome||'', 'pt'); });
+    return resultado;
   }
 
   function renderCuidadores() {
@@ -418,53 +468,36 @@
     if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhum cuidador encontrado.</div>'; return; }
 
     el.innerHTML = lista.map(function(c) {
-      var p    = c.perfil || {};
-      var exps = Array.isArray(p.experiencia) ? p.experiencia.slice(0,3) : [];
-      var mods = Array.isArray(p.modalidade)  ? p.modalidade.slice(0,2)  : [];
-      var tags = '';
-      if (p.cidade)  tags += '<span class="tag tag-cidade">📍 ' + p.cidade + '</span>';
-      exps.forEach(function(e) { tags += '<span class="tag tag-exp">' + e + '</span>'; });
-      mods.forEach(function(m) { tags += '<span class="tag tag-modal">' + m + '</span>'; });
-
+      var p = c.perfil || {};
       var statusCls = c.status || 'pendente';
-      var whatsLink = p.whatsapp ? 'https://wa.me/55' + p.whatsapp.replace(/\D/g,'') : '';
+      var foto = p.fotoUrl ? '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' : '🧑‍⚕️';
 
-      return '<div class="card">' +
-        '<div class="card-topo">' +
-          '<div class="card-foto">' + (p.fotoUrl ? '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' : '🧑‍⚕️') + '</div>' +
-          '<div>' +
-            '<div class="card-nome">' + (c.nome || '—') + '</div>' +
-            '<div class="card-email">' + (c.email || '') + '</div>' +
-            '<div class="card-data">Cadastro: ' + formatarData(c.criadoEm) + '</div>' +
-          '</div>' +
+      var docTag = function(url, label) {
+        return url
+          ? '<a href="' + url + '" target="_blank" onclick="event.stopPropagation()" style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;text-decoration:none;">✓ ' + label + '</a>'
+          : '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#f5f5f5;color:#bbb;">✗ ' + label + '</span>';
+      };
+
+      return '<div class="card" style="display:flex;align-items:center;gap:14px;padding:12px 16px;">' +
+        '<div class="card-foto" style="flex-shrink:0;">' + foto + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="card-nome">' + (c.nome || '—') + '</div>' +
+          '<div class="card-email">' + (c.email || '') + '</div>' +
         '</div>' +
-        (tags ? '<div class="tags">' + tags + '</div>' : '') +
-        ((p.docFrenteUrl || p.docVersoUrl || p.antecedentesUrl) ? '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 4px;">' +
-          (p.docFrenteUrl ? '<a href="' + p.docFrenteUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#1a3a6b;color:white;border-radius:8px;text-decoration:none;">🪪 Frente</a>' : '') +
-          (p.docVersoUrl ? '<a href="' + p.docVersoUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#1a3a6b;color:white;border-radius:8px;text-decoration:none;">🪪 Verso</a>' : '') +
-          (p.antecedentesUrl ? '<a href="' + p.antecedentesUrl + '" target="_blank" style="font-size:11px;font-weight:700;padding:4px 10px;background:#e67e22;color:white;border-radius:8px;text-decoration:none;">📋 Antecedentes</a>' : '') +
-        '</div>' : '') +
-        (c.status !== 'excluido' ? '<div style="margin:8px 0 4px;">' +
-          '<button id="btn-email-' + c.uid + '" onclick="enviarEmailDocs(\'' + c.uid + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\',\'' + (c.email||'') + '\')" ' +
-          (c.emailDocsSolicitado ? 'disabled style="font-size:11px;font-weight:700;padding:4px 12px;background:#f0f0f0;color:#aaa;border:none;border-radius:8px;cursor:not-allowed;"' : 'style="font-size:11px;font-weight:700;padding:4px 12px;background:#eef3e8;color:#3a4e2a;border:none;border-radius:8px;cursor:pointer;"') + '>' +
-          (c.emailDocsSolicitado ? '✓ Email enviado' : '📧 Solicitar docs') +
-          '</button>' +
-        '</div>' : '') +
-        '<div class="status-row">' +
-          '<span class="status-label-txt">Status</span>' +
-          '<div style="display:flex;gap:8px;align-items:center;">' +
-            (c.status === 'excluido'
-              ? '<button onclick="restaurarRegistro(\'cuidadores\',\'' + c.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
-              : (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
-                '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'cuidadores\',\'' + c.uid + '\',this)">' +
-                  '<option value="pendente"'  + (c.status==='pendente' ?' selected':'') + '>⏳ Pendente</option>' +
-                  '<option value="analise"'   + (c.status==='analise'  ?' selected':'') + '>🔍 Em análise</option>' +
-                  '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
-                  '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
-                '</select>' +
-                '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
-            ) +
-          '</div>' +
+        '<div style="display:flex;flex-direction:row;gap:4px;align-items:center;flex-shrink:0;">' +
+          docTag(p.docFrenteUrl, 'Frente') + docTag(p.docVersoUrl, 'Verso') + docTag(p.antecedentesUrl, 'Antecedentes') +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
+          (c.status === 'excluido'
+            ? '<button onclick="restaurarRegistro(\'cuidadores\',\'' + c.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
+            : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'cuidadores\',\'' + c.uid + '\',this)">' +
+                '<option value="pendente"'  + (c.status==='pendente' ?' selected':'') + '>⏳ Pendente</option>' +
+                '<option value="analise"'   + (c.status==='analise'  ?' selected':'') + '>🔍 Em análise</option>' +
+                '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
+                '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
+              '</select>' +
+              '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+          ) +
         '</div>' +
       '</div>';
     }).join('');
@@ -476,42 +509,26 @@
     if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhuma família encontrada.</div>'; return; }
 
     el.innerHTML = lista.map(function(f) {
-      var p    = f.perfil || {};
-      var conds = Array.isArray(p.condicao) ? p.condicao.slice(0,2) : [];
-      var tags = '';
-      if (p.cidade)    tags += '<span class="tag tag-cidade">📍 ' + p.cidade + '</span>';
-      if (p.dependencia) tags += '<span class="tag tag-modal">' + p.dependencia + '</span>';
-      conds.forEach(function(c) { tags += '<span class="tag tag-cond">' + c + '</span>'; });
-
+      var p = f.perfil || {};
       var statusCls = f.status || 'pendente';
-      var whatsLink = p.whatsapp ? 'https://wa.me/55' + p.whatsapp.replace(/\D/g,'') : '';
-      var idosoInfo = p.nome_idoso ? p.nome_idoso + (p.idade ? ', ' + p.idade + ' anos' : '') : '';
 
-      return '<div class="card">' +
-        '<div class="card-topo">' +
-          '<div class="card-foto">🏠</div>' +
-          '<div>' +
-            '<div class="card-nome">' + (f.nome || '—') + '</div>' +
-            '<div class="card-email">' + (f.email || '') + '</div>' +
-            '<div class="card-data">Cadastro: ' + formatarData(f.criadoEm) + '</div>' +
-          '</div>' +
+      return '<div class="card" style="display:flex;align-items:center;gap:14px;padding:12px 16px;">' +
+        '<div class="card-foto" style="flex-shrink:0;">🏠</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div class="card-nome">' + (f.nome || '—') + '</div>' +
+          '<div class="card-email">' + (f.email || '') + '</div>' +
         '</div>' +
-        (idosoInfo ? '<div class="card-info">👴 ' + idosoInfo + '</div>' : '') +
-        (tags ? '<div class="tags">' + tags + '</div>' : '') +
-        '<div class="status-row">' +
-          '<span class="status-label-txt">Status</span>' +
-          '<div style="display:flex;gap:8px;align-items:center;">' +
-            (f.status === 'excluido'
-              ? '<button onclick="restaurarRegistro(\'familias\',\'' + f.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
-              : (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
-                '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
-                  '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>📋 Em análise</option>' +
-                  '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>✅ Aprovado para explorar</option>' +
-                  '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>💚 Match encontrado</option>' +
-                '</select>' +
-                '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
-            ) +
-          '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
+          (f.status === 'excluido'
+            ? '<button onclick="restaurarRegistro(\'familias\',\'' + f.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
+            : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
+                '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>📋 Em análise</option>' +
+                '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>✅ Aprovado para explorar</option>' +
+                '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>💚 Match encontrado</option>' +
+                '<option value="suspenso"'   + (f.status==='suspenso'  ?' selected':'') + '>🚫 Suspenso</option>' +
+              '</select>' +
+              '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+          ) +
         '</div>' +
       '</div>';
     }).join('');
@@ -531,17 +548,18 @@
     var statusF = [
       { key: 'pendente',  label: '📋 Em análise' },
       { key: 'andamento', label: '✅ Aprovado para explorar' },
-      { key: 'match',     label: '💚 Match encontrado' }
+      { key: 'match',     label: '💚 Match encontrado' },
+      { key: 'suspenso',  label: '🚫 Suspenso' }
     ];
 
     document.getElementById('status-cuidadores').innerHTML = statusC.map(function(s) {
       var n = cuidadores.filter(function(c) { return (c.status || 'pendente') === s.key; }).length;
-      return '<div class="resumo-status-item" onclick="filtrarPorStatus(\'cuidadores\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
+      return '<div class="resumo-status-item" onclick="event.stopPropagation();filtrarPorStatus(\'cuidadores\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
     }).join('');
 
     document.getElementById('status-familias').innerHTML = statusF.map(function(s) {
       var n = familias.filter(function(f) { return (f.status || 'pendente') === s.key; }).length;
-      return '<div class="resumo-status-item" onclick="filtrarPorStatus(\'familias\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
+      return '<div class="resumo-status-item" onclick="event.stopPropagation();filtrarPorStatus(\'familias\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
     }).join('');
   }
 
@@ -571,6 +589,12 @@
         var m = d.data(), id = d.id;
         var data = m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '—';
         var label = statusLabel[m.status] || m.status;
+        var temMsgs = uidsComMsgs.familias.has(m.familiaId) && uidsComMsgs.cuidadores.has(m.cuidadorId);
+        var chaveInteresse = (m.familiaId||'') + '_' + (m.cuidadorId||'');
+        var temNaoLidas = paresNaoLidos.has(chaveInteresse);
+        var btnMsgs = temMsgs
+          ? '<button id="btn-conv-' + chaveInteresse + '" onclick="verMensagensInteresse(\'' + (m.familiaId||'') + '\',\'' + (m.cuidadorId||'') + '\',\'' + (m.familiaNome||'').replace(/'/g,"\\'") + '\',\'' + (m.cuidadorNome||'').replace(/'/g,"\\'") + '\')" class="' + (temNaoLidas ? 'btn-msgs-novo' : '') + '" style="background:#f0f2ec;color:#3a4e2a;border:1px solid #c8d8a0;padding:7px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">💬 Conversa</button>'
+          : '<button disabled style="background:#f5f5f5;color:#ccc;border:1px solid #eee;padding:7px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:not-allowed;">💬 Conversa</button>';
         var btns = m.status === 'pendente'
           ? '<button onclick="aprovarInteresse(\'' + id + '\')" style="background:#3a4e2a;color:#c8d8a0;border:none;padding:7px 14px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-right:6px;">✅ Aprovar</button>' +
             '<button onclick="recusarInteresse(\'' + id + '\')" style="background:#f5e8e8;color:#c0392b;border:none;padding:7px 14px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">❌ Recusar</button>'
@@ -581,7 +605,7 @@
             '<div style="font-size:12px;color:#aaa;">' + data + ' · ' + (m.score || 0) + '% compatibilidade · ' + label + '</div>' +
             '<div style="font-size:12px;color:#888;">' + (m.familiaEmail || '') + '</div>' +
           '</div>' +
-          '<div style="white-space:nowrap;">' + btns + '</div>' +
+          '<div style="display:flex;gap:6px;align-items:center;white-space:nowrap;">' + btnMsgs + btns + '</div>' +
         '</div>';
       }).join('');
     } catch(e) {
@@ -625,6 +649,133 @@
       carregarBadgeInteresses();
       renderInteresses();
     } catch(e) { alert('Erro: ' + e.message); }
+  };
+
+  var _adminMsgsConversas = {};
+
+  window.verMensagensAdmin = async function(uid, nome, tipo) {
+    var modal = document.getElementById('modal-msgs-admin');
+    var corpo = document.getElementById('admin-msgs-corpo');
+    document.getElementById('admin-msgs-titulo').textContent = '💬 ' + nome;
+    document.getElementById('admin-msgs-sub').textContent = '';
+    corpo.innerHTML = '<div style="text-align:center;color:#bbb;font-size:13px;padding:24px;">Carregando...</div>';
+    modal.style.display = 'flex';
+
+    try {
+      var campo = tipo === 'cuidador' ? 'cuidadorId' : 'familiaId';
+      var q = query(collection(db, 'mensagens'), where(campo, '==', uid), orderBy('criadaEm', 'asc'));
+      var snap = await getDocs(q);
+
+      var conversas = {};
+      snap.forEach(function(d) {
+        var m = d.data();
+        var chave = m.familiaId + '_' + m.cuidadorId;
+        if (!conversas[chave]) conversas[chave] = { familiaNome: m.familiaNome, cuidadorId: m.cuidadorId, msgs: [] };
+        conversas[chave].msgs.push(m);
+      });
+      _adminMsgsConversas = conversas;
+
+      renderAdminInbox();
+    } catch(e) {
+      corpo.innerHTML = '<div style="color:#c0392b;font-size:13px;padding:16px;">Erro: ' + e.message + '</div>';
+    }
+  };
+
+  function renderAdminInbox() {
+    var corpo = document.getElementById('admin-msgs-corpo');
+    document.getElementById('admin-msgs-sub').textContent = Object.keys(_adminMsgsConversas).length + ' conversa(s)';
+    corpo.innerHTML = Object.entries(_adminMsgsConversas).map(function(entry) {
+      var chave = entry[0], c = entry[1];
+      var ultima = c.msgs[c.msgs.length - 1];
+      var preview = ultima ? (ultima.de === 'familia' ? (c.familiaNome||'Família') + ': ' + ultima.texto : 'Cuidadora: ' + ultima.texto) : '';
+      if (preview.length > 55) preview = preview.substring(0, 55) + '…';
+      return '<div onclick="abrirAdminConversa(\'' + chave + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fafafa;border-radius:12px;cursor:pointer;border:1.5px solid #f0f0f0;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:700;color:#2d2d2d;margin-bottom:3px;">👨‍👩‍👦 ' + (c.familiaNome || '—') + '</div>' +
+          '<div style="font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + preview + '</div>' +
+        '</div>' +
+        '<span style="font-size:16px;color:#ccc;margin-left:12px;">›</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.abrirAdminConversa = function(chave) {
+    var c = _adminMsgsConversas[chave];
+    if (!c) return;
+    var corpo = document.getElementById('admin-msgs-corpo');
+    document.getElementById('admin-msgs-sub').textContent = c.familiaNome;
+    var msgsHtml = c.msgs.map(function(m) {
+      var deFamilia = m.de === 'familia';
+      return '<div style="display:flex;justify-content:' + (deFamilia ? 'flex-start' : 'flex-end') + ';margin-bottom:6px;">' +
+        '<div style="max-width:80%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;' +
+          (deFamilia ? 'background:#f0f2ec;color:#2d2d2d;' : 'background:#3a4e2a;color:#c8d8a0;') + '">' +
+          '<div style="font-size:10px;font-weight:700;margin-bottom:3px;opacity:0.7;">' + (deFamilia ? (c.familiaNome||'Família') : 'Cuidadora') + '</div>' +
+          m.texto +
+        '</div>' +
+      '</div>';
+    }).join('');
+    corpo.innerHTML =
+      '<button onclick="renderAdminInbox()" style="background:none;border:none;font-size:13px;font-weight:700;color:#3a4e2a;cursor:pointer;margin-bottom:12px;padding:0;">← Voltar</button>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;">' + msgsHtml + '</div>';
+  };
+
+  window.renderAdminInbox = renderAdminInbox;
+
+  window.deletarMsgAdmin = async function(msgId) {
+    if (!confirm('Remover esta mensagem?')) return;
+    try {
+      await updateDoc(doc(db, 'mensagens', msgId), { deletadaPorAdmin: true });
+      var el = document.getElementById('msg-admin-' + msgId);
+      if (el) el.innerHTML = '<em style="color:#aaa;font-size:12px;">⚠️ Mensagem removida pelo administrador.</em>';
+    } catch(e) { alert('Erro: ' + e.message); }
+  };
+
+  window.verMensagensInteresse = async function(familiaId, cuidadorId, familiaNome, cuidadorNome) {
+    var chave = familiaId + '_' + cuidadorId;
+    paresNaoLidos.delete(chave);
+    var btnEl = document.getElementById('btn-conv-' + chave);
+    if (btnEl) btnEl.classList.remove('btn-msgs-novo');
+
+    var modal = document.getElementById('modal-msgs-admin');
+    var corpo = document.getElementById('admin-msgs-corpo');
+    document.getElementById('admin-msgs-titulo').textContent = '💬 ' + familiaNome + ' → ' + cuidadorNome;
+    document.getElementById('admin-msgs-sub').textContent = '';
+    corpo.innerHTML = '<div style="text-align:center;color:#bbb;font-size:13px;padding:24px;">Carregando...</div>';
+    modal.style.display = 'flex';
+    try {
+      var q = query(collection(db, 'mensagens'),
+        where('familiaId', '==', familiaId),
+        where('cuidadorId', '==', cuidadorId),
+        orderBy('criadaEm', 'asc'));
+      var snap = await getDocs(q);
+      if (snap.empty) { corpo.innerHTML = '<div style="text-align:center;color:#bbb;font-size:13px;padding:24px;">Nenhuma mensagem.</div>'; return; }
+      document.getElementById('admin-msgs-sub').textContent = snap.size + ' mensagem' + (snap.size !== 1 ? 's' : '');
+      corpo.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px;">' +
+        snap.docs.map(function(d) {
+          var m = d.data(), mid = d.id;
+          var deFamilia = m.de === 'familia';
+          var texto = m.deletadaPorAdmin
+            ? '<em style="color:#aaa;font-size:12px;">⚠️ Mensagem removida pelo administrador.</em>'
+            : m.texto;
+          var btnDel = m.deletadaPorAdmin ? '' :
+            '<button onclick="deletarMsgAdmin(\'' + mid + '\')" title="Remover mensagem" style="background:none;border:none;cursor:pointer;font-size:11px;color:#ddd;padding:2px 4px;line-height:1;flex-shrink:0;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">✕</button>';
+          return '<div style="display:flex;align-items:flex-start;justify-content:' + (deFamilia ? 'flex-start' : 'flex-end') + ';gap:4px;">' +
+            (deFamilia ? '' : btnDel) +
+            '<div id="msg-admin-' + mid + '" style="max-width:80%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;' +
+              (deFamilia ? 'background:#f0f2ec;color:#2d2d2d;' : 'background:#3a4e2a;color:#c8d8a0;') + '">' +
+              '<div style="font-size:10px;font-weight:700;margin-bottom:3px;opacity:0.7;">' + (deFamilia ? familiaNome : cuidadorNome) + '</div>' +
+              texto +
+            '</div>' +
+            (deFamilia ? btnDel : '') +
+          '</div>';
+        }).join('') + '</div>';
+    } catch(e) {
+      corpo.innerHTML = '<div style="color:#c0392b;font-size:13px;padding:16px;">Erro: ' + e.message + '</div>';
+    }
+  };
+
+  window.abrirAba = function(tab) {
+    filtrarPorStatus(tab, '');
   };
 
   window.filtrarPorStatus = function(tab, status) {

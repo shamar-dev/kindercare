@@ -500,7 +500,7 @@
   <div style="background:white;border-radius:16px;padding:28px 24px;max-width:480px;width:100%;position:relative;">
     <button onclick="fecharModalMensagem()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;">✕</button>
     <h3 style="font-size:16px;font-weight:700;color:#2d2d2d;margin-bottom:6px;">💬 Mensagem para <span id="modal-msg-nome"></span></h3>
-    <p style="font-size:12px;color:#aaa;margin-bottom:16px;">A cuidadora poderá responder antes do match ser aprovado.</p>
+    <p style="font-size:12px;color:#a05a3a;background:#fff3e8;border-radius:8px;padding:8px 12px;margin-bottom:16px;">⚠️ Não compartilhe dados de contato (telefone, email, endereço). A conexão acontece somente após o match ser aprovado.</p>
     <textarea id="modal-msg-texto" maxlength="300" placeholder="Escreva sua mensagem..." style="width:100%;height:120px;padding:12px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;color:#2d2d2d;outline:none;resize:none;background:#fafafa;" oninput="atualizarContadorMsg()"></textarea>
     <div style="text-align:right;font-size:11px;color:#bbb;margin-top:4px;margin-bottom:16px;"><span id="modal-msg-contador">0</span>/300</div>
     <button id="modal-msg-btn" onclick="confirmarEnvioMensagem()" style="width:100%;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;padding:13px;cursor:pointer;">Enviar mensagem</button>
@@ -574,7 +574,8 @@
     const statusMap = {
       pendente:   { label: '📋 Em análise',           cls: 'status-pendente'  },
       andamento:  { label: '✅ Aprovado para explorar', cls: 'status-andamento' },
-      match:      { label: '💚 Match encontrado',      cls: 'status-match'     }
+      match:      { label: '💚 Match encontrado',      cls: 'status-match'     },
+      suspenso:   { label: '🚫 Conta suspensa',        cls: 'status-pendente'  }
     };
     const s = statusMap[dados.status] || statusMap['pendente'];
     const badge = document.getElementById('status-badge');
@@ -970,7 +971,7 @@
         '<div style="max-width:80%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;' +
           (deFamilia ? 'background:#3a4e2a;color:#c8d8a0;border-bottom-right-radius:4px;' : 'background:#f0f2ec;color:#2d2d2d;border-bottom-left-radius:4px;') + '">' +
           '<div style="font-size:10px;font-weight:700;margin-bottom:4px;opacity:0.7;">' + (deFamilia ? 'Você' : abreviarNome(c.cuidadorNome)) + '</div>' +
-          m.texto +
+          (m.deletadaPorAdmin ? '<em style="color:#aaa;font-size:12px;">⚠️ Mensagem removida pelo administrador.</em>' : m.texto) +
         '</div>' +
       '</div>';
     }).join('');
@@ -1269,7 +1270,8 @@
   var STATUS_TOOLTIP_FAMILIA = {
     pendente:  'Seu cadastro foi recebido. Estamos buscando cuidadores compatíveis com o perfil do seu familiar.',
     andamento: 'Já temos sugestões de cuidadores para você. Explore os perfis e demonstre interesse nos que gostar.',
-    match:     'Um match foi encontrado! Aguarde a liberação do contato pelo administrador.'
+    match:     'Um match foi encontrado! Aguarde a liberação do contato pelo administrador.',
+    suspenso:  'Sua conta foi suspensa. Entre em contato com o administrador para mais informações.'
   };
 
   function toggleTooltipStatus() {
