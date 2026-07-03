@@ -494,8 +494,11 @@
 
 <header>
   <a href="/" class="logo">🤍 KINDER</a>
-  <div class="header-user">
-    <span class="header-nome" id="header-nome"></span>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div id="badge-msgs" onclick="irParaMensagens()" style="display:none;position:relative;cursor:pointer;">
+      <span style="font-size:20px;">📬</span>
+      <span id="badge-count" style="position:absolute;top:-4px;right:-6px;background:#c0392b;color:white;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 3px;"></span>
+    </div>
     <button class="btn-sair" onclick="sair()">Sair</button>
   </div>
 </header>
@@ -509,17 +512,35 @@
     <div class="status-info">
       <div class="status-label">Bem-vindo(a) de volta</div>
       <div class="status-nome" id="status-nome">—</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div id="toggle-disponivel" style="display:none;align-items:center;gap:8px;">
-        <span style="font-size:13px;color:#888;" id="label-disponivel">Disponível</span>
-        <div onclick="toggleDisponibilidade()" id="toggle-btn"
-          style="width:44px;height:24px;border-radius:99px;cursor:pointer;position:relative;transition:background 0.2s;">
-          <div style="width:18px;height:18px;background:white;border-radius:50%;position:absolute;top:3px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);" id="toggle-knob"></div>
+      <div style="margin-top:10px;">
+        <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Status do perfil</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="status-badge" id="status-badge">—</div>
+          <span id="status-info-btn" onclick="toggleTooltipStatus()" style="font-size:14px;color:#bbb;cursor:pointer;user-select:none;" title="Saiba mais">ⓘ</span>
+        </div>
+        <div id="status-tooltip" style="display:none;margin-top:8px;background:#f7f7f7;border:1px solid #e8e8e8;border-radius:10px;padding:12px 14px;font-size:12px;color:#555;line-height:1.7;">
+          <div id="status-tooltip-texto"></div>
         </div>
       </div>
-      <div class="status-badge" id="status-badge">—</div>
     </div>
+  </div>
+
+  <!-- DISPONIBILIDADE -->
+  <div id="toggle-disponivel" style="display:none;background:white;border-radius:12px;padding:16px 20px;margin-bottom:20px;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Disponibilidade</div>
+      <span style="font-size:13px;color:#888;" id="label-disponivel">—</span>
+    </div>
+    <div onclick="toggleDisponibilidade()" id="toggle-btn"
+      style="width:44px;height:24px;border-radius:99px;cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;">
+      <div style="width:18px;height:18px;background:white;border-radius:50%;position:absolute;top:3px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);" id="toggle-knob"></div>
+    </div>
+  </div>
+
+  <!-- CARD PREVIEW -->
+  <div style="margin-bottom:16px;">
+    <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">👁️ Como você aparece para as famílias</div>
+    <div id="card-preview-wrapper" style="display:flex;justify-content:center;"></div>
   </div>
 
   <!-- PROGRESSO -->
@@ -531,22 +552,6 @@
     <div class="prog-barra">
       <div class="prog-fill" id="prog-fill" style="width:0%"></div>
     </div>
-  </div>
-
-  <!-- VITRINE -->
-  <a href="./vitrine.html" style="display:block;text-decoration:none;margin-bottom:16px;">
-    <div style="background:linear-gradient(135deg,#3a4e2a,#6b7c52);border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;transition:opacity 0.2s;" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
-      <div>
-        <div style="font-size:15px;font-weight:700;color:#c8d8a0;margin-bottom:4px;">👁️ Como apareço para as famílias</div>
-        <div style="font-size:13px;color:#a8c070;">Veja seu perfil ao lado de outros cuidadores</div>
-      </div>
-      <div style="font-size:22px;color:#c8d8a0;">→</div>
-    </div>
-  </a>
-
-  <!-- AVISO CERTIDÃO -->
-  <div style="background:#fff8e8;border:1.5px solid #f0d080;border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#7a5a10;line-height:1.6;">
-    📋 <strong>Atenção:</strong> para aprovação você precisará de uma <strong>Certidão de Antecedentes Criminais</strong> válida por 30 dias, do estado onde reside. Providencie com antecedência — em SP é gratuita pelo <a href="https://www.poupatempo.sp.gov.br" target="_blank" style="color:#7a5a10;font-weight:700;">Poupatempo</a>.
   </div>
 
   <!-- SEÇÃO: PERFIL PROFISSIONAL -->
@@ -640,6 +645,10 @@
       <div class="campo">
         <label>Não se sente preparado(a) para <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
         <input type="text" id="p-limite" placeholder="Ex: pacientes acamados, PCR...">
+      </div>
+
+      <div style="background:#fff8e8;border:1.5px solid #f0d080;border-radius:10px;padding:14px 16px;margin-top:20px;font-size:13px;color:#7a5a10;line-height:1.6;">
+        📋 <strong>Atenção:</strong> para aprovação você precisará de uma <strong>Certidão de Antecedentes Criminais</strong> válida por 30 dias, do estado onde reside. Providencie com antecedência e envie na seção <strong>Documentos</strong> abaixo — em SP é gratuita pelo <a href="https://www.poupatempo.sp.gov.br" target="_blank" style="color:#7a5a10;font-weight:700;">Poupatempo</a>.
       </div>
 
       <button class="btn-salvar" onclick="salvarSecao('profissional')">Salvar perfil profissional</button>
@@ -786,6 +795,19 @@
     </div>
   </div>
 
+  <!-- SEÇÃO: MENSAGENS -->
+  <div class="secao" id="sec-mensagens">
+    <div class="secao-header" onclick="toggleSecao('sec-mensagens')">
+      <div class="secao-titulo"><span class="secao-icone">📬</span> Mensagens <span id="badge-msgs-secao" style="display:none;background:#c0392b;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-left:6px;"></span></div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div id="msgs-lista" style="margin-top:8px;">
+        <div style="text-align:center;padding:24px;color:#bbb;font-size:13px;">Nenhuma mensagem ainda.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- SEÇÃO: CONTA -->
   <div class="secao" id="sec-conta">
     <div class="secao-header" onclick="toggleSecao('sec-conta')">
@@ -832,12 +854,39 @@
   </div>
 </div>
 
+<!-- MODAL PERFIL PROFISSIONAL -->
+<div id="modal-perfil" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;">
+  <div style="background:white;border-radius:16px;padding:28px 24px;max-width:480px;width:100%;position:relative;">
+    <button onclick="fecharModalPerfil()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;">✕</button>
+    <h3 style="font-size:16px;font-weight:700;color:#2d2d2d;margin-bottom:20px;">🧑‍⚕️ Perfil profissional</h3>
+    <div id="modal-perfil-corpo"></div>
+  </div>
+</div>
+
+<!-- Modal conversa -->
+<div id="modal-conversa" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center;padding:0;">
+  <div style="background:white;border-radius:16px 16px 0 0;padding:24px 20px 32px;max-width:480px;width:100%;max-height:80vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#2d2d2d;" id="conv-nome"></div>
+        <div style="font-size:11px;color:#aaa;" id="conv-sub"></div>
+      </div>
+      <button onclick="fecharModalConversa()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;">✕</button>
+    </div>
+    <div id="conv-msgs" style="flex:1;overflow-y:auto;margin-bottom:16px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="conv-input" placeholder="Responder..." style="flex:1;padding:10px 12px;border:1.5px solid #e8e8e8;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;outline:none;">
+      <button onclick="enviarResposta()" style="padding:10px 16px;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Enviar</button>
+    </div>
+  </div>
+</div>
+
 <!-- FIREBASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { getAuth, signOut, onAuthStateChanged, deleteUser, updatePassword }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc }
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, orderBy, getDocs }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
   import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
@@ -895,6 +944,7 @@
         return;
       }
 
+      window._dadosFirestore = dadosFirestore;
       carregarUI(user, dadosFirestore);
 
     } catch (e) {
@@ -909,8 +959,6 @@
   });
 
   function carregarUI(user, dados) {
-    // Header
-    document.getElementById('header-nome').textContent = dados.nome || user.email;
 
     // Status
     document.getElementById('status-nome').textContent = dados.nome || 'Cuidador(a)';
@@ -923,6 +971,7 @@
     const badge = document.getElementById('status-badge');
     badge.textContent = s.label;
     badge.className = 'status-badge ' + s.cls;
+    document.getElementById('status-tooltip-texto').textContent = STATUS_TOOLTIP[dados.status] || STATUS_TOOLTIP['pendente'];
 
     // Toggle disponibilidade (só pra aprovados)
     if (dados.status === 'aprovado') {
@@ -977,74 +1026,179 @@
     }
 
     atualizarProgresso();
+    renderCardPreview(dados);
+    carregarMensagens(user.uid);
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('container').style.display = 'block';
   }
 
-  // ── VITRINE ────────────────────────────────────────
-  var FICTICIOS = [
-    { nome: 'Ana Paula S.',    cidade: 'São Paulo', estilo: 'comunicativa', experiencia: ['alzheimer','parkinson'], cozinha: 'sim',   foto: '👩' },
-    { nome: 'Rosana M.',       cidade: 'São Paulo', estilo: 'tranquila',    experiencia: ['acamados'],              cozinha: 'básico', foto: '👩‍🦱' },
-    { nome: 'Claudete F.',     cidade: 'São Paulo', estilo: 'adapto',       experiencia: ['avc','paliativos'],      cozinha: 'sim',   foto: '👩‍🦳' },
-    { nome: 'Márcia T.',       cidade: 'São Paulo', estilo: 'comunicativa', experiencia: ['alzheimer'],             cozinha: 'não',   foto: '🧑‍⚕️' },
-    { nome: 'Silvia R.',       cidade: 'São Paulo', estilo: 'adapto',       experiencia: ['parkinson','acamados'],  cozinha: 'sim',   foto: '👩‍🦰' },
-  ];
+  // ── MENSAGENS ──────────────────────────────────────
+  async function carregarMensagens(uid) {
+    const q = query(
+      collection(db, 'mensagens'),
+      where('cuidadorId', '==', uid),
+      orderBy('criadaEm', 'asc')
+    );
+    const snap = await getDocs(q);
+    if (snap.empty) return;
 
-  function renderVitrine(dados) {
+    // Agrupa por família
+    var conversas = {};
+    snap.forEach(function(d) {
+      var m = d.data();
+      m.id = d.id;
+      var fid = m.familiaId;
+      if (!conversas[fid]) conversas[fid] = { familiaNome: m.familiaNome, msgs: [], naoLidas: 0 };
+      conversas[fid].msgs.push(m);
+      if (!m.lida && m.de === 'familia') conversas[fid].naoLidas++;
+    });
+
+    var totalNaoLidas = Object.values(conversas).reduce(function(acc, c) { return acc + c.naoLidas; }, 0);
+
+    // Badge header
+    if (totalNaoLidas > 0) {
+      document.getElementById('badge-msgs').style.display = 'block';
+      document.getElementById('badge-count').textContent = totalNaoLidas;
+      document.getElementById('badge-msgs-secao').style.display = 'inline';
+      document.getElementById('badge-msgs-secao').textContent = totalNaoLidas;
+    }
+
+    // Salva conversas globalmente para o modal acessar
+    window._conversas = conversas;
+
+    // Renderiza lista estilo inbox
+    var abrevNome = function(n) { if (!n) return '—'; var p = n.trim().split(/\s+/); return p.length <= 1 ? p[0] : p[0] + ' ' + p[p.length-1][0] + '.'; };
+    var html = Object.entries(conversas).map(function(entry) {
+      var fid = entry[0], c = entry[1];
+      var ultima = c.msgs[c.msgs.length - 1];
+      var preview = ultima ? (ultima.de === 'familia' ? ultima.texto : 'Você: ' + ultima.texto) : '';
+      if (preview.length > 50) preview = preview.substring(0, 50) + '…';
+      return '<div onclick="abrirConversa(\'' + fid + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fafafa;border-radius:12px;margin-bottom:8px;cursor:pointer;border:1.5px solid #f0f0f0;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:700;color:#2d2d2d;margin-bottom:3px;display:flex;align-items:center;gap:8px;">' +
+            abrevNome(c.familiaNome) +
+            (c.naoLidas ? '<span style="background:#c0392b;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;">' + c.naoLidas + ' nova' + (c.naoLidas > 1 ? 's' : '') + '</span>' : '') +
+          '</div>' +
+          '<div style="font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + preview + '</div>' +
+        '</div>' +
+        '<span style="font-size:16px;color:#ccc;margin-left:12px;">›</span>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('msgs-lista').innerHTML = html || '<div style="text-align:center;padding:24px;color:#bbb;font-size:13px;">Nenhuma mensagem ainda.</div>';
+  }
+
+  var _convAberta = null;
+
+  window.abrirConversa = function(familiaId) {
+    var c = window._conversas[familiaId];
+    if (!c) return;
+    _convAberta = { familiaId: familiaId, familiaNome: c.familiaNome };
+    var abrev = function(n) { if (!n) return '—'; var p = n.trim().split(/\s+/); return p.length <= 1 ? p[0] : p[0] + ' ' + p[p.length-1][0] + '.'; };
+    document.getElementById('conv-nome').textContent = abrev(c.familiaNome);
+    document.getElementById('conv-sub').textContent = c.msgs.length + ' mensagem' + (c.msgs.length !== 1 ? 's' : '');
+    document.getElementById('conv-input').value = '';
+
+    // Marca como lida todas as msgs da família nesta conversa
+    c.msgs.filter(function(m) { return m.de === 'familia' && !m.lida; }).forEach(async function(m) {
+      try { await updateDoc(doc(db, 'mensagens', m.id), { lida: true }); m.lida = true; } catch(e) {}
+    });
+    c.naoLidas = 0;
+
+    var msgsHtml = c.msgs.map(function(m) {
+      var deFamilia = m.de === 'familia';
+      return '<div style="display:flex;justify-content:' + (deFamilia ? 'flex-start' : 'flex-end') + ';">' +
+        '<div style="max-width:80%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;' +
+          (deFamilia ? 'background:#f0f2ec;color:#2d2d2d;border-bottom-left-radius:4px;' : 'background:#3a4e2a;color:#c8d8a0;border-bottom-right-radius:4px;') + '">' +
+          '<div style="font-size:10px;font-weight:700;margin-bottom:4px;opacity:0.7;">' + (deFamilia ? abrev(c.familiaNome) : 'Você') + '</div>' +
+          m.texto +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('conv-msgs').innerHTML = msgsHtml;
+    document.getElementById('modal-conversa').style.display = 'flex';
+  };
+
+  window.fecharModalConversa = function() {
+    document.getElementById('modal-conversa').style.display = 'none';
+    _convAberta = null;
+  };
+
+  window.enviarResposta = async function() {
+    if (!_convAberta) return;
+    var input = document.getElementById('conv-input');
+    var texto = input.value.trim();
+    if (!texto) return;
+    input.disabled = true;
+    try {
+      await setDoc(doc(collection(db, 'mensagens')), {
+        familiaId:   _convAberta.familiaId,
+        familiaNome: _convAberta.familiaNome,
+        cuidadorId:  currentUser.uid,
+        texto:       texto,
+        de:          'cuidadora',
+        lida:        false,
+        criadaEm:    new Date().toISOString()
+      });
+      input.value = '';
+      fecharModalConversa();
+      await carregarMensagens(currentUser.uid);
+    } catch(e) {
+      console.error(e);
+    }
+    input.disabled = false;
+  };
+
+  window.irParaMensagens = function() {
+    var sec = document.getElementById('sec-mensagens');
+    sec.classList.add('aberta');
+    sec.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // ── CARD PREVIEW ───────────────────────────────────
+  function renderCardPreview(dados) {
     var p    = dados.perfil || {};
     var nome = dados.nome || '';
-    var scroll = document.getElementById('vitrine-scroll');
+    var primeiroNome = nome.split(' ')[0] || 'Você';
+    var sobrenome = nome.split(' ').slice(1,2).join('');
+    var nomeExibido = sobrenome ? primeiroNome + ' ' + sobrenome[0] + '.' : primeiroNome;
+    var cidade = p.cidade || '';
+    var exps = Array.isArray(p.experiencia) ? p.experiencia : [];
+    var tagList = [];
+    if (cidade) tagList.push('📍 ' + cidade);
+    if (exps.length) exps.forEach(function(e) { if (e) tagList.push(e); });
+    var modalidade = Array.isArray(p.modalidade) ? p.modalidade : [];
+    modalidade.forEach(function(m) { if (m) tagList.push(m); });
+    if (p.cuidados) tagList.push(p.cuidados);
+    if (p.rotina) tagList.push('Rotina: ' + p.rotina);
+    if (p.estilo) tagList.push(p.estilo);
+    if (p.cozinha === 'sim') tagList.push('🍳 Cozinha');
+    if (p.restricao && p.restricao !== 'nenhuma') tagList.push('⚠ ' + p.restricao);
 
-    function cardFicticio(c) {
-      var tags = (c.experiencia || []).slice(0,2).map(function(e) {
-        return '<span class="cv-tag">' + e + '</span>';
-      }).join('');
-      if (c.cozinha === 'sim') tags += '<span class="cv-tag">🍳 cozinha</span>';
-      return '<div class="card-vitrine desbotado">' +
-        '<div class="cv-foto">' + c.foto + '</div>' +
-        '<div class="cv-nome">' + c.nome + '</div>' +
-        '<div class="cv-cidade">📍 ' + c.cidade + '</div>' +
-        '<div class="cv-tags">' + tags + '</div>' +
+    var tags = tagList.length
+      ? tagList.map(function(t) { return '<span style="font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;background:#eef3e8;color:#3a4e2a;">' + t + '</span>'; }).join('')
+      : '<span style="font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;background:#f5f5f5;color:#ccc;font-style:italic;">complete o perfil</span>';
+
+    var pronto = cidade && exps.length;
+    var fotoHtml = p.fotoUrl
+      ? '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
+      : '<span style="font-size:28px;">👤</span>';
+
+    document.getElementById('card-preview-wrapper').innerHTML =
+      '<div style="width:100%;background:white;border:2px solid #3a4e2a;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 16px rgba(58,78,42,0.12);">' +
+        '<div style="width:72px;height:72px;border-radius:50%;background:#e8e8e8;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;">' + fotoHtml + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:15px;font-weight:700;color:#2d2d2d;margin-bottom:2px;">' + (nomeExibido || '—') + '</div>' +
+          '<div style="font-size:12px;color:#aaa;margin-bottom:8px;">' + (cidade ? '📍 ' + cidade : '<span style="color:#ddd;">📍 cidade não informada</span>') + '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#3a4e2a;margin-bottom:10px;">100% compatível <span style="font-size:11px;font-weight:400;color:#aaa;">(exemplo)</span></div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+            '<button onclick="abrirModalPerfil()" style="font-size:12px;font-weight:700;padding:6px 14px;border-radius:99px;background:#f0f2ec;color:#6b7c52;border:1.5px solid #c8d8a0;cursor:pointer;font-family:Nunito,sans-serif;white-space:nowrap;">👁️ Ver perfil</button>' +
+            '<button title="Disponível para a família após aprovação do interesse pelo administrador" style="font-size:12px;font-weight:700;padding:6px 14px;border-radius:99px;background:#f5f5f5;color:#bbb;border:1.5px solid #e8e8e8;cursor:not-allowed;font-family:Nunito,sans-serif;white-space:nowrap;">💬 Entrar em contato</button>' +
+          '</div>' +
+        '</div>' +
       '</div>';
-    }
-
-    function cardUsuario() {
-      var primeiroNome = nome.split(' ')[0] || 'Você';
-      var cidade = p.cidade || '';
-      var exps = Array.isArray(p.experiencia) ? p.experiencia : [];
-      var tags = exps.length
-        ? exps.slice(0,2).map(function(e) { return '<span class="cv-tag">' + e + '</span>'; }).join('')
-        : '<span class="cv-tag vazio">sem experiência</span>';
-      if (p.cozinha === 'sim') tags += '<span class="cv-tag">🍳 cozinha</span>';
-      if (p.estilo) tags += '<span class="cv-tag">' + p.estilo + '</span>';
-
-      var fotoHtml = p.fotoUrl
-        ? '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;">'
-        : '👤';
-      return '<div class="card-vitrine destaque" style="position:relative;">' +
-        '<div class="badge-voce">✦ VOCÊ</div>' +
-        '<div class="cv-foto">' + fotoHtml + '</div>' +
-        '<div class="cv-nome">' + (primeiroNome || '—') + '</div>' +
-        '<div class="cv-cidade">' + (cidade ? '📍 ' + cidade : '<span style="color:#ddd">📍 cidade</span>') + '</div>' +
-        '<div class="cv-tags">' + tags + '</div>' +
-        '<div class="cv-status">' + (cidade && exps.length ? '✓ Pronto para match' : 'Complete o perfil') + '</div>' +
-      '</div>';
-    }
-
-    // Monta: 2 fictícios, VOCÊ, 3 fictícios
-    var html = FICTICIOS.slice(0,2).map(cardFicticio).join('') +
-               cardUsuario() +
-               FICTICIOS.slice(2).map(cardFicticio).join('');
-    scroll.innerHTML = html;
-
-    // Centraliza no card "você"
-    setTimeout(function() {
-      var destaque = scroll.querySelector('.destaque');
-      if (destaque) {
-        scroll.scrollLeft = destaque.offsetLeft - scroll.offsetWidth / 2 + destaque.offsetWidth / 2;
-      }
-    }, 100);
   }
 
   // ── VALIDAÇÕES ─────────────────────────────────────
@@ -1112,7 +1266,6 @@
           'perfil.estado':      document.getElementById('p-estado').value.trim(),
         };
         document.getElementById('status-nome').textContent = nome;
-        document.getElementById('header-nome').textContent = nome;
       } else {
         update = {
           'perfil.estilo':      getOpcaoSelecionada('opc-estilo'),
@@ -1347,6 +1500,47 @@
 </script>
 
 <script>
+  var STATUS_TOOLTIP = {
+    pendente:  'Seu cadastro foi recebido e está na fila de verificação. Em breve um administrador irá analisá-lo.',
+    analise:   'Seu perfil está sendo analisado pelo administrador. Você será notificado assim que houver uma decisão.',
+    aprovado:  'Seu perfil foi aprovado! Você já pode receber propostas de famílias compatíveis.',
+    suspenso:  'Seu perfil está temporariamente suspenso. Entre em contato com o Kinder para mais informações.',
+    excluido:  'Sua conta foi encerrada.'
+  };
+
+  window.toggleTooltipStatus = function() {
+    var tooltip = document.getElementById('status-tooltip');
+    tooltip.style.display = tooltip.style.display === 'none' ? 'block' : 'none';
+  };
+
+  function abrirModalPerfil() {
+    var p = (window._dadosFirestore && window._dadosFirestore.perfil) || {};
+    var linhas = [
+      { label: 'Estilo de trabalho',         val: p.estilo },
+      { label: 'Resistência a desafios',      val: p.resistente },
+      { label: 'Rotina',                      val: p.rotina },
+      { label: 'Experiência',                 val: Array.isArray(p.experiencia) ? p.experiencia.join(', ') : p.experiencia },
+      { label: 'Cuidados físicos',            val: p.cuidados },
+      { label: 'Cozinha',                     val: p.cozinha },
+      { label: 'Modalidade',                  val: Array.isArray(p.modalidade) ? p.modalidade.join(', ') : p.modalidade },
+      { label: 'Restrição de ambiente',       val: p.restricao },
+      { label: 'Não se sente preparado(a) para', val: p.limite },
+    ];
+    var html = linhas.filter(function(l) { return l.val; }).map(function(l) {
+      return '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">' + l.label + '</div>' +
+        '<div style="font-size:14px;color:#2d2d2d;">' + l.val + '</div>' +
+      '</div>';
+    }).join('');
+    if (!html) html = '<p style="font-size:13px;color:#aaa;">Perfil profissional ainda não preenchido.</p>';
+    document.getElementById('modal-perfil-corpo').innerHTML = html;
+    document.getElementById('modal-perfil').style.display = 'flex';
+  }
+
+  function fecharModalPerfil() {
+    document.getElementById('modal-perfil').style.display = 'none';
+  }
+
   function abrirModalExclusao() {
     document.getElementById('modal-exclusao').style.display = 'flex';
   }
@@ -1410,15 +1604,13 @@
 
   // Experiência: "sem experiência" é exclusivo (não combina com outros)
   function toggleMultiExperiencia(btn) {
-    const semExp = 'sem experiência';
-    if (btn.textContent.trim() === semExp) {
-      // Se clicar em "sem experiência", desmarca todos os outros
+    const isNenhum = btn.textContent.trim() === 'nenhum';
+    if (isNenhum) {
       document.querySelectorAll('#opc-experiencia .opcao-btn').forEach(b => b.classList.remove('selecionado'));
       btn.classList.add('selecionado');
     } else {
-      // Se clicar em outra opção, desmarca "sem experiência"
       document.querySelectorAll('#opc-experiencia .opcao-btn').forEach(b => {
-        if (b.textContent.trim() === semExp) b.classList.remove('selecionado');
+        if (b.textContent.trim() === 'nenhum') b.classList.remove('selecionado');
       });
       btn.classList.toggle('selecionado');
     }

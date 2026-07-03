@@ -32,7 +32,44 @@
 
     .loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; font-size: 14px; color: #888; }
 
-    .container { max-width: 720px; margin: 0 auto; padding: 28px 16px 60px; display: none; }
+    .container { max-width: 720px; margin: 0 auto; padding: 28px 16px 90px; display: none; }
+
+    /* BARRA INFERIOR */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 1px solid #e8e8e8;
+      display: none;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      z-index: 100;
+    }
+    .bottom-nav.visivel { display: flex; }
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 6px 24px;
+      border-radius: 10px;
+      border: none;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.15s;
+    }
+    .nav-btn:hover { background: #f5f5f5; }
+    .nav-btn .nav-icone { font-size: 22px; }
+    .nav-btn .nav-label { font-size: 11px; font-weight: 700; color: #aaa; }
+    .nav-btn.ativo .nav-label { color: #3a4e2a; }
+
+    /* TELAS */
+    .tela { display: none; }
+    .tela.ativa { display: block; }
 
     .status-bar { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .status-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
@@ -107,57 +144,54 @@
 
 <header>
   <a href="../index.html" class="logo">🤍 KINDER</a>
-  <div class="header-user">
-    <span class="header-nome" id="header-nome"></span>
-    <button class="btn-sair" onclick="sair()">Sair</button>
-  </div>
+  <button class="btn-sair" onclick="sair()">Sair</button>
 </header>
 
 <div class="loading" id="loading">Carregando sua área...</div>
 
 <div class="container" id="container">
 
-  <!-- STATUS -->
-  <div class="status-bar">
-    <div>
-      <div class="status-label">Bem-vindo(a) de volta</div>
-      <div class="status-nome" id="status-nome">—</div>
+  <!-- TELA: EXPLORAR -->
+  <div class="tela ativa" id="tela-explorar">
+
+    <!-- CUIDADORES SUGERIDOS -->
+    <div id="lista-sugeridos">
+      <div class="vazio-msg">Ainda não há sugestões.<br>Entraremos em contato em breve com perfis compatíveis.</div>
     </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div id="toggle-disponivel" style="display:none;align-items:center;gap:8px;">
-        <span style="font-size:13px;color:#888;" id="label-disponivel">Disponível</span>
-        <div onclick="toggleDisponibilidade()" id="toggle-btn"
-          style="width:44px;height:24px;border-radius:99px;cursor:pointer;position:relative;transition:background 0.2s;">
-          <div style="width:18px;height:18px;background:white;border-radius:50%;position:absolute;top:3px;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);" id="toggle-knob"></div>
+
+  </div>
+
+  <!-- TELA: PERFIL -->
+  <div class="tela" id="tela-perfil">
+
+    <!-- STATUS -->
+    <div class="status-bar">
+      <div class="status-info">
+        <div class="status-label">Bem-vindo(a) de volta</div>
+        <div class="status-nome" id="status-nome">—</div>
+        <div style="margin-top:10px;">
+          <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Status do perfil</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="status-badge" id="status-badge">—</div>
+            <span onclick="toggleTooltipStatus()" style="font-size:14px;color:#bbb;cursor:pointer;user-select:none;">ⓘ</span>
+          </div>
+          <div id="status-tooltip" style="display:none;margin-top:8px;background:#f7f7f7;border:1px solid #e8e8e8;border-radius:10px;padding:12px 14px;font-size:12px;color:#555;line-height:1.7;">
+            <div id="status-tooltip-texto"></div>
+          </div>
         </div>
       </div>
-      <div class="status-badge" id="status-badge">—</div>
     </div>
-  </div>
 
-  <!-- PROGRESSO -->
-  <div class="progresso-box">
-    <div class="prog-header">
-      <span class="prog-label">Completude do perfil</span>
-      <span class="prog-pct" id="prog-pct">0%</span>
-    </div>
-    <div class="prog-barra">
-      <div class="prog-fill" id="prog-fill" style="width:0%"></div>
-    </div>
-  </div>
-
-  <!-- CUIDADORES SUGERIDOS -->
-  <div class="secao aberta" id="sec-sugeridos">
-    <div class="secao-header" onclick="toggleSecao('sec-sugeridos')">
-      <div class="secao-titulo"><span class="secao-icone">🤝</span> Cuidadores sugeridos</div>
-      <span class="secao-chevron">▼</span>
-    </div>
-    <div class="secao-corpo">
-      <div id="lista-sugeridos">
-        <div class="vazio-msg">Ainda não há sugestões.<br>Entraremos em contato em breve com perfis compatíveis.</div>
+    <!-- PROGRESSO -->
+    <div class="progresso-box" style="margin-top:0;">
+      <div class="prog-header">
+        <span class="prog-label">Completude do perfil</span>
+        <span class="prog-pct" id="prog-pct">0%</span>
+      </div>
+      <div class="prog-barra">
+        <div class="prog-fill" id="prog-fill" style="width:0%"></div>
       </div>
     </div>
-  </div>
 
   <!-- DADOS DO RESPONSÁVEL -->
   <div class="secao aberta" id="sec-responsavel">
@@ -405,13 +439,79 @@
     </div>
   </div>
 
+  <!-- SEÇÃO MENSAGENS -->
+  <div class="secao" id="sec-msgs-familia">
+    <div class="secao-header" onclick="toggleSecao('sec-msgs-familia')">
+      <div class="secao-titulo"><span class="secao-icone">📬</span> Mensagens <span id="badge-msgs-familia" style="display:none;background:#c0392b;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-left:6px;"></span></div>
+      <span class="secao-chevron">▼</span>
+    </div>
+    <div class="secao-corpo">
+      <div id="msgs-lista-familia" style="margin-top:8px;">
+        <div style="text-align:center;padding:24px;color:#bbb;font-size:13px;">Nenhuma mensagem ainda.</div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tela-perfil -->
+
+</div><!-- /container -->
+
+<!-- BARRA INFERIOR -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn" id="nav-perfil" onclick="mudarTela('perfil')">
+    <span class="nav-icone">👤</span>
+    <span class="nav-label">Meu perfil</span>
+  </button>
+  <button class="nav-btn ativo" id="nav-explorar" onclick="mudarTela('explorar')">
+    <span class="nav-icone">🔍</span>
+    <span class="nav-label">Explorar</span>
+  </button>
+</nav>
+
+<!-- MODAL PERFIL CUIDADORA -->
+<div id="modal-cuidadora" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;">
+  <div style="background:white;border-radius:16px;padding:28px 24px;max-width:480px;width:100%;position:relative;">
+    <button onclick="fecharModalCuidadora()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;">✕</button>
+    <h3 style="font-size:16px;font-weight:700;color:#2d2d2d;margin-bottom:20px;">🧑‍⚕️ Perfil profissional</h3>
+    <div id="modal-cuidadora-corpo"></div>
+  </div>
+</div>
+
+<!-- Modal conversa família -->
+<div id="modal-conversa-familia" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center;padding:0;">
+  <div style="background:white;border-radius:16px 16px 0 0;padding:24px 20px 32px;max-width:480px;width:100%;max-height:80vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#2d2d2d;" id="conv-fam-nome"></div>
+        <div style="font-size:11px;color:#aaa;" id="conv-fam-sub"></div>
+      </div>
+      <button onclick="fecharConversaFamilia()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;">✕</button>
+    </div>
+    <div id="conv-fam-msgs" style="flex:1;overflow-y:auto;margin-bottom:16px;display:flex;flex-direction:column;gap:8px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="conv-fam-input" placeholder="Responder..." maxlength="300" style="flex:1;padding:10px 12px;border:1.5px solid #e8e8e8;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;outline:none;">
+      <button onclick="enviarRespostaFamilia()" style="padding:10px 16px;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal mensagem para cuidadora -->
+<div id="modal-mensagem" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:24px 16px;">
+  <div style="background:white;border-radius:16px;padding:28px 24px;max-width:480px;width:100%;position:relative;">
+    <button onclick="fecharModalMensagem()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;">✕</button>
+    <h3 style="font-size:16px;font-weight:700;color:#2d2d2d;margin-bottom:6px;">💬 Mensagem para <span id="modal-msg-nome"></span></h3>
+    <p style="font-size:12px;color:#aaa;margin-bottom:16px;">A cuidadora poderá responder antes do match ser aprovado.</p>
+    <textarea id="modal-msg-texto" maxlength="300" placeholder="Escreva sua mensagem..." style="width:100%;height:120px;padding:12px 14px;border:1.5px solid #e8e8e8;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;color:#2d2d2d;outline:none;resize:none;background:#fafafa;" oninput="atualizarContadorMsg()"></textarea>
+    <div style="text-align:right;font-size:11px;color:#bbb;margin-top:4px;margin-bottom:16px;"><span id="modal-msg-contador">0</span>/300</div>
+    <button id="modal-msg-btn" onclick="confirmarEnvioMensagem()" style="width:100%;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;padding:13px;cursor:pointer;">Enviar mensagem</button>
+  </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import { getAuth, signOut, onAuthStateChanged, deleteUser, updatePassword }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs, addDoc }
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, where, orderBy, getDocs, addDoc }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -455,6 +555,7 @@
       await carregarInteresses(user.uid);
       carregarUI(user, dadosFS);
       carregarSugeridos(user.uid);
+      carregarMensagensFamilia(user.uid);
     } catch(e) {
       console.error(e);
       document.getElementById('loading').innerHTML =
@@ -467,19 +568,19 @@
   });
 
   function carregarUI(user, dados) {
-    document.getElementById('header-nome').textContent = dados.nome || user.email;
     document.getElementById('status-nome').textContent = dados.nome || 'Família';
     document.getElementById('p-email').value = user.email;
 
     const statusMap = {
-      pendente:   { label: '⏳ Aguardando match',   cls: 'status-pendente'  },
-      andamento:  { label: '🔍 Match em andamento', cls: 'status-andamento' },
-      match:      { label: '✅ Match encontrado',   cls: 'status-match'     }
+      pendente:   { label: '📋 Em análise',           cls: 'status-pendente'  },
+      andamento:  { label: '✅ Aprovado para explorar', cls: 'status-andamento' },
+      match:      { label: '💚 Match encontrado',      cls: 'status-match'     }
     };
     const s = statusMap[dados.status] || statusMap['pendente'];
     const badge = document.getElementById('status-badge');
     badge.textContent = s.label;
     badge.className = 'status-badge ' + s.cls;
+    document.getElementById('status-tooltip-texto').textContent = STATUS_TOOLTIP_FAMILIA[dados.status] || STATUS_TOOLTIP_FAMILIA['pendente'];
 
     if (dados.status === 'match') {
       const toggle = document.getElementById('toggle-disponivel');
@@ -516,6 +617,17 @@
 
     document.getElementById('loading').style.display = 'none';
     document.getElementById('container').style.display = 'block';
+    document.getElementById('bottom-nav').classList.add('visivel');
+
+    const isPendente = !dados.status || dados.status === 'pendente';
+    const btnExplorar = document.getElementById('nav-explorar');
+    if (isPendente) {
+      mudarTela('perfil');
+      btnExplorar.disabled = true;
+      btnExplorar.title = 'Complete seu perfil e aguarde a aprovação para explorar cuidadoras.';
+      btnExplorar.style.opacity = '0.4';
+      btnExplorar.style.cursor = 'not-allowed';
+    }
   }
 
   window.salvar = async function(secao) {
@@ -533,7 +645,6 @@
           'perfil.whatsapp': document.getElementById('p-whatsapp').value.trim(),
         };
         document.getElementById('status-nome').textContent = nome;
-        document.getElementById('header-nome').textContent = nome;
       } else if (secao === 'familiar') {
         update = {
           'perfil.nome_idoso':  document.getElementById('p-nome-idoso').value.trim(),
@@ -669,58 +780,49 @@
 
   function renderCardCuidadora(c, verTodos) {
     var rejeitados = verTodos ? [] : getRejeitados();
-    var total  = sugestoesList.length;
-    var visto  = rejeitados.length;
-    var progresso = total > 1
-      ? '<div style="font-size:11px;color:#bbb;margin-bottom:12px;">' + (visto + 1) + ' de ' + total + ' perfis</div>'
-      : '';
+    var total = sugestoesList.length;
+    var visto = rejeitados.length;
 
     var fotoEl = c.fotoUrl
-      ? '<img src="' + c.fotoUrl + '" style="width:104px;height:104px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
-      : '<div style="width:104px;height:104px;border-radius:50%;background:#e8edd8;display:flex;align-items:center;justify-content:center;font-size:48px;flex-shrink:0;">🧑‍⚕️</div>';
+      ? '<img src="' + c.fotoUrl + '" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid #c8d8a0;">'
+      : '<div style="width:120px;height:120px;border-radius:50%;background:#e8edd8;display:flex;align-items:center;justify-content:center;font-size:52px;border:3px solid #c8d8a0;">🧑‍⚕️</div>';
 
-    // Todos os atributos preenchidos
-    var tags = [];
-    if (c.cidade)      tags.push('📍 ' + c.cidade);
-    if (c.experiencia) c.experiencia.forEach(function(e) { if(e) tags.push(e); });
-    if (c.modalidade)  c.modalidade.forEach(function(m) { if(m) tags.push(m); });
-    if (c.cuidados)    tags.push(c.cuidados);
-    if (c.rotina)      tags.push('Rotina: ' + c.rotina);
-    if (c.estilo)      tags.push(c.estilo);
-    if (c.cozinha && normalizar(c.cozinha).indexOf('sim') !== -1) tags.push('🍳 Cozinha');
-    if (c.restricao && normalizar(c.restricao) !== 'nenhuma' && c.restricao) tags.push('⚠ ' + c.restricao);
-
-    var tagsHtml = tags.length
-      ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">' +
-          tags.map(function(t) { return '<span style="font-size:11px;background:#eef3e8;color:#3a4e2a;border-radius:99px;padding:3px 9px;font-weight:600;">' + t + '</span>'; }).join('') +
-        '</div>'
+    var destaques = Array.isArray(c._destaques) ? c._destaques.filter(function(d) { return d; }).slice(0, 3) : [];
+    var tagsHtml = destaques.length
+      ? destaques.map(function(t) { return '<span style="font-size:12px;padding:5px 14px;border-radius:99px;font-weight:600;background:#eef3e8;color:#3a4e2a;">' + t + '</span>'; }).join('')
       : '';
 
     var interesse = interessesMap[c._id];
     var btnAcao = '';
     if (interesse && interesse.status === 'aprovado') {
       btnAcao = c.whatsapp
-        ? '<a href="https://wa.me/55' + c.whatsapp.replace(/\D/g,'') + '" target="_blank" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:#25d366;color:white;padding:11px 16px;border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;text-decoration:none;">📱 WhatsApp</a>'
+        ? '<a href="https://wa.me/55' + c.whatsapp.replace(/\D/g,'') + '" target="_blank" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25d366;color:white;padding:14px 16px;border-radius:12px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;text-decoration:none;">📱 WhatsApp</a>'
         : '';
     } else if (interesse && interesse.status === 'pendente') {
-      btnAcao = '<div style="flex:1;text-align:center;font-size:12px;color:#6b7c52;font-weight:700;padding:11px 14px;background:#eef3e8;border-radius:8px;">⏳ Aguardando aprovação</div>';
+      btnAcao = '<div style="width:100%;display:flex;flex-direction:column;gap:10px;">' +
+        '<div style="text-align:center;font-size:13px;color:#6b7c52;font-weight:700;padding:12px 14px;background:#eef3e8;border-radius:12px;">⏳ Aguardando aprovação</div>' +
+        '<button onclick="abrirModalMensagem(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\')" style="width:100%;background:#f0f4ec;color:#3a4e2a;border:1.5px solid #c8d8a0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;">💬 Enviar mensagem</button>' +
+        '<button onclick="rejeitarCuidadora(\'' + c._id + '\')" style="width:100%;background:none;border:1.5px solid #e0e0e0;color:#bbb;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;padding:10px;border-radius:10px;cursor:pointer;">✕ Cancelar interesse</button>' +
+      '</div>';
     } else {
-      btnAcao = '<button onclick="manifestarInteresse(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\',' + c._score + ')" style="flex:1;background:#3a4e2a;color:#c8d8a0;border:none;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:11px 16px;border-radius:8px;cursor:pointer;">❤️ Tenho interesse</button>';
+      btnAcao = '<button onclick="manifestarInteresse(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\',' + c._score + ')" style="flex:1;background:#3a4e2a;color:#c8d8a0;border:none;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;padding:14px 16px;border-radius:12px;cursor:pointer;">❤️ Tenho interesse</button>';
     }
 
-    var btnRejeitar = '<button onclick="rejeitarCuidadora(\'' + c._id + '\')" style="flex:1;background:none;border:1.5px solid #e0e0e0;color:#aaa;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;padding:11px 14px;border-radius:8px;cursor:pointer;">Não tenho interesse</button>';
+    var btnRejeitar = interesse && interesse.status === 'pendente' ? '' : '<button onclick="rejeitarCuidadora(\'' + c._id + '\')" style="flex:1;background:none;border:1.5px solid #e0e0e0;color:#aaa;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:14px;border-radius:12px;cursor:pointer;">✕ Não tenho interesse</button>';
 
-    return progresso +
-      '<div style="background:#f8f9f5;border-radius:10px;padding:16px;border:1.5px solid #e8edd8;">' +
-        '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">' +
-          fotoEl +
-          '<div style="flex:1;">' +
-            '<div style="font-size:15px;font-weight:700;color:#2d2d2d;">' + abreviarNome(c.nome) + '</div>' +
-            '<div style="font-size:12px;color:#6b7c52;font-weight:600;">' + c._score + '% compatibilidade</div>' +
-            tagsHtml +
-          '</div>' +
-        '</div>' +
-        '<div style="display:flex;gap:8px;">' + btnRejeitar + btnAcao + '</div>' +
+    var contadorHtml = total > 1
+      ? '<div style="text-align:center;font-size:11px;color:#bbb;font-weight:600;margin-bottom:12px;">' + (visto + 1) + ' de ' + total + ' perfis</div>'
+      : '';
+
+    return contadorHtml +
+      '<div style="background:white;border:2px solid #e8e8e8;border-radius:20px;padding:28px 20px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;min-height:calc(100vh - 230px);">' +
+        '<div style="margin-bottom:16px;">' + fotoEl + '</div>' +
+        '<div style="font-size:20px;font-weight:700;color:#2d2d2d;margin-bottom:4px;text-align:center;">' + abreviarNome(c.nome) + '</div>' +
+        '<div style="font-size:13px;color:#aaa;margin-bottom:8px;text-align:center;">' + (c.cidade ? '📍 ' + c.cidade : '') + '</div>' +
+        '<div style="font-size:18px;font-weight:700;color:#3a4e2a;margin-bottom:16px;">' + c._score + '% compatível</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px;">' + tagsHtml + '</div>' +
+        '<button onclick="abrirModalCuidadora(\'' + c._id + '\')" style="font-size:13px;font-weight:700;padding:8px 20px;border-radius:99px;background:#f0f2ec;color:#6b7c52;border:1.5px solid #c8d8a0;cursor:pointer;font-family:Nunito,sans-serif;margin-bottom:auto;">👁️ Ver perfil completo</button>' +
+        '<div style="width:100%;display:flex;gap:10px;margin-top:24px;">' + btnRejeitar + btnAcao + '</div>' +
       '</div>';
   }
 
@@ -752,6 +854,157 @@
       });
     } catch(e) { /* silencioso */ }
   }
+
+  var _msgCuidadorId = null;
+
+  window.abrirModalMensagem = function(cuidadorId, cuidadorNome) {
+    _msgCuidadorId = cuidadorId;
+    document.getElementById('modal-msg-nome').textContent = cuidadorNome;
+    document.getElementById('modal-msg-texto').value = '';
+    document.getElementById('modal-msg-contador').textContent = '0';
+    document.getElementById('modal-msg-btn').disabled = false;
+    document.getElementById('modal-msg-btn').textContent = 'Enviar mensagem';
+    document.getElementById('modal-mensagem').style.display = 'flex';
+  };
+
+  window.fecharModalMensagem = function() {
+    document.getElementById('modal-mensagem').style.display = 'none';
+    _msgCuidadorId = null;
+  };
+
+  window.atualizarContadorMsg = function() {
+    var len = document.getElementById('modal-msg-texto').value.length;
+    document.getElementById('modal-msg-contador').textContent = len;
+  };
+
+  window.confirmarEnvioMensagem = async function() {
+    var texto = document.getElementById('modal-msg-texto').value.trim();
+    if (!texto || !_msgCuidadorId) return;
+    var btn = document.getElementById('modal-msg-btn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    try {
+      await addDoc(collection(db, 'mensagens'), {
+        familiaId:   currentUser.uid,
+        familiaNome: dadosFS.nome || currentUser.email,
+        cuidadorId:  _msgCuidadorId,
+        texto:       texto,
+        de:          'familia',
+        lida:        false,
+        criadaEm:    new Date().toISOString()
+      });
+      btn.textContent = '✓ Enviado!';
+      setTimeout(function() { fecharModalMensagem(); }, 1200);
+    } catch(e) {
+      console.error('Erro mensagem:', e);
+      btn.disabled = false;
+      btn.textContent = 'Enviar mensagem';
+      alert('Erro ao enviar. Tente novamente.');
+    }
+  };
+
+  var _convFamiliaAberta = null;
+
+  async function carregarMensagensFamilia(uid) {
+    try {
+      var q = query(collection(db, 'mensagens'), where('familiaId', '==', uid), orderBy('criadaEm', 'asc'));
+      var snap = await getDocs(q);
+      var conversas = {};
+      snap.forEach(function(d) {
+        var m = d.data(); m.id = d.id;
+        var cid = m.cuidadorId;
+        if (!conversas[cid]) conversas[cid] = { cuidadorNome: cid, msgs: [], naoLidas: 0 };
+        conversas[cid].msgs.push(m);
+        if (!m.lida && m.de === 'cuidadora') conversas[cid].naoLidas++;
+      });
+      (window._sugestoesList || []).forEach(function(c) {
+        if (conversas[c._id]) conversas[c._id].cuidadorNome = c.nome || c._id;
+      });
+      window._conversasFamilia = conversas;
+      renderListaMensagensFamilia();
+    } catch(e) { console.error('msgs familia:', e); }
+  }
+
+  function renderListaMensagensFamilia() {
+    var conversas = window._conversasFamilia || {};
+    var total = Object.values(conversas).reduce(function(a, c) { return a + c.naoLidas; }, 0);
+    var badgeEl = document.getElementById('badge-msgs-familia');
+    if (total > 0) { badgeEl.textContent = total; badgeEl.style.display = 'inline'; } else { badgeEl.style.display = 'none'; }
+    var html = Object.entries(conversas).map(function(entry) {
+      var cid = entry[0], c = entry[1];
+      var ultima = c.msgs[c.msgs.length - 1];
+      var preview = ultima ? (ultima.de === 'familia' ? 'Você: ' + ultima.texto : ultima.texto) : '';
+      if (preview.length > 50) preview = preview.substring(0, 50) + '…';
+      return '<div onclick="abrirConversaFamilia(\'' + cid + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fafafa;border-radius:12px;margin-bottom:8px;cursor:pointer;border:1.5px solid #f0f0f0;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:700;color:#2d2d2d;margin-bottom:3px;display:flex;align-items:center;gap:8px;">' +
+            abreviarNome(c.cuidadorNome) +
+            (c.naoLidas ? '<span style="background:#c0392b;color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;">' + c.naoLidas + ' nova' + (c.naoLidas > 1 ? 's' : '') + '</span>' : '') +
+          '</div>' +
+          '<div style="font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + preview + '</div>' +
+        '</div>' +
+        '<span style="font-size:16px;color:#ccc;margin-left:12px;">›</span>' +
+      '</div>';
+    }).join('');
+    document.getElementById('msgs-lista-familia').innerHTML = html || '<div style="text-align:center;padding:24px;color:#bbb;font-size:13px;">Nenhuma mensagem ainda.</div>';
+  }
+
+  window.abrirConversaFamilia = function(cuidadorId) {
+    var c = (window._conversasFamilia || {})[cuidadorId];
+    if (!c) return;
+    _convFamiliaAberta = { cuidadorId: cuidadorId, cuidadorNome: c.cuidadorNome };
+    document.getElementById('conv-fam-nome').textContent = abreviarNome(c.cuidadorNome);
+    document.getElementById('conv-fam-sub').textContent = c.msgs.length + ' mensagem' + (c.msgs.length !== 1 ? 's' : '');
+    document.getElementById('conv-fam-input').value = '';
+
+    // Marca como lida todas as msgs da cuidadora nesta conversa
+    c.msgs.filter(function(m) { return m.de === 'cuidadora' && !m.lida; }).forEach(async function(m) {
+      try { await updateDoc(doc(db, 'mensagens', m.id), { lida: true }); m.lida = true; } catch(e) {}
+    });
+    c.naoLidas = 0;
+    renderListaMensagensFamilia();
+
+    var html = c.msgs.map(function(m) {
+      var deFamilia = m.de === 'familia';
+      return '<div style="display:flex;justify-content:' + (deFamilia ? 'flex-end' : 'flex-start') + ';margin-bottom:8px;">' +
+        '<div style="max-width:80%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.5;' +
+          (deFamilia ? 'background:#3a4e2a;color:#c8d8a0;border-bottom-right-radius:4px;' : 'background:#f0f2ec;color:#2d2d2d;border-bottom-left-radius:4px;') + '">' +
+          '<div style="font-size:10px;font-weight:700;margin-bottom:4px;opacity:0.7;">' + (deFamilia ? 'Você' : abreviarNome(c.cuidadorNome)) + '</div>' +
+          m.texto +
+        '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('conv-fam-msgs').innerHTML = html;
+    document.getElementById('modal-conversa-familia').style.display = 'flex';
+  };
+
+  window.fecharConversaFamilia = function() {
+    document.getElementById('modal-conversa-familia').style.display = 'none';
+    _convFamiliaAberta = null;
+  };
+
+  window.enviarRespostaFamilia = async function() {
+    if (!_convFamiliaAberta) return;
+    var input = document.getElementById('conv-fam-input');
+    var texto = input.value.trim();
+    if (!texto) return;
+    input.disabled = true;
+    try {
+      await addDoc(collection(db, 'mensagens'), {
+        familiaId:   currentUser.uid,
+        familiaNome: dadosFS.nome || currentUser.email,
+        cuidadorId:  _convFamiliaAberta.cuidadorId,
+        texto:       texto,
+        de:          'familia',
+        lida:        false,
+        criadaEm:    new Date().toISOString()
+      });
+      input.value = '';
+      fecharConversaFamilia();
+      await carregarMensagensFamilia(currentUser.uid);
+    } catch(e) { console.error(e); alert('Erro ao enviar.'); }
+    input.disabled = false;
+  };
 
   window.manifestarInteresse = async function(cuidadorId, cuidadorNome, score) {
     var btn = event.target;
@@ -853,6 +1106,7 @@
             estilo: pr.estilo || '',
             restricao: pr.restricao || '',
             cozinha: pr.cozinha || '',
+            limite: pr.limite || '',
             // para o score engine
             experiencia_str: Array.isArray(pr.experiencia) ? pr.experiencia.join(', ') : (pr.experiencia || '')
           };
@@ -878,6 +1132,8 @@
           return c;
         })
         .sort(function(a, b) { return b._score - a._score; });
+
+      window._sugestoesList = sugestoesList;
 
       if (!sugestoesList.length) return;
       renderSugeridos(false);
@@ -972,6 +1228,54 @@
 
 <script>
   function toggleSecao(id) { document.getElementById(id).classList.toggle('aberta'); }
+
+  window.mudarTela = function(tela) {
+    document.getElementById('tela-explorar').classList.toggle('ativa', tela === 'explorar');
+    document.getElementById('tela-perfil').classList.toggle('ativa', tela === 'perfil');
+    document.getElementById('nav-explorar').classList.toggle('ativo', tela === 'explorar');
+    document.getElementById('nav-perfil').classList.toggle('ativo', tela === 'perfil');
+  };
+
+  window.abrirModalCuidadora = function(id) {
+    var c = (window._sugestoesList || []).find(function(x) { return x._id === id; });
+    if (!c) return;
+    var p = c;
+    var linhas = [
+      { label: 'Estilo de trabalho',      val: p.estilo },
+      { label: 'Resistência a desafios',  val: p.resistente },
+      { label: 'Rotina',                  val: p.rotina },
+      { label: 'Experiência',             val: Array.isArray(p.experiencia) ? p.experiencia.join(', ') : p.experiencia },
+      { label: 'Cuidados físicos',        val: p.cuidados },
+      { label: 'Cozinha',                 val: p.cozinha },
+      { label: 'Modalidade',              val: Array.isArray(p.modalidade) ? p.modalidade.join(', ') : p.modalidade },
+      { label: 'Restrição de ambiente',   val: p.restricao },
+      { label: 'Não se sente preparado(a) para', val: p.limite },
+    ];
+    var html = linhas.filter(function(l) { return l.val; }).map(function(l) {
+      return '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">' + l.label + '</div>' +
+        '<div style="font-size:14px;color:#2d2d2d;">' + l.val + '</div>' +
+      '</div>';
+    }).join('');
+    if (!html) html = '<p style="font-size:13px;color:#aaa;">Perfil profissional não preenchido.</p>';
+    document.getElementById('modal-cuidadora-corpo').innerHTML = html;
+    document.getElementById('modal-cuidadora').style.display = 'flex';
+  };
+
+  window.fecharModalCuidadora = function() {
+    document.getElementById('modal-cuidadora').style.display = 'none';
+  };
+
+  var STATUS_TOOLTIP_FAMILIA = {
+    pendente:  'Seu cadastro foi recebido. Estamos buscando cuidadores compatíveis com o perfil do seu familiar.',
+    andamento: 'Já temos sugestões de cuidadores para você. Explore os perfis e demonstre interesse nos que gostar.',
+    match:     'Um match foi encontrado! Aguarde a liberação do contato pelo administrador.'
+  };
+
+  function toggleTooltipStatus() {
+    var t = document.getElementById('status-tooltip');
+    t.style.display = t.style.display === 'none' ? 'block' : 'none';
+  }
 
   // Máscara WhatsApp
   document.getElementById('p-whatsapp').addEventListener('input', function() {

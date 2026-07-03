@@ -505,9 +505,9 @@
               ? '<button onclick="restaurarRegistro(\'familias\',\'' + f.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
               : (whatsLink ? '<a href="' + whatsLink + '" target="_blank" class="btn-whats">📱 WhatsApp</a>' : '') +
                 '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
-                  '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>⏳ Aguardando</option>' +
-                  '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>🔍 Em andamento</option>' +
-                  '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>✅ Match encontrado</option>' +
+                  '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>📋 Em análise</option>' +
+                  '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>✅ Aprovado para explorar</option>' +
+                  '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>💚 Match encontrado</option>' +
                 '</select>' +
                 '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
             ) +
@@ -529,9 +529,9 @@
       { key: 'suspenso', label: '🚫 Suspenso' }
     ];
     var statusF = [
-      { key: 'pendente',  label: '⏳ Aguardando' },
-      { key: 'andamento', label: '🔍 Em andamento' },
-      { key: 'match',     label: '✅ Match' }
+      { key: 'pendente',  label: '📋 Em análise' },
+      { key: 'andamento', label: '✅ Aprovado para explorar' },
+      { key: 'match',     label: '💚 Match encontrado' }
     ];
 
     document.getElementById('status-cuidadores').innerHTML = statusC.map(function(s) {
