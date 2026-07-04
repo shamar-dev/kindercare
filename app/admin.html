@@ -487,7 +487,11 @@
     });
     if (ordem === 'az') resultado.sort(function(a, b) { return (a.nome||'').localeCompare(b.nome||'', 'pt'); });
     else if (ordem === 'za') resultado.sort(function(a, b) { return (b.nome||'').localeCompare(a.nome||'', 'pt'); });
-    else resultado.sort(function(a, b) { return (b.criadoEm||'0').localeCompare(a.criadoEm||'0'); });
+    else resultado.sort(function(a, b) {
+      var ta = a.criadoEm ? (a.criadoEm.seconds ? a.criadoEm.seconds : new Date(a.criadoEm).getTime()/1000) : 0;
+      var tb = b.criadoEm ? (b.criadoEm.seconds ? b.criadoEm.seconds : new Date(b.criadoEm).getTime()/1000) : 0;
+      return tb - ta;
+    });
     return resultado;
   }
 
