@@ -508,27 +508,33 @@
           : '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#f5f5f5;color:#bbb;">✗ ' + label + '</span>';
       };
 
-      return '<div class="card" style="display:flex;align-items:center;gap:14px;padding:12px 16px;cursor:pointer;" onclick="abrirDetalhesCuidadora(event,\'' + c.uid + '\')">' +
-        '<div class="card-foto" style="flex-shrink:0;">' + foto + '</div>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div class="card-nome">' + (c.nome || '—') + '</div>' +
-          '<div class="card-email">' + (c.email || '') + '</div>' +
-          datasC +
+      var obsId = 'obs-c-' + c.uid;
+      return '<div class="card" style="padding:12px 16px;cursor:pointer;" onclick="abrirDetalhesCuidadora(event,\'' + c.uid + '\')">' +
+        '<div style="display:flex;align-items:center;gap:14px;">' +
+          '<div class="card-foto" style="flex-shrink:0;">' + foto + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="card-nome">' + (c.nome || '—') + '</div>' +
+            '<div class="card-email">' + (c.email || '') + '</div>' +
+            datasC +
+          '</div>' +
+          '<div style="display:flex;flex-direction:row;gap:4px;align-items:center;flex-shrink:0;">' +
+            docTag(p.docFrenteUrl, 'Frente') + docTag(p.docVersoUrl, 'Verso') + docTag(p.antecedentesUrl, 'Antecedentes') +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
+            (c.status === 'excluido'
+              ? '<button onclick="restaurarRegistro(\'cuidadores\',\'' + c.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
+              : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'cuidadores\',\'' + c.uid + '\',this)">' +
+                  '<option value="pendente"'  + (c.status==='pendente' ?' selected':'') + '>⏳ Pendente</option>' +
+                  '<option value="analise"'   + (c.status==='analise'  ?' selected':'') + '>🔍 Em análise</option>' +
+                  '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
+                  '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
+                '</select>' +
+                '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\',\'' + (c.nome||c.uid).replace(/'/g,"\\'") + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+            ) +
+          '</div>' +
         '</div>' +
-        '<div style="display:flex;flex-direction:row;gap:4px;align-items:center;flex-shrink:0;">' +
-          docTag(p.docFrenteUrl, 'Frente') + docTag(p.docVersoUrl, 'Verso') + docTag(p.antecedentesUrl, 'Antecedentes') +
-        '</div>' +
-        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
-          (c.status === 'excluido'
-            ? '<button onclick="restaurarRegistro(\'cuidadores\',\'' + c.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
-            : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'cuidadores\',\'' + c.uid + '\',this)">' +
-                '<option value="pendente"'  + (c.status==='pendente' ?' selected':'') + '>⏳ Pendente</option>' +
-                '<option value="analise"'   + (c.status==='analise'  ?' selected':'') + '>🔍 Em análise</option>' +
-                '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
-                '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
-              '</select>' +
-              '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\',\'' + (c.nome||c.uid).replace(/'/g,"\\'") + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
-          ) +
+        '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5;" onclick="event.stopPropagation()">' +
+          '<textarea id="' + obsId + '" placeholder="📝 Observação interna..." onblur="salvarObs(\'cuidadores\',\'' + c.uid + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid #ece9e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;color:#555;resize:none;outline:none;background:#fffdf7;height:54px;line-height:1.5;">' + (c.observacaoAdmin || '') + '</textarea>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -545,24 +551,30 @@
       var fmtData = function(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); };
       var datasF = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(f.criadoEm) + ' · 🕐 ' + fmtData(f.ultimoAcesso) + '</div>';
 
-      return '<div class="card" style="display:flex;align-items:center;gap:14px;padding:12px 16px;cursor:pointer;" onclick="abrirDetalhesFamilia(event,\'' + f.uid + '\')">' +
-        '<div class="card-foto" style="flex-shrink:0;">🏠</div>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div class="card-nome">' + (f.nome || '—') + '</div>' +
-          '<div class="card-email">' + (f.email || '') + '</div>' +
-          datasF +
+      var obsIdF = 'obs-f-' + f.uid;
+      return '<div class="card" style="padding:12px 16px;cursor:pointer;" onclick="abrirDetalhesFamilia(event,\'' + f.uid + '\')">' +
+        '<div style="display:flex;align-items:center;gap:14px;">' +
+          '<div class="card-foto" style="flex-shrink:0;">🏠</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="card-nome">' + (f.nome || '—') + '</div>' +
+            '<div class="card-email">' + (f.email || '') + '</div>' +
+            datasF +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
+            (f.status === 'excluido'
+              ? '<button onclick="restaurarRegistro(\'familias\',\'' + f.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
+              : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
+                  '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>📋 Em análise</option>' +
+                  '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>✅ Aprovado para explorar</option>' +
+                  '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>💚 Match encontrado</option>' +
+                  '<option value="suspenso"'   + (f.status==='suspenso'  ?' selected':'') + '>🚫 Suspenso</option>' +
+                '</select>' +
+                '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\',\'' + (f.nome||f.uid).replace(/'/g,"\\'") + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+            ) +
+          '</div>' +
         '</div>' +
-        '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
-          (f.status === 'excluido'
-            ? '<button onclick="restaurarRegistro(\'familias\',\'' + f.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
-            : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
-                '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>📋 Em análise</option>' +
-                '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>✅ Aprovado para explorar</option>' +
-                '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>💚 Match encontrado</option>' +
-                '<option value="suspenso"'   + (f.status==='suspenso'  ?' selected':'') + '>🚫 Suspenso</option>' +
-              '</select>' +
-              '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\',\'' + (f.nome||f.uid).replace(/'/g,"\\'") + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
-          ) +
+        '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5;" onclick="event.stopPropagation()">' +
+          '<textarea id="' + obsIdF + '" placeholder="📝 Observação interna..." onblur="salvarObs(\'familias\',\'' + f.uid + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid #ece9e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;color:#555;resize:none;outline:none;background:#fffdf7;height:54px;line-height:1.5;">' + (f.observacaoAdmin || '') + '</textarea>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -832,6 +844,16 @@
     } catch(e) {
       corpo.innerHTML = '<div style="color:#c0392b;font-size:13px;padding:16px;">Erro: ' + e.message + '</div>';
     }
+  };
+
+  // ── OBSERVAÇÃO INTERNA ─────────────────────────────
+  window.salvarObs = async function(colecao, uid, valor) {
+    try {
+      await updateDoc(doc(db, colecao, uid), { observacaoAdmin: valor });
+      var lista = colecao === 'cuidadores' ? cuidadores : familias;
+      var item = lista.find(function(i) { return i.uid === uid; });
+      if (item) item.observacaoAdmin = valor;
+    } catch(e) { console.warn('Erro ao salvar obs:', e.message); }
   };
 
   // ── MODAIS DETALHE ─────────────────────────────────
