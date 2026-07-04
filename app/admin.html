@@ -407,7 +407,7 @@
       var m = d.data();
       if (m.cuidadorId) uidsComMsgs.cuidadores.add(m.cuidadorId);
       if (m.familiaId)  uidsComMsgs.familias.add(m.familiaId);
-      if (!m.lida) paresNaoLidos.add(m.familiaId + '_' + m.cuidadorId);
+      if (!m.lida && !m.lidaPorAdmin) paresNaoLidos.add(m.familiaId + '_' + m.cuidadorId);
     });
 
     // Resumo
@@ -758,6 +758,9 @@
         orderBy('criadaEm', 'asc'));
       var snap = await getDocs(q);
       if (snap.empty) { corpo.innerHTML = '<div style="text-align:center;color:#bbb;font-size:13px;padding:24px;">Nenhuma mensagem.</div>'; return; }
+      snap.docs.forEach(function(d) {
+        if (!d.data().lidaPorAdmin) updateDoc(doc(db, 'mensagens', d.id), { lidaPorAdmin: true }).catch(() => {});
+      });
       document.getElementById('admin-msgs-sub').textContent = snap.size + ' mensagem' + (snap.size !== 1 ? 's' : '');
       corpo.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px;">' +
         snap.docs.map(function(d) {
