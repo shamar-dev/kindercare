@@ -800,13 +800,12 @@
       btnAcao = '<div style="width:100%;display:flex;flex-direction:column;gap:10px;">' +
         '<div style="text-align:center;font-size:13px;color:#6b7c52;font-weight:700;padding:12px 14px;background:#eef3e8;border-radius:12px;">⏳ Aguardando aprovação</div>' +
         '<button onclick="abrirModalMensagem(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\')" style="width:100%;background:#f0f4ec;color:#3a4e2a;border:1.5px solid #c8d8a0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;">💬 Enviar mensagem</button>' +
-        '<button onclick="rejeitarCuidadora(\'' + c._id + '\')" style="width:100%;background:none;border:1.5px solid #e0e0e0;color:#bbb;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;padding:10px;border-radius:10px;cursor:pointer;">✕ Cancelar interesse</button>' +
       '</div>';
     } else {
       btnAcao = '<button onclick="manifestarInteresse(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\',' + c._score + ')" style="flex:1;background:#3a4e2a;color:#c8d8a0;border:none;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;padding:14px 16px;border-radius:12px;cursor:pointer;">❤️ Tenho interesse</button>';
     }
 
-    var btnRejeitar = interesse && interesse.status === 'pendente' ? '' : '<button onclick="rejeitarCuidadora(\'' + c._id + '\')" style="flex:1;background:none;border:1.5px solid #e0e0e0;color:#aaa;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:14px;border-radius:12px;cursor:pointer;">✕ Não tenho interesse</button>';
+    var btnRejeitar = '';
 
     return '<div style="background:white;border:2px solid #e8e8e8;border-radius:20px;padding:28px 20px 20px;box-shadow:0 4px 20px rgba(0,0,0,0.08);display:flex;flex-direction:column;align-items:center;min-height:calc(100vh - 230px);">' +
         '<div style="margin-bottom:16px;">' + fotoEl + '</div>' +
