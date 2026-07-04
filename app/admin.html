@@ -488,9 +488,17 @@
     if (ordem === 'az') resultado.sort(function(a, b) { return (a.nome||'').localeCompare(b.nome||'', 'pt'); });
     else if (ordem === 'za') resultado.sort(function(a, b) { return (b.nome||'').localeCompare(a.nome||'', 'pt'); });
     else resultado.sort(function(a, b) {
-      var ta = a.criadoEm ? (a.criadoEm.seconds ? a.criadoEm.seconds : new Date(a.criadoEm).getTime()/1000) : 0;
-      var tb = b.criadoEm ? (b.criadoEm.seconds ? b.criadoEm.seconds : new Date(b.criadoEm).getTime()/1000) : 0;
-      return tb - ta;
+      function parseData(v) {
+        if (!v) return 0;
+        if (v.seconds) return v.seconds * 1000;
+        var d = new Date(v);
+        if (!isNaN(d)) return d.getTime();
+        // formato pt-BR: "dd/mm/yyyy, hh:mm:ss"
+        var m = v.match(/(\d{2})\/(\d{2})\/(\d{4})[,\s]+(\d{2}):(\d{2})/);
+        if (m) return new Date(m[3], m[2]-1, m[1], m[4], m[5]).getTime();
+        return 0;
+      }
+      return parseData(b.criadoEm) - parseData(a.criadoEm);
     });
     return resultado;
   }
