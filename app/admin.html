@@ -204,7 +204,7 @@
   <div class="tabs">
     <button class="tab ativo" onclick="mudarTab('cuidadores')">🧑‍⚕️ Cuidadores</button>
     <button class="tab" onclick="mudarTab('familias')">🏠 Famílias</button>
-    <button class="tab" onclick="mudarTab('interesses')">❤️ Interesses <span id="badge-interesses" style="display:none;background:#e57373;color:white;font-size:10px;padding:1px 6px;border-radius:99px;margin-left:4px;"></span></button>
+    <button class="tab" onclick="mudarTab('interesses')">💚 Interesses <span id="badge-interesses" style="display:none;background:#e57373;color:white;font-size:10px;padding:1px 6px;border-radius:99px;margin-left:4px;"></span></button>
   </div>
 
   <!-- PAINEL INTERESSES -->
@@ -319,6 +319,8 @@
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
   import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, setDoc, deleteDoc, query, where, orderBy }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  import { getStorage, ref as storageRef, deleteObject, listAll }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAMe9GRhZyYOiDCVQBxMnu8MHjuaY1hY5Y",
@@ -330,9 +332,10 @@
     measurementId: "G-KKN5D5NEK0"
   };
 
-  const app  = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db   = getFirestore(app);
+  const app     = initializeApp(firebaseConfig);
+  const auth    = getAuth(app);
+  const db      = getFirestore(app);
+  const storage = getStorage(app);
 
   var cuidadores = [];
   var familias   = [];
@@ -502,7 +505,7 @@
                 '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
                 '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
               '</select>' +
-              '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+              '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\',\'' + (c.nome||c.uid).replace(/'/g,"\\'") + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
           ) +
         '</div>' +
       '</div>';
@@ -536,7 +539,7 @@
                 '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>💚 Match encontrado</option>' +
                 '<option value="suspenso"'   + (f.status==='suspenso'  ?' selected':'') + '>🚫 Suspenso</option>' +
               '</select>' +
-              '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+              '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\',\'' + (f.nome||f.uid).replace(/'/g,"\\'") + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
           ) +
         '</div>' +
       '</div>';
@@ -610,7 +613,7 @@
           : '';
         return '<div style="background:white;border-radius:12px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:16px;">' +
           '<div>' +
-            '<div style="font-size:14px;font-weight:700;color:#2d2d2d;margin-bottom:2px;">❤️ ' + (m.familiaNome || '—') + ' → 🧑‍⚕️ ' + (m.cuidadorNome || '—') + '</div>' +
+            '<div style="font-size:14px;font-weight:700;color:#2d2d2d;margin-bottom:2px;">💚 ' + (m.familiaNome || '—') + ' → 🧑‍⚕️ ' + (m.cuidadorNome || '—') + '</div>' +
             '<div style="font-size:12px;color:#aaa;">' + data + ' · ' + (m.score || 0) + '% compatibilidade · ' + label + '</div>' +
             '<div style="font-size:12px;color:#888;">' + (m.familiaEmail || '') + '</div>' +
           '</div>' +
@@ -730,6 +733,29 @@
 
   window.renderAdminInbox = renderAdminInbox;
 
+  window.excluirRegistro = async function(colecao, uid, nome) {
+    if (!confirm('Excluir "' + nome + '"? O registro ficará oculto mas preservado para fins legais.')) return;
+    try {
+      await updateDoc(doc(db, colecao, uid), { status: 'excluido' });
+      var lista = colecao === 'cuidadores' ? cuidadores : familias;
+      var item = lista.find(function(i) { return i.uid === uid; });
+      if (item) item.status = 'excluido';
+      atualizarResumo();
+      renderAtual();
+    } catch(e) { alert('Erro: ' + e.message); }
+  };
+
+  window.restaurarRegistro = async function(colecao, uid) {
+    try {
+      await updateDoc(doc(db, colecao, uid), { status: 'pendente' });
+      var lista = colecao === 'cuidadores' ? cuidadores : familias;
+      var item = lista.find(function(i) { return i.uid === uid; });
+      if (item) item.status = 'pendente';
+      atualizarResumo();
+      renderAtual();
+    } catch(e) { alert('Erro ao restaurar: ' + e.message); }
+  };
+
   window.deletarMsgAdmin = async function(msgId) {
     if (!confirm('Remover esta mensagem?')) return;
     try {
@@ -801,33 +827,6 @@
   };
 
   // ── RESTAURAR ──────────────────────────────────────
-  window.restaurarRegistro = async function(colecao, uid) {
-    try {
-      await updateDoc(doc(db, colecao, uid), { status: 'pendente' });
-      var lista = colecao === 'cuidadores' ? cuidadores : familias;
-      var item  = lista.find(function(i) { return i.uid === uid; });
-      if (item) item.status = 'pendente';
-      atualizarResumo();
-      renderAtual();
-    } catch(e) {
-      alert('Erro ao restaurar: ' + e.message);
-    }
-  };
-
-  // ── EXCLUIR (soft delete) ──────────────────────────
-  window.excluirRegistro = async function(colecao, uid) {
-    if (!confirm('Excluir este registro? Ele ficará oculto mas pode ser recuperado pelo filtro "Excluídos".')) return;
-    try {
-      await updateDoc(doc(db, colecao, uid), { status: 'excluido' });
-      var lista = colecao === 'cuidadores' ? cuidadores : familias;
-      var item  = lista.find(function(i) { return i.uid === uid; });
-      if (item) item.status = 'excluido';
-      atualizarResumo();
-      renderAtual();
-    } catch(e) {
-      alert('Erro ao excluir: ' + e.message);
-    }
-  };
 
   // ── MUDAR STATUS ───────────────────────────────────
   window.mudarStatus = async function(colecao, uid, selectEl) {
