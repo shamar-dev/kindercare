@@ -178,6 +178,9 @@
           <div id="status-tooltip" style="display:none;margin-top:8px;background:#f7f7f7;border:1px solid #e8e8e8;border-radius:10px;padding:12px 14px;font-size:12px;color:#555;line-height:1.7;">
             <div id="status-tooltip-texto"></div>
           </div>
+          <div id="aviso-sem-email" style="display:none;margin-top:10px;background:#fff8e8;border:1px solid #f0d080;border-radius:10px;padding:10px 14px;font-size:12px;color:#7a5a10;line-height:1.6;">
+            📬 Ainda não enviamos notificações por email. Acesse o painel regularmente para ver atualizações do seu perfil.
+          </div>
         </div>
       </div>
     </div>
@@ -583,6 +586,9 @@
     badge.textContent = s.label;
     badge.className = 'status-badge ' + s.cls;
     document.getElementById('status-tooltip-texto').textContent = STATUS_TOOLTIP_FAMILIA[dados.status] || STATUS_TOOLTIP_FAMILIA['pendente'];
+
+    var avisoEl = document.getElementById('aviso-sem-email');
+    if (avisoEl) avisoEl.style.display = (!dados.status || dados.status === 'pendente') ? 'block' : 'none';
 
     if (dados.status === 'match') {
       const toggle = document.getElementById('toggle-disponivel');
@@ -1096,6 +1102,7 @@
       });
 
       interessesMap[cuidadorId] = { status: 'pendente', interesseId: ref.id };
+      alert('💚 Interesse enviado!\n\nAcompanhe o status pelo painel. Como ainda não enviamos notificações por email, acesse regularmente para ver atualizações.');
       renderSugeridos(false);
     } catch(e) {
       btn.disabled = false;
