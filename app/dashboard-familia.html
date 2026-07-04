@@ -802,7 +802,7 @@
         '<button onclick="abrirModalMensagem(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\')" style="width:100%;background:#f0f4ec;color:#3a4e2a;border:1.5px solid #c8d8a0;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;">💬 Enviar mensagem</button>' +
       '</div>';
     } else {
-      btnAcao = '<button onclick="manifestarInteresse(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\',' + c._score + ')" style="flex:1;background:#3a4e2a;color:#c8d8a0;border:none;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;padding:14px 16px;border-radius:12px;cursor:pointer;">❤️ Tenho interesse</button>';
+      btnAcao = '<button onclick="manifestarInteresse(\'' + c._id + '\',\'' + (c.nome||'').replace(/'/g,"\\'") + '\',' + c._score + ')" style="flex:1;background:#3a4e2a;color:#c8d8a0;border:none;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;padding:14px 16px;border-radius:12px;cursor:pointer;">💚 Tenho interesse</button>';
     }
 
     var btnRejeitar = '';
@@ -1099,7 +1099,7 @@
       renderSugeridos(false);
     } catch(e) {
       btn.disabled = false;
-      btn.textContent = '❤️ Tenho interesse';
+      btn.textContent = '💚 Tenho interesse';
       alert('Erro ao enviar interesse. Tente novamente.');
     }
   };
