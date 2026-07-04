@@ -216,7 +216,7 @@
   <div class="filtros" id="painel-filtros">
     <input type="text" id="filtro-busca" placeholder="Buscar por nome ou email..." oninput="renderAtual()">
     <select id="filtro-ordem" onchange="renderAtual()" style="width:auto;">
-      <option value="">Nome (padrão)</option>
+      <option value="">Mais recentes primeiro</option>
       <option value="az">A → Z</option>
       <option value="za">Z → A</option>
     </select>
@@ -486,7 +486,8 @@
       return true;
     });
     if (ordem === 'az') resultado.sort(function(a, b) { return (a.nome||'').localeCompare(b.nome||'', 'pt'); });
-    if (ordem === 'za') resultado.sort(function(a, b) { return (b.nome||'').localeCompare(a.nome||'', 'pt'); });
+    else if (ordem === 'za') resultado.sort(function(a, b) { return (b.nome||'').localeCompare(a.nome||'', 'pt'); });
+    else resultado.sort(function(a, b) { return (b.criadoEm||'').localeCompare(a.criadoEm||''); });
     return resultado;
   }
 
