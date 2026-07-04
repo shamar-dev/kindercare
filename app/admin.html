@@ -474,6 +474,8 @@
       var p = c.perfil || {};
       var statusCls = c.status || 'pendente';
       var foto = p.fotoUrl ? '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' : '🧑‍⚕️';
+      var fmtData = function(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); };
+      var datasC = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(c.criadoEm) + ' · 🕐 ' + fmtData(c.ultimoAcesso) + '</div>';
 
       var docTag = function(url, label) {
         return url
@@ -486,6 +488,7 @@
         '<div style="flex:1;min-width:0;">' +
           '<div class="card-nome">' + (c.nome || '—') + '</div>' +
           '<div class="card-email">' + (c.email || '') + '</div>' +
+          datasC +
         '</div>' +
         '<div style="display:flex;flex-direction:row;gap:4px;align-items:center;flex-shrink:0;">' +
           docTag(p.docFrenteUrl, 'Frente') + docTag(p.docVersoUrl, 'Verso') + docTag(p.antecedentesUrl, 'Antecedentes') +
@@ -514,12 +517,15 @@
     el.innerHTML = lista.map(function(f) {
       var p = f.perfil || {};
       var statusCls = f.status || 'pendente';
+      var fmtData = function(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); };
+      var datasF = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(f.criadoEm) + ' · 🕐 ' + fmtData(f.ultimoAcesso) + '</div>';
 
       return '<div class="card" style="display:flex;align-items:center;gap:14px;padding:12px 16px;">' +
         '<div class="card-foto" style="flex-shrink:0;">🏠</div>' +
         '<div style="flex:1;min-width:0;">' +
           '<div class="card-nome">' + (f.nome || '—') + '</div>' +
           '<div class="card-email">' + (f.email || '') + '</div>' +
+          datasF +
         '</div>' +
         '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
           (f.status === 'excluido'

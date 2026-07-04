@@ -931,6 +931,7 @@
       } else {
         dadosFirestore = snap.data();
       }
+      updateDoc(ref, { ultimoAcesso: new Date().toISOString() }).catch(() => {});
 
       // Verifica se não é uma família tentando acessar área errada
       if (!snap.exists()) {

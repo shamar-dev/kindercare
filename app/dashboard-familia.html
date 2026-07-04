@@ -551,6 +551,7 @@
       } else {
         dadosFS = snap.data();
       }
+      updateDoc(ref, { ultimoAcesso: new Date().toISOString() }).catch(() => {});
 
       await carregarInteresses(user.uid);
       carregarUI(user, dadosFS);
