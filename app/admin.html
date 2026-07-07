@@ -642,7 +642,8 @@
             (f.status === 'excluido'
               ? '<button onclick="restaurarRegistro(\'familias\',\'' + f.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
               : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
-                  '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>📋 Em análise</option>' +
+                  '<option value="pendente"'   + (f.status==='pendente'  ?' selected':'') + '>⏳ Pendente</option>' +
+                  '<option value="analise"'    + (f.status==='analise'   ?' selected':'') + '>🔍 Em análise</option>' +
                   '<option value="andamento"'  + (f.status==='andamento' ?' selected':'') + '>✅ Aprovado para explorar</option>' +
                   '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>💚 Match encontrado</option>' +
                   '<option value="suspenso"'   + (f.status==='suspenso'  ?' selected':'') + '>🚫 Suspenso</option>' +
@@ -675,7 +676,8 @@
     var statusF = [
       { key: 'incompleto', label: '⚠️ Cadastro incompleto' },
       { key: 'falta_perfil', label: '⚠️ Falta perfil' },
-      { key: 'pendente',  label: '📋 Em análise' },
+      { key: 'pendente',  label: '⏳ Pendente' },
+      { key: 'analise',   label: '🔍 Em análise' },
       { key: 'andamento', label: '✅ Aprovado para explorar' },
       { key: 'match',     label: '💚 Match encontrado' },
       { key: 'suspenso',  label: '🚫 Suspenso' }

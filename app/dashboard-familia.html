@@ -76,6 +76,7 @@
     .status-nome { font-size: 16px; font-weight: 700; color: #2d2d2d; }
     .status-badge { font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 99px; white-space: nowrap; }
     .status-pendente { background: #fff3e8; color: #a05a3a; }
+    .status-analise { background: #f0e6fa; color: #6b3aa0; }
     .status-andamento { background: #e8f0ff; color: #3a5aa0; }
     .status-match { background: #eef3e8; color: #3a4e2a; }
 
@@ -567,7 +568,8 @@
     document.getElementById('p-email').value = user.email;
 
     const statusMap = {
-      pendente:   { label: '📋 Em análise',           cls: 'status-pendente'  },
+      pendente:   { label: '⏳ Pendente',             cls: 'status-pendente'  },
+      analise:    { label: '🔍 Em análise',           cls: 'status-analise'   },
       andamento:  { label: '✅ Aprovado para explorar', cls: 'status-andamento' },
       match:      { label: '💚 Match encontrado',      cls: 'status-match'     },
       suspenso:   { label: '🚫 Conta suspensa',        cls: 'status-pendente'  }
@@ -579,7 +581,7 @@
     document.getElementById('status-tooltip-texto').textContent = STATUS_TOOLTIP_FAMILIA[dados.status] || STATUS_TOOLTIP_FAMILIA['pendente'];
 
     var avisoEl = document.getElementById('aviso-sem-email');
-    if (avisoEl) avisoEl.style.display = (!dados.status || dados.status === 'pendente') ? 'block' : 'none';
+    if (avisoEl) avisoEl.style.display = (!dados.status || dados.status === 'pendente' || dados.status === 'analise') ? 'block' : 'none';
 
     if (dados.status === 'match') {
       const toggle = document.getElementById('toggle-disponivel');
@@ -1325,7 +1327,8 @@
   };
 
   var STATUS_TOOLTIP_FAMILIA = {
-    pendente:  'Seu cadastro foi recebido. Estamos buscando cuidadores compatíveis com o perfil do seu familiar.',
+    pendente:  'Seu cadastro foi recebido e está na fila de verificação. Em breve um administrador irá analisá-lo.',
+    analise:   'Seu cadastro está sendo analisado pelo administrador. Estamos buscando cuidadores compatíveis com o perfil do seu familiar.',
     andamento: 'Já temos sugestões de cuidadores para você. Explore os perfis e demonstre interesse nos que gostar.',
     match:     'Um match foi encontrado! Aguarde a liberação do contato pelo administrador.',
     suspenso:  'Sua conta foi suspensa. Entre em contato com o administrador para mais informações.'
