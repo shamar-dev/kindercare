@@ -222,6 +222,9 @@
     </select>
     <select id="filtro-status" onchange="renderAtual()">
       <option value="">Todos os status</option>
+      <option value="incompleto">⚠️ Cadastro incompleto</option>
+      <option value="falta_perfil">⚠️ Falta perfil</option>
+      <option value="falta_docs">⚠️ Falta documentos</option>
       <option value="pendente">Pendente</option>
       <option value="analise">Em análise</option>
       <option value="aprovado">Aprovado</option>
@@ -470,6 +473,24 @@
     }
   };
 
+  function perfilIncompleto(item, tipo) {
+    var p = item.perfil || {};
+    if ((tipo || tabAtual) === 'cuidadores') {
+      return !p.cidade || !(p.experiencia && p.experiencia.length);
+    }
+    return !p.cidade || !p.whatsapp || !p.rotina || !(p.condicao && p.condicao.length);
+  }
+
+  function documentosIncompletos(item, tipo) {
+    if ((tipo || tabAtual) !== 'cuidadores') return false; // familias não têm documentos
+    var p = item.perfil || {};
+    return !p.docFrenteUrl || !p.docVersoUrl || !p.antecedentesUrl;
+  }
+
+  function cadastroIncompleto(item, tipo) {
+    return perfilIncompleto(item, tipo) || documentosIncompletos(item, tipo);
+  }
+
   function filtrar(lista) {
     var busca  = document.getElementById('filtro-busca').value.toLowerCase();
     var status = document.getElementById('filtro-status').value;
@@ -479,7 +500,16 @@
       var email = (item.email || '').toLowerCase();
       if (busca && nome.indexOf(busca) === -1 && email.indexOf(busca) === -1) return false;
       if (status) {
-        if (item.status !== status) return false;
+        if (status === 'incompleto') {
+          if (item.status === 'excluido') return false;
+          if (!cadastroIncompleto(item)) return false;
+        } else if (status === 'falta_perfil') {
+          if (item.status === 'excluido') return false;
+          if (!perfilIncompleto(item)) return false;
+        } else if (status === 'falta_docs') {
+          if (item.status === 'excluido') return false;
+          if (!documentosIncompletos(item)) return false;
+        } else if (item.status !== status) return false;
       } else {
         if (item.status === 'excluido') return false;
       }
@@ -526,7 +556,7 @@
         '<div style="display:flex;align-items:center;gap:14px;">' +
           '<div class="card-foto" style="flex-shrink:0;">' + foto + '</div>' +
           '<div style="flex:1;min-width:0;">' +
-            '<div class="card-nome">' + (c.nome || '—') + '</div>' +
+            '<div class="card-nome">' + (c.nome || '—') + (perfilIncompleto(c, 'cuidadores') ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fff3e0;color:#a05a10;">⚠️ Falta perfil</span>' : '') + '</div>' +
             '<div class="card-email">' + (c.email || '') + '</div>' +
             datasC +
           '</div>' +
@@ -569,7 +599,7 @@
         '<div style="display:flex;align-items:center;gap:14px;">' +
           '<div class="card-foto" style="flex-shrink:0;">🏠</div>' +
           '<div style="flex:1;min-width:0;">' +
-            '<div class="card-nome">' + (f.nome || '—') + '</div>' +
+            '<div class="card-nome">' + (f.nome || '—') + (perfilIncompleto(f, 'familias') ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fff3e0;color:#a05a10;">⚠️ Falta perfil</span>' : '') + '</div>' +
             '<div class="card-email">' + (f.email || '') + '</div>' +
             datasF +
           '</div>' +
@@ -599,25 +629,39 @@
     document.getElementById('num-familias').textContent   = familias.length;
 
     var statusC = [
+      { key: 'incompleto', label: '⚠️ Cadastro incompleto' },
+      { key: 'falta_perfil', label: '⚠️ Falta perfil' },
+      { key: 'falta_docs', label: '⚠️ Falta documentos' },
       { key: 'pendente', label: '⏳ Pendente' },
       { key: 'analise',  label: '🔍 Em análise' },
       { key: 'aprovado', label: '✅ Aprovado' },
       { key: 'suspenso', label: '🚫 Suspenso' }
     ];
     var statusF = [
+      { key: 'incompleto', label: '⚠️ Cadastro incompleto' },
+      { key: 'falta_perfil', label: '⚠️ Falta perfil' },
       { key: 'pendente',  label: '📋 Em análise' },
       { key: 'andamento', label: '✅ Aprovado para explorar' },
       { key: 'match',     label: '💚 Match encontrado' },
       { key: 'suspenso',  label: '🚫 Suspenso' }
     ];
 
+    function contarEspecial(lista, tipo, key) {
+      var fn = key === 'incompleto' ? cadastroIncompleto : (key === 'falta_perfil' ? perfilIncompleto : documentosIncompletos);
+      return lista.filter(function(item) { return item.status !== 'excluido' && fn(item, tipo); }).length;
+    }
+
     document.getElementById('status-cuidadores').innerHTML = statusC.map(function(s) {
-      var n = cuidadores.filter(function(c) { return (c.status || 'pendente') === s.key; }).length;
+      var n = (s.key === 'incompleto' || s.key === 'falta_perfil' || s.key === 'falta_docs')
+        ? contarEspecial(cuidadores, 'cuidadores', s.key)
+        : cuidadores.filter(function(c) { return (c.status || 'pendente') === s.key; }).length;
       return '<div class="resumo-status-item" onclick="event.stopPropagation();filtrarPorStatus(\'cuidadores\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
     }).join('');
 
     document.getElementById('status-familias').innerHTML = statusF.map(function(s) {
-      var n = familias.filter(function(f) { return (f.status || 'pendente') === s.key; }).length;
+      var n = (s.key === 'incompleto' || s.key === 'falta_perfil' || s.key === 'falta_docs')
+        ? contarEspecial(familias, 'familias', s.key)
+        : familias.filter(function(f) { return (f.status || 'pendente') === s.key; }).length;
       return '<div class="resumo-status-item" onclick="event.stopPropagation();filtrarPorStatus(\'familias\',\'' + s.key + '\')">' + s.label + ' <span>' + n + '</span></div>';
     }).join('');
   }
