@@ -228,32 +228,21 @@
     </div>
     <div class="secao-corpo">
       <div class="campo">
-        <label>Nome do familiar</label>
-        <input type="text" id="p-nome-idoso" placeholder="Primeiro nome">
-      </div>
-      <div class="campo">
         <label>Idade aproximada</label>
         <input type="number" id="p-idade" placeholder="Ex: 82" min="50" max="120">
+      </div>
+      <div class="campo">
+        <label>Gênero do familiar</label>
+        <div class="opcoes" id="opc-genero-idoso">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'genero-idoso')">feminino</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'genero-idoso')">masculino</button>
+        </div>
       </div>
       <div class="campo">
         <label>CEP</label>
         <div style="position:relative;">
           <input type="text" id="p-cep" placeholder="00000-000" maxlength="9">
           <span id="cep-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#888;"></span>
-        </div>
-      </div>
-      <div class="campo">
-        <label>Rua</label>
-        <input type="text" id="p-rua" placeholder="Preenchido pelo CEP">
-      </div>
-      <div class="campo-row">
-        <div class="campo">
-          <label>Número</label>
-          <input type="text" id="p-numero" placeholder="Ex: 123">
-        </div>
-        <div class="campo">
-          <label>Complemento <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
-          <input type="text" id="p-complemento" placeholder="Apto, bloco...">
         </div>
       </div>
       <div class="campo">
@@ -532,6 +521,7 @@
   const db   = getFirestore(app);
 
   let currentUser = null;
+  let coordCep = { lat: null, lng: null };
   let dadosFS = {};
   let interessesMap = {}; // cuidadorId -> { status, interesseId }
 
@@ -600,15 +590,13 @@
     document.getElementById('p-nome-resp').value  = dados.nome || '';
     document.getElementById('p-email-resp').value = user.email;
     if (p.whatsapp)     document.getElementById('p-whatsapp').value     = p.whatsapp;
-    if (p.nome_idoso)   document.getElementById('p-nome-idoso').value   = p.nome_idoso;
     if (p.idade)        document.getElementById('p-idade').value        = p.idade;
-    if (p.cep)          document.getElementById('p-cep').value          = p.cep;
-    if (p.rua)          document.getElementById('p-rua').value          = p.rua;
-    if (p.numero)       document.getElementById('p-numero').value       = p.numero;
-    if (p.complemento)  document.getElementById('p-complemento').value  = p.complemento;
+    if (p.genero_idoso) marcarOpcao('opc-genero-idoso', p.genero_idoso);
     if (p.bairro)       document.getElementById('p-bairro').value       = p.bairro;
     if (p.cidade)       document.getElementById('p-cidade').value       = p.cidade;
     if (p.estado)       document.getElementById('p-estado').value       = p.estado;
+    coordCep.lat = p.lat || null;
+    coordCep.lng = p.lng || null;
 
     if (p.reacao)      marcarOpcao('opc-reacao', p.reacao);
     if (p.conversa)    marcarOpcao('opc-conversa', p.conversa);
@@ -616,7 +604,7 @@
     if (p.rotina)      marcarOpcao('opc-rotina', p.rotina);
     if (p.dependencia) marcarOpcao('opc-dependencia', p.dependencia);
     if (p.medicamento) marcarOpcao('opc-medicamento', p.medicamento);
-    if (p.genero)      marcarOpcao('opc-genero', p.genero);
+    if (p.genero_pref) marcarOpcao('opc-genero', p.genero_pref);
     if (p.atividades)  marcarMulti('opc-ativ', p.atividades);
     if (p.condicao)    marcarMulti('opc-condicao', p.condicao);
     if (p.ambiente)    marcarMulti('opc-ambiente', p.ambiente);
@@ -655,15 +643,13 @@
         document.getElementById('status-nome').textContent = nome;
       } else if (secao === 'familiar') {
         update = {
-          'perfil.nome_idoso':  document.getElementById('p-nome-idoso').value.trim(),
-          'perfil.idade':       document.getElementById('p-idade').value.trim(),
-          'perfil.cep':         document.getElementById('p-cep').value.trim(),
-          'perfil.rua':         document.getElementById('p-rua').value.trim(),
-          'perfil.numero':      document.getElementById('p-numero').value.trim(),
-          'perfil.complemento': document.getElementById('p-complemento').value.trim(),
+          'perfil.idade':        document.getElementById('p-idade').value.trim(),
+          'perfil.genero_idoso': getOpcao('opc-genero-idoso'),
           'perfil.bairro':      document.getElementById('p-bairro').value.trim(),
           'perfil.cidade':      document.getElementById('p-cidade').value.trim(),
           'perfil.estado':      document.getElementById('p-estado').value.trim(),
+          'perfil.lat':         coordCep.lat,
+          'perfil.lng':         coordCep.lng,
         };
       } else if (secao === 'personalidade') {
         update = {
@@ -684,7 +670,7 @@
         };
       } else if (secao === 'preferencias') {
         update = {
-          'perfil.genero':   getOpcao('opc-genero'),
+          'perfil.genero_pref': getOpcao('opc-genero'),
           'perfil.ambiente': getMulti('opc-ambiente'),
         };
       }
@@ -1278,7 +1264,7 @@
     var campos = [
       document.getElementById('p-nome-resp').value,
       document.getElementById('p-whatsapp').value,
-      document.getElementById('p-nome-idoso').value,
+      getOpcao('opc-genero-idoso'),
       document.getElementById('p-idade').value,
       document.getElementById('p-cep').value,
       document.getElementById('p-cidade').value,
@@ -1366,15 +1352,16 @@
     if (v.replace(/\D/g,'').length === 8) {
       st.textContent = '🔍';
       try {
-        var res  = await fetch('https://brasilapi.com.br/api/cep/v1/' + v.replace(/\D/g,''));
+        var res  = await fetch('https://brasilapi.com.br/api/cep/v2/' + v.replace(/\D/g,''));
         var data = await res.json();
-        if (data.street !== undefined) {
-          document.getElementById('p-rua').value    = data.street        || '';
+        if (data.city !== undefined) {
           document.getElementById('p-bairro').value = data.neighborhood  || '';
           document.getElementById('p-cidade').value = data.city          || '';
           document.getElementById('p-estado').value = data.state         || '';
+          var coords = data.location && data.location.coordinates;
+          coordCep.lat = coords && coords.latitude  ? Math.round(parseFloat(coords.latitude)  * 100) / 100 : null;
+          coordCep.lng = coords && coords.longitude ? Math.round(parseFloat(coords.longitude) * 100) / 100 : null;
           st.textContent = '✓';
-          document.getElementById('p-numero').focus();
         } else { st.textContent = '✗'; }
       } catch(e) { st.textContent = ''; }
     } else { st.textContent = ''; }

@@ -972,6 +972,7 @@
       '</div>' +
       '<hr style="border:none;border-top:1px solid #f0f0f0;">' +
       linha('Cidade', p.cidade) +
+      linha('Gênero', p.genero) +
       linha('Experiência', arr(p.experiencia)) +
       linha('Modalidade', arr(p.modalidade)) +
       linha('Tipos de cuidado', arr(p.cuidados)) +
@@ -998,15 +999,15 @@
       '<hr style="border:none;border-top:1px solid #f0f0f0;">' +
       linha('Cidade', p.cidade) +
       '<div style="font-size:11px;font-weight:700;color:#6b7c52;text-transform:uppercase;letter-spacing:1px;margin:4px 0 8px;">Sobre o familiar</div>' +
-      linha('Nome do familiar', p.nome_idoso) +
       linha('Idade', p.idade) +
+      linha('Gênero', p.genero_idoso) +
       linha('Condição', arr(p.condicao)) +
       linha('Dependência', p.dependencia) +
       '<div style="font-size:11px;font-weight:700;color:#6b7c52;text-transform:uppercase;letter-spacing:1px;margin:4px 0 8px;">Preferências</div>' +
       linha('Rotina', p.rotina) +
       linha('Personalidade do familiar', p.conversa) +
       linha('Ambiente', arr(p.ambiente)) +
-      linha('Preferência de cuidador', arr(p.preferencia));
+      linha('Gênero preferido do cuidador', p.genero_pref);
     document.getElementById('modal-detalhe-familia').style.display = 'flex';
   };
 

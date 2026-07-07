@@ -675,24 +675,17 @@
         <input type="tel" id="p-whatsapp" placeholder="(11) 99999-9999">
       </div>
       <div class="campo">
+        <label>Gênero</label>
+        <div class="opcoes" id="opc-genero">
+          <button class="opcao-btn" onclick="toggleOpcao(this,'genero')">feminino</button>
+          <button class="opcao-btn" onclick="toggleOpcao(this,'genero')">masculino</button>
+        </div>
+      </div>
+      <div class="campo">
         <label>CEP</label>
         <div style="position:relative;">
           <input type="text" id="p-cep" placeholder="00000-000" maxlength="9">
           <span id="cep-status" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#888;"></span>
-        </div>
-      </div>
-      <div class="campo">
-        <label>Rua</label>
-        <input type="text" id="p-rua" placeholder="Preenchido pelo CEP">
-      </div>
-      <div class="campo-row">
-        <div class="campo">
-          <label>Número</label>
-          <input type="text" id="p-numero" placeholder="Ex: 123">
-        </div>
-        <div class="campo">
-          <label>Complemento <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
-          <input type="text" id="p-complemento" placeholder="Apto, bloco...">
         </div>
       </div>
       <div class="campo">
@@ -911,6 +904,7 @@
 
   let currentUser = null;
   let dadosFirestore = {};
+  let coordCep = { lat: null, lng: null };
 
   // ── AUTH STATE ─────────────────────────────────────
   onAuthStateChanged(auth, async (user) => {
@@ -991,14 +985,13 @@
     const p = dados.perfil || {};
     document.getElementById('p-nome').value        = dados.nome || '';
     document.getElementById('p-whatsapp').value    = p.whatsapp || '';
-    document.getElementById('p-cep').value         = p.cep || '';
-    document.getElementById('p-rua').value         = p.rua || '';
-    document.getElementById('p-numero').value      = p.numero || '';
-    document.getElementById('p-complemento').value = p.complemento || '';
+    if (p.genero) marcarOpcao('opc-genero', p.genero);
     document.getElementById('p-bairro').value      = p.bairro || '';
     document.getElementById('p-cidade').value      = p.cidade || '';
     document.getElementById('p-estado').value      = p.estado || '';
     document.getElementById('p-email').value       = user.email;
+    coordCep.lat = p.lat || null;
+    coordCep.lng = p.lng || null;
 
     // Preenche opções
     if (p.estilo)      marcarOpcao('opc-estilo', p.estilo);
@@ -1229,7 +1222,6 @@
     const nome     = document.getElementById('p-nome').value.trim();
     const whatsapp = document.getElementById('p-whatsapp').value.trim();
     const cep      = document.getElementById('p-cep').value.trim();
-    const numero   = document.getElementById('p-numero').value.trim();
     const cidade   = document.getElementById('p-cidade').value.trim();
 
     if (!nome) { mostrarFeedback(fb, 'erro', 'Nome é obrigatório.'); return false; }
@@ -1242,7 +1234,6 @@
     if (!cep || cep.replace(/\D/g,'').length !== 8) {
       mostrarFeedback(fb, 'erro', 'CEP inválido.'); return false;
     }
-    if (!numero)   { mostrarFeedback(fb, 'erro', 'Número é obrigatório.'); return false; }
     if (!cidade)   { mostrarFeedback(fb, 'erro', 'Cidade é obrigatória.'); return false; }
     return true;
   }
@@ -1280,13 +1271,12 @@
         update = {
           nome: nome,
           'perfil.whatsapp':    document.getElementById('p-whatsapp').value.trim(),
-          'perfil.cep':         document.getElementById('p-cep').value.trim(),
-          'perfil.rua':         document.getElementById('p-rua').value.trim(),
-          'perfil.numero':      document.getElementById('p-numero').value.trim(),
-          'perfil.complemento': document.getElementById('p-complemento').value.trim(),
+          'perfil.genero':      getOpcaoSelecionada('opc-genero'),
           'perfil.bairro':      document.getElementById('p-bairro').value.trim(),
           'perfil.cidade':      document.getElementById('p-cidade').value.trim(),
           'perfil.estado':      document.getElementById('p-estado').value.trim(),
+          'perfil.lat':         coordCep.lat,
+          'perfil.lng':         coordCep.lng,
         };
         document.getElementById('status-nome').textContent = nome;
       } else {
@@ -1605,15 +1595,16 @@
     if (v.replace(/\D/g,'').length === 8) {
       status.textContent = '🔍';
       try {
-        const res  = await fetch('https://brasilapi.com.br/api/cep/v1/' + v.replace(/\D/g,''));
+        const res  = await fetch('https://brasilapi.com.br/api/cep/v2/' + v.replace(/\D/g,''));
         const data = await res.json();
-        if (data.street !== undefined) {
-          document.getElementById('p-rua').value    = data.street    || '';
+        if (data.city !== undefined) {
           document.getElementById('p-bairro').value = data.neighborhood || '';
           document.getElementById('p-cidade').value = data.city      || '';
           document.getElementById('p-estado').value = data.state     || '';
+          const coords = data.location && data.location.coordinates;
+          coordCep.lat = coords && coords.latitude  ? Math.round(parseFloat(coords.latitude)  * 100) / 100 : null;
+          coordCep.lng = coords && coords.longitude ? Math.round(parseFloat(coords.longitude) * 100) / 100 : null;
           status.textContent = '✓';
-          document.getElementById('p-numero').focus();
         } else {
           status.textContent = '✗ CEP não encontrado';
         }

@@ -342,7 +342,10 @@
           nome: data.nome || '',
           email: data.email || '',
           cidade: p.cidade || '',
+          lat: typeof p.lat === 'number' ? p.lat : null,
+          lng: typeof p.lng === 'number' ? p.lng : null,
           whatsapp: p.whatsapp || '',
+          genero: p.genero || '',
           experiencia: Array.isArray(p.experiencia) ? p.experiencia.join(', ') : (p.experiencia || ''),
           modalidade: Array.isArray(p.modalidade) ? p.modalidade.join(', ') : (p.modalidade || ''),
           cuidados: p.cuidados || '',
@@ -367,9 +370,11 @@
         nome: data.nome || '',
         email: data.email || '',
         cidade: p.cidade || '',
+        lat: typeof p.lat === 'number' ? p.lat : null,
+        lng: typeof p.lng === 'number' ? p.lng : null,
         whatsapp: p.whatsapp || '',
-        nome_idoso: p.nome_idoso || '',
         idade: p.idade || '',
+        genero_idoso: p.genero_idoso || '',
         condicao:     arr(p.condicao),
         dependencia:  p.dependencia || '',
         rotina:       p.rotina || '',
@@ -495,7 +500,7 @@
       var conds = f.condicao ? f.condicao.split(/[,;]/).map(function(c) {
         return c.trim() ? '<span class="tag tag-cond">' + c.trim() + '</span>' : '';
       }).join('') : '';
-      var idosoInfo = f.nome_idoso ? f.nome_idoso + (f.idade ? ', ' + f.idade + ' anos' : '') : '';
+      var idosoInfo = f.idade ? f.idade + ' anos' + (f.genero_idoso ? ', ' + f.genero_idoso : '') : (f.genero_idoso || '');
 
       var topDir = '';
       if (selF === i) {
@@ -526,14 +531,37 @@
     return (str || '').toLowerCase().trim().normalize('NFD').replace(/[̀-ͯ]/g, '');
   }
 
+  // Distância em km entre dois pontos (fórmula de Haversine)
+  function distanciaKm(lat1, lng1, lat2, lng2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
   function calcularScore(c, f) {
     var pts = 0;
     var detalhes = [];
 
-    // 1. LOCALIZAÇÃO (25 pts)
-    var ptsCidade = (c.cidade && f.cidade && normalizar(c.cidade) === normalizar(f.cidade)) ? 25 : 0;
+    // 1. LOCALIZAÇÃO (25 pts) — distância real quando há coordenadas, senão cai pra mesma cidade
+    var ptsCidade, labelLocal;
+    if (c.lat != null && c.lng != null && f.lat != null && f.lng != null) {
+      var dist = distanciaKm(c.lat, c.lng, f.lat, f.lng);
+      if (dist <= 5)       ptsCidade = 25;
+      else if (dist <= 15) ptsCidade = 18;
+      else if (dist <= 30) ptsCidade = 10;
+      else if (dist <= 50) ptsCidade = 5;
+      else                 ptsCidade = 0;
+      labelLocal = '📍 Distância (' + dist.toFixed(0) + 'km)';
+    } else {
+      ptsCidade = (c.cidade && f.cidade && normalizar(c.cidade) === normalizar(f.cidade)) ? 25 : 0;
+      labelLocal = '📍 Cidade';
+    }
     pts += ptsCidade;
-    detalhes.push({ label: '📍 Cidade', pts: ptsCidade, max: 25 });
+    detalhes.push({ label: labelLocal, pts: ptsCidade, max: 25 });
 
     // 2. CONDIÇÃO / EXPERIÊNCIA (25 pts)
     var ptsExp = 0;
@@ -566,19 +594,19 @@
     pts += ptsCuidado;
     detalhes.push({ label: '💪 Cuidado', pts: ptsCuidado, max: 20 });
 
-    // 4. RESTRIÇÕES (15 pts)
-    var ptsRest = 15;
+    // 4. RESTRIÇÕES (12 pts)
+    var ptsRest = 12;
     var restricao = normalizar(c.restricao);
     var ambiente  = normalizar(f.ambiente);
     if (restricao && restricao !== 'nenhuma') {
       restricao.split(/[,;]/).forEach(function(r) {
         r = r.trim();
-        if (r && ambiente.indexOf(r) !== -1) ptsRest -= 10;
+        if (r && ambiente.indexOf(r) !== -1) ptsRest -= 8;
       });
     }
     ptsRest = Math.max(0, ptsRest);
     pts += ptsRest;
-    detalhes.push({ label: '⚠ Restrições', pts: ptsRest, max: 15 });
+    detalhes.push({ label: '⚠ Restrições', pts: ptsRest, max: 12 });
 
     // 5. ROTINA (10 pts)
     var ptsRotina = 5;
@@ -597,17 +625,27 @@
     pts += ptsRotina;
     detalhes.push({ label: '🕐 Rotina', pts: ptsRotina, max: 10 });
 
-    // 6. CONVERSA (5 pts)
-    var ptsConv = 5;
+    // 6. CONVERSA (3 pts)
+    var ptsConv = 3;
     var conv   = normalizar(f.conversa);
     var estilo = normalizar(c.estilo);
     if (conv === 'muito') {
-      if (estilo.indexOf('comunicativa') !== -1) ptsConv = 5;
-      else if (estilo.indexOf('adapto') !== -1) ptsConv = 3;
-      else ptsConv = 2;
+      if (estilo.indexOf('comunicativa') !== -1) ptsConv = 3;
+      else if (estilo.indexOf('adapto') !== -1) ptsConv = 2;
+      else ptsConv = 1;
     }
     pts += ptsConv;
-    detalhes.push({ label: '💬 Conversa', pts: ptsConv, max: 5 });
+    detalhes.push({ label: '💬 Conversa', pts: ptsConv, max: 3 });
+
+    // 7. GÊNERO (5 pts)
+    var ptsGenero = 5;
+    var prefGen = normalizar(f.genero_pref);
+    var genCuid = normalizar(c.genero);
+    if (prefGen && prefGen !== 'indiferente') {
+      ptsGenero = (genCuid === prefGen) ? 5 : 0;
+    }
+    pts += ptsGenero;
+    detalhes.push({ label: '🚻 Gênero', pts: ptsGenero, max: 5 });
 
     return { total: Math.min(100, pts), detalhes: detalhes };
   }
