@@ -126,6 +126,13 @@
     animation: pulse-borda 1.4s ease-in-out infinite;
     border-color: #3a4e2a !important;
   }
+  @keyframes pulse-numero {
+    0%, 100% { color: #2d2d2d; transform: scale(1); }
+    50%       { color: #c0392b; transform: scale(1.15); }
+  }
+  .resumo-num.tem-novo {
+    animation: pulse-numero 1s ease-in-out infinite;
+  }
   </style>
 </head>
 <body>
@@ -443,6 +450,7 @@
     document.getElementById('num-familias').textContent   = familias.length;
 
     atualizarResumo();
+    marcarNovos();
 
     document.getElementById('loading').style.display  = 'none';
     document.getElementById('container').style.display = 'block';
@@ -491,6 +499,39 @@
     return perfilIncompleto(item, tipo) || documentosIncompletos(item, tipo);
   }
 
+  function parseDataGenerica(v) {
+    if (!v) return 0;
+    if (v.seconds) return v.seconds * 1000;
+    var d = new Date(v);
+    if (!isNaN(d)) return d.getTime();
+    // formato pt-BR: "dd/mm/yyyy, hh:mm:ss"
+    var m = v.match(/(\d{2})\/(\d{2})\/(\d{4})[,\s]+(\d{2}):(\d{2})/);
+    if (m) return new Date(m[3], m[2]-1, m[1], m[4], m[5]).getTime();
+    return 0;
+  }
+
+  function marcarNovos() {
+    try {
+      var ultC = parseInt(localStorage.getItem('kinderAdminVisto_cuidadores') || '0', 10);
+      var ultF = parseInt(localStorage.getItem('kinderAdminVisto_familias') || '0', 10);
+      var temNovoC = cuidadores.some(function(c) { return c.status !== 'excluido' && parseDataGenerica(c.criadoEm) > ultC; });
+      var temNovoF = familias.some(function(f) { return f.status !== 'excluido' && parseDataGenerica(f.criadoEm) > ultF; });
+      document.getElementById('num-cuidadores').classList.toggle('tem-novo', temNovoC);
+      document.getElementById('num-familias').classList.toggle('tem-novo', temNovoF);
+    } catch(e) {
+      console.warn('Admin: falha ao marcar novos cadastros —', e.message);
+    }
+  }
+
+  function marcarVisitado(tipo) {
+    try {
+      localStorage.setItem('kinderAdminVisto_' + tipo, Date.now());
+      document.getElementById('num-' + tipo).classList.remove('tem-novo');
+    } catch(e) {
+      console.warn('Admin: falha ao marcar visitado —', e.message);
+    }
+  }
+
   function filtrar(lista) {
     var busca  = document.getElementById('filtro-busca').value.toLowerCase();
     var status = document.getElementById('filtro-status').value;
@@ -518,22 +559,13 @@
     if (ordem === 'az') resultado.sort(function(a, b) { return (a.nome||'').localeCompare(b.nome||'', 'pt'); });
     else if (ordem === 'za') resultado.sort(function(a, b) { return (b.nome||'').localeCompare(a.nome||'', 'pt'); });
     else resultado.sort(function(a, b) {
-      function parseData(v) {
-        if (!v) return 0;
-        if (v.seconds) return v.seconds * 1000;
-        var d = new Date(v);
-        if (!isNaN(d)) return d.getTime();
-        // formato pt-BR: "dd/mm/yyyy, hh:mm:ss"
-        var m = v.match(/(\d{2})\/(\d{2})\/(\d{4})[,\s]+(\d{2}):(\d{2})/);
-        if (m) return new Date(m[3], m[2]-1, m[1], m[4], m[5]).getTime();
-        return 0;
-      }
-      return parseData(b.criadoEm) - parseData(a.criadoEm);
+      return parseDataGenerica(b.criadoEm) - parseDataGenerica(a.criadoEm);
     });
     return resultado;
   }
 
   function renderCuidadores() {
+    marcarVisitado('cuidadores');
     var lista = filtrar(cuidadores);
     var el    = document.getElementById('cards-grid');
     if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhum cuidador encontrado.</div>'; return; }
@@ -584,6 +616,7 @@
   }
 
   function renderFamilias() {
+    marcarVisitado('familias');
     var lista = filtrar(familias);
     var el    = document.getElementById('cards-grid');
     if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhuma família encontrada.</div>'; return; }
