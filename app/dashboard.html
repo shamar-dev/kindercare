@@ -229,6 +229,12 @@
       background: white;
     }
 
+    .campo input:read-only {
+      background: #f0f0f0;
+      color: #888;
+      cursor: not-allowed;
+    }
+
     .campo textarea { resize: vertical; min-height: 80px; }
 
     .campo-row {
@@ -691,16 +697,16 @@
       </div>
       <div class="campo">
         <label>Bairro</label>
-        <input type="text" id="p-bairro" placeholder="Preenchido pelo CEP">
+        <input type="text" id="p-bairro" placeholder="Preenchido pelo CEP" readonly>
       </div>
       <div class="campo-row">
         <div class="campo">
           <label>Cidade</label>
-          <input type="text" id="p-cidade" placeholder="Preenchido pelo CEP">
+          <input type="text" id="p-cidade" placeholder="Preenchido pelo CEP" readonly>
         </div>
         <div class="campo">
           <label>Estado</label>
-          <input type="text" id="p-estado" placeholder="UF" maxlength="2">
+          <input type="text" id="p-estado" placeholder="UF" maxlength="2" readonly>
         </div>
       </div>
       <button class="btn-salvar" onclick="salvarSecao('pessoal')">Salvar dados pessoais</button>
@@ -1598,19 +1604,31 @@
       try {
         const res  = await fetch('https://brasilapi.com.br/api/cep/v2/' + v.replace(/\D/g,''));
         const data = await res.json();
+        const bairroEl = document.getElementById('p-bairro');
+        const cidadeEl = document.getElementById('p-cidade');
+        const estadoEl = document.getElementById('p-estado');
         if (data.city !== undefined) {
-          document.getElementById('p-bairro').value = data.neighborhood || '';
-          document.getElementById('p-cidade').value = data.city      || '';
-          document.getElementById('p-estado').value = data.state     || '';
+          bairroEl.readOnly = true;
+          cidadeEl.readOnly = true;
+          estadoEl.readOnly = true;
+          bairroEl.value = data.neighborhood || '';
+          cidadeEl.value = data.city      || '';
+          estadoEl.value = data.state     || '';
           const coords = data.location && data.location.coordinates;
           coordCep.lat = coords && coords.latitude  ? Math.round(parseFloat(coords.latitude)  * 100) / 100 : null;
           coordCep.lng = coords && coords.longitude ? Math.round(parseFloat(coords.longitude) * 100) / 100 : null;
           status.textContent = '✓';
         } else {
-          status.textContent = '✗ CEP não encontrado';
+          bairroEl.readOnly = false;
+          cidadeEl.readOnly = false;
+          estadoEl.readOnly = false;
+          status.textContent = '✗ CEP não encontrado — preencha manualmente';
         }
       } catch(e) {
-        status.textContent = '';
+        document.getElementById('p-bairro').readOnly = false;
+        document.getElementById('p-cidade').readOnly = false;
+        document.getElementById('p-estado').readOnly = false;
+        status.textContent = '✗ Erro ao buscar — preencha manualmente';
       }
     } else {
       status.textContent = '';

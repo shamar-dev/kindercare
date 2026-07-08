@@ -94,6 +94,7 @@
     .campo label { display: block; font-size: 11px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
     .campo input, .campo select, .campo textarea { width: 100%; padding: 11px 14px; border: 1.5px solid #e8e8e8; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; color: #2d2d2d; outline: none; background: #fafafa; transition: border 0.2s, background 0.2s; }
     .campo input:focus, .campo select:focus { border-color: #6b7c52; background: white; }
+    .campo input:read-only { background: #f0f0f0; color: #888; cursor: not-allowed; }
     .campo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 480px) { .campo-row { grid-template-columns: 1fr; } }
 
@@ -249,16 +250,16 @@
       </div>
       <div class="campo">
         <label>Bairro</label>
-        <input type="text" id="p-bairro" placeholder="Preenchido pelo CEP">
+        <input type="text" id="p-bairro" placeholder="Preenchido pelo CEP" readonly>
       </div>
       <div class="campo-row">
         <div class="campo">
           <label>Cidade</label>
-          <input type="text" id="p-cidade" placeholder="Preenchido pelo CEP">
+          <input type="text" id="p-cidade" placeholder="Preenchido pelo CEP" readonly>
         </div>
         <div class="campo">
           <label>Estado</label>
-          <input type="text" id="p-estado" placeholder="UF" maxlength="2">
+          <input type="text" id="p-estado" placeholder="UF" maxlength="2" readonly>
         </div>
       </div>
       <button class="btn-salvar" onclick="salvar('familiar')">Salvar</button>
@@ -1358,16 +1359,32 @@
       try {
         var res  = await fetch('https://brasilapi.com.br/api/cep/v2/' + v.replace(/\D/g,''));
         var data = await res.json();
+        var bairroEl = document.getElementById('p-bairro');
+        var cidadeEl = document.getElementById('p-cidade');
+        var estadoEl = document.getElementById('p-estado');
         if (data.city !== undefined) {
-          document.getElementById('p-bairro').value = data.neighborhood  || '';
-          document.getElementById('p-cidade').value = data.city          || '';
-          document.getElementById('p-estado').value = data.state         || '';
+          bairroEl.readOnly = true;
+          cidadeEl.readOnly = true;
+          estadoEl.readOnly = true;
+          bairroEl.value = data.neighborhood  || '';
+          cidadeEl.value = data.city          || '';
+          estadoEl.value = data.state         || '';
           var coords = data.location && data.location.coordinates;
           coordCep.lat = coords && coords.latitude  ? Math.round(parseFloat(coords.latitude)  * 100) / 100 : null;
           coordCep.lng = coords && coords.longitude ? Math.round(parseFloat(coords.longitude) * 100) / 100 : null;
           st.textContent = '✓';
-        } else { st.textContent = '✗'; }
-      } catch(e) { st.textContent = ''; }
+        } else {
+          bairroEl.readOnly = false;
+          cidadeEl.readOnly = false;
+          estadoEl.readOnly = false;
+          st.textContent = '✗ CEP não encontrado — preencha manualmente';
+        }
+      } catch(e) {
+        document.getElementById('p-bairro').readOnly = false;
+        document.getElementById('p-cidade').readOnly = false;
+        document.getElementById('p-estado').readOnly = false;
+        st.textContent = '✗ Erro ao buscar — preencha manualmente';
+      }
     } else { st.textContent = ''; }
   });
   function toggleOpcao(btn, grupo) {
