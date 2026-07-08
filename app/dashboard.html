@@ -911,7 +911,7 @@
 
   let currentUser = null;
   let dadosFirestore = {};
-  let coordCep = { lat: null, lng: null };
+  window.coordCep = { lat: null, lng: null };
 
   // ── AUTH STATE ─────────────────────────────────────
   onAuthStateChanged(auth, async (user) => {

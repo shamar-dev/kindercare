@@ -524,7 +524,7 @@
   const db   = getFirestore(app);
 
   let currentUser = null;
-  let coordCep = { lat: null, lng: null };
+  window.coordCep = { lat: null, lng: null };
   let dadosFS = {};
   let interessesMap = {}; // cuidadorId -> { status, interesseId }
 
