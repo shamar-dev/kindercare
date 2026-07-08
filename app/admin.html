@@ -373,6 +373,20 @@
   var familias   = [];
   var tabAtual   = 'cuidadores';
 
+  // ── SEGURANÇA ───────────────────────────────────────
+  // Escapa texto vindo do usuário antes de inserir como HTML (evita XSS armazenado)
+  function escapeHtml(str) {
+    return (str == null ? '' : String(str))
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  // Escapa texto vindo do usuário antes de embutir dentro de uma string JS de aspas simples
+  // usada em atributo onclick="..." (evita quebrar o atributo ou a string JS)
+  function escapeJsAttr(str) {
+    return (str == null ? '' : String(str))
+      .replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
   // ── AUTH ────────────────────────────────────────────
   onAuthStateChanged(auth, async (user) => {
     if (!user) return; // aguarda login manual
@@ -583,14 +597,14 @@
           : '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#f5f5f5;color:#bbb;">✗ ' + label + '</span>';
       };
 
-      var cidadeTag = p.cidade ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;">📍 ' + p.cidade + '</span>' : '';
+      var cidadeTag = p.cidade ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;">📍 ' + escapeHtml(p.cidade) + '</span>' : '';
       var obsId = 'obs-c-' + c.uid;
       return '<div class="card" style="padding:12px 16px;cursor:pointer;" onclick="abrirDetalhesCuidadora(event,\'' + c.uid + '\')">' +
         '<div style="display:flex;align-items:center;gap:14px;">' +
           '<div class="card-foto" style="flex-shrink:0;">' + foto + '</div>' +
           '<div style="flex:1;min-width:0;">' +
-            '<div class="card-nome">' + (c.nome || '—') + cidadeTag + (perfilIncompleto(c, 'cuidadores') ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fff3e0;color:#a05a10;">⚠️ Falta perfil</span>' : '') + '</div>' +
-            '<div class="card-email">' + (c.email || '') + '</div>' +
+            '<div class="card-nome">' + (c.nome ? escapeHtml(c.nome) : '—') + cidadeTag + (perfilIncompleto(c, 'cuidadores') ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fff3e0;color:#a05a10;">⚠️ Falta perfil</span>' : '') + '</div>' +
+            '<div class="card-email">' + escapeHtml(c.email) + '</div>' +
             datasC +
           '</div>' +
           '<div style="display:flex;flex-direction:row;gap:4px;align-items:center;flex-shrink:0;">' +
@@ -605,12 +619,12 @@
                   '<option value="aprovado"'  + (c.status==='aprovado' ?' selected':'') + '>✅ Aprovado</option>' +
                   '<option value="suspenso"'  + (c.status==='suspenso' ?' selected':'') + '>🚫 Suspenso</option>' +
                 '</select>' +
-                '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\',\'' + (c.nome||c.uid).replace(/'/g,"\\'") + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+                '<button onclick="excluirRegistro(\'cuidadores\',\'' + c.uid + '\',\'' + escapeJsAttr(c.nome||c.uid) + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
             ) +
           '</div>' +
         '</div>' +
         '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5;" onclick="event.stopPropagation()">' +
-          '<textarea id="' + obsId + '" placeholder="📝 Observação interna..." onblur="salvarObs(\'cuidadores\',\'' + c.uid + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid #ece9e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;color:#555;resize:none;outline:none;background:#fffdf7;height:54px;line-height:1.5;">' + (c.observacaoAdmin || '') + '</textarea>' +
+          '<textarea id="' + obsId + '" placeholder="📝 Observação interna..." onblur="salvarObs(\'cuidadores\',\'' + c.uid + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid #ece9e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;color:#555;resize:none;outline:none;background:#fffdf7;height:54px;line-height:1.5;">' + escapeHtml(c.observacaoAdmin) + '</textarea>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -628,14 +642,14 @@
       var fmtData = function(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); };
       var datasF = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(f.criadoEm) + ' · 🕐 ' + fmtData(f.ultimoAcesso) + '</div>';
 
-      var cidadeTagF = p.cidade ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;">📍 ' + p.cidade + '</span>' : '';
+      var cidadeTagF = p.cidade ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;">📍 ' + escapeHtml(p.cidade) + '</span>' : '';
       var obsIdF = 'obs-f-' + f.uid;
       return '<div class="card" style="padding:12px 16px;cursor:pointer;" onclick="abrirDetalhesFamilia(event,\'' + f.uid + '\')">' +
         '<div style="display:flex;align-items:center;gap:14px;">' +
           '<div class="card-foto" style="flex-shrink:0;">🏠</div>' +
           '<div style="flex:1;min-width:0;">' +
-            '<div class="card-nome">' + (f.nome || '—') + cidadeTagF + (perfilIncompleto(f, 'familias') ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fff3e0;color:#a05a10;">⚠️ Falta perfil</span>' : '') + '</div>' +
-            '<div class="card-email">' + (f.email || '') + '</div>' +
+            '<div class="card-nome">' + (f.nome ? escapeHtml(f.nome) : '—') + cidadeTagF + (perfilIncompleto(f, 'familias') ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#fff3e0;color:#a05a10;">⚠️ Falta perfil</span>' : '') + '</div>' +
+            '<div class="card-email">' + escapeHtml(f.email) + '</div>' +
             datasF +
           '</div>' +
           '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
@@ -648,12 +662,12 @@
                   '<option value="match"'      + (f.status==='match'     ?' selected':'') + '>💚 Match encontrado</option>' +
                   '<option value="suspenso"'   + (f.status==='suspenso'  ?' selected':'') + '>🚫 Suspenso</option>' +
                 '</select>' +
-                '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\',\'' + (f.nome||f.uid).replace(/'/g,"\\'") + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
+                '<button onclick="excluirRegistro(\'familias\',\'' + f.uid + '\',\'' + escapeJsAttr(f.nome||f.uid) + '\')" title="Excluir" style="background:none;border:none;cursor:pointer;font-size:16px;color:#ddd;padding:4px;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">🗑</button>'
             ) +
           '</div>' +
         '</div>' +
         '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5;" onclick="event.stopPropagation()">' +
-          '<textarea id="' + obsIdF + '" placeholder="📝 Observação interna..." onblur="salvarObs(\'familias\',\'' + f.uid + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid #ece9e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;color:#555;resize:none;outline:none;background:#fffdf7;height:54px;line-height:1.5;">' + (f.observacaoAdmin || '') + '</textarea>' +
+          '<textarea id="' + obsIdF + '" placeholder="📝 Observação interna..." onblur="salvarObs(\'familias\',\'' + f.uid + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid #ece9e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;color:#555;resize:none;outline:none;background:#fffdf7;height:54px;line-height:1.5;">' + escapeHtml(f.observacaoAdmin) + '</textarea>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -733,7 +747,7 @@
         var chaveInteresse = (m.familiaId||'') + '_' + (m.cuidadorId||'');
         var temNaoLidas = paresNaoLidos.has(chaveInteresse);
         var btnMsgs = temMsgs
-          ? '<button id="btn-conv-' + chaveInteresse + '" onclick="verMensagensInteresse(\'' + (m.familiaId||'') + '\',\'' + (m.cuidadorId||'') + '\',\'' + (m.familiaNome||'').replace(/'/g,"\\'") + '\',\'' + (m.cuidadorNome||'').replace(/'/g,"\\'") + '\')" class="' + (temNaoLidas ? 'btn-msgs-novo' : '') + '" style="background:#f0f2ec;color:#3a4e2a;border:1px solid #c8d8a0;padding:7px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">💬 Conversa</button>'
+          ? '<button id="btn-conv-' + chaveInteresse + '" onclick="verMensagensInteresse(\'' + (m.familiaId||'') + '\',\'' + (m.cuidadorId||'') + '\',\'' + escapeJsAttr(m.familiaNome||'') + '\',\'' + escapeJsAttr(m.cuidadorNome||'') + '\')" class="' + (temNaoLidas ? 'btn-msgs-novo' : '') + '" style="background:#f0f2ec;color:#3a4e2a;border:1px solid #c8d8a0;padding:7px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">💬 Conversa</button>'
           : '<button disabled style="background:#f5f5f5;color:#ccc;border:1px solid #eee;padding:7px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:not-allowed;">💬 Conversa</button>';
         var btns = m.status === 'pendente'
           ? '<button onclick="aprovarInteresse(\'' + id + '\')" style="background:#3a4e2a;color:#c8d8a0;border:none;padding:7px 14px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-right:6px;">✅ Aprovar</button>' +
@@ -741,9 +755,9 @@
           : '';
         return '<div style="background:white;border-radius:12px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:16px;">' +
           '<div>' +
-            '<div style="font-size:14px;font-weight:700;color:#2d2d2d;margin-bottom:2px;">💚 ' + (m.familiaNome || '—') + ' → 🧑‍⚕️ ' + (m.cuidadorNome || '—') + '</div>' +
+            '<div style="font-size:14px;font-weight:700;color:#2d2d2d;margin-bottom:2px;">💚 ' + (m.familiaNome ? escapeHtml(m.familiaNome) : '—') + ' → 🧑‍⚕️ ' + (m.cuidadorNome ? escapeHtml(m.cuidadorNome) : '—') + '</div>' +
             '<div style="font-size:12px;color:#aaa;">' + data + ' · ' + (m.score || 0) + '% compatibilidade · ' + label + '</div>' +
-            '<div style="font-size:12px;color:#888;">' + (m.familiaEmail || '') + '</div>' +
+            '<div style="font-size:12px;color:#888;">' + escapeHtml(m.familiaEmail) + '</div>' +
           '</div>' +
           '<div style="display:flex;gap:6px;align-items:center;white-space:nowrap;">' + btnMsgs + btns + '</div>' +
         '</div>';
@@ -831,8 +845,8 @@
       if (preview.length > 55) preview = preview.substring(0, 55) + '…';
       return '<div onclick="abrirAdminConversa(\'' + chave + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#fafafa;border-radius:12px;cursor:pointer;border:1.5px solid #f0f0f0;">' +
         '<div style="flex:1;min-width:0;">' +
-          '<div style="font-size:13px;font-weight:700;color:#2d2d2d;margin-bottom:3px;">👨‍👩‍👦 ' + (c.familiaNome || '—') + '</div>' +
-          '<div style="font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + preview + '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#2d2d2d;margin-bottom:3px;">👨‍👩‍👦 ' + (c.familiaNome ? escapeHtml(c.familiaNome) : '—') + '</div>' +
+          '<div style="font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(preview) + '</div>' +
         '</div>' +
         '<span style="font-size:16px;color:#ccc;margin-left:12px;">›</span>' +
       '</div>';
@@ -849,8 +863,8 @@
       return '<div style="display:flex;justify-content:' + (deFamilia ? 'flex-start' : 'flex-end') + ';margin-bottom:6px;">' +
         '<div style="max-width:80%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;' +
           (deFamilia ? 'background:#f0f2ec;color:#2d2d2d;' : 'background:#3a4e2a;color:#c8d8a0;') + '">' +
-          '<div style="font-size:10px;font-weight:700;margin-bottom:3px;opacity:0.7;">' + (deFamilia ? (c.familiaNome||'Família') : 'Cuidadora') + '</div>' +
-          m.texto +
+          '<div style="font-size:10px;font-weight:700;margin-bottom:3px;opacity:0.7;">' + (deFamilia ? escapeHtml(c.familiaNome||'Família') : 'Cuidadora') + '</div>' +
+          escapeHtml(m.texto) +
         '</div>' +
       '</div>';
     }).join('');
@@ -922,14 +936,14 @@
           var deFamilia = m.de === 'familia';
           var texto = m.deletadaPorAdmin
             ? '<em style="color:#aaa;font-size:12px;">⚠️ Mensagem removida pelo administrador.</em>'
-            : m.texto;
+            : escapeHtml(m.texto);
           var btnDel = m.deletadaPorAdmin ? '' :
             '<button onclick="deletarMsgAdmin(\'' + mid + '\')" title="Remover mensagem" style="background:none;border:none;cursor:pointer;font-size:11px;color:#ddd;padding:2px 4px;line-height:1;flex-shrink:0;" onmouseover="this.style.color=\'#e57373\'" onmouseout="this.style.color=\'#ddd\'">✕</button>';
           return '<div style="display:flex;align-items:flex-start;justify-content:' + (deFamilia ? 'flex-start' : 'flex-end') + ';gap:4px;">' +
             (deFamilia ? '' : btnDel) +
             '<div id="msg-admin-' + mid + '" style="max-width:80%;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;' +
               (deFamilia ? 'background:#f0f2ec;color:#2d2d2d;' : 'background:#3a4e2a;color:#c8d8a0;') + '">' +
-              '<div style="font-size:10px;font-weight:700;margin-bottom:3px;opacity:0.7;">' + (deFamilia ? familiaNome : cuidadorNome) + '</div>' +
+              '<div style="font-size:10px;font-weight:700;margin-bottom:3px;opacity:0.7;">' + escapeHtml(deFamilia ? familiaNome : cuidadorNome) + '</div>' +
               texto +
             '</div>' +
             (deFamilia ? btnDel : '') +
@@ -953,7 +967,7 @@
   // ── MODAIS DETALHE ─────────────────────────────────
   function linha(label, valor) {
     if (!valor) return '';
-    return '<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">' + label + '</div><div style="font-size:14px;color:#2d2d2d;">' + valor + '</div></div>';
+    return '<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;">' + label + '</div><div style="font-size:14px;color:#2d2d2d;">' + escapeHtml(valor) + '</div></div>';
   }
   function arr(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); }
 
@@ -969,9 +983,9 @@
     document.getElementById('detalhe-c-corpo').innerHTML =
       '<div style="display:flex;align-items:center;gap:16px;">' + fotoHtml +
         '<div>' +
-          '<div style="font-size:17px;font-weight:700;color:#2d2d2d;">' + (c.nome || '—') + '</div>' +
-          '<div style="font-size:13px;color:#aaa;">' + (c.email || '') + '</div>' +
-          (p.whatsapp ? '<div style="font-size:13px;color:#3a4e2a;margin-top:4px;">📱 ' + p.whatsapp + '</div>' : '') +
+          '<div style="font-size:17px;font-weight:700;color:#2d2d2d;">' + (c.nome ? escapeHtml(c.nome) : '—') + '</div>' +
+          '<div style="font-size:13px;color:#aaa;">' + escapeHtml(c.email) + '</div>' +
+          (p.whatsapp ? '<div style="font-size:13px;color:#3a4e2a;margin-top:4px;">📱 ' + escapeHtml(p.whatsapp) + '</div>' : '') +
         '</div>' +
       '</div>' +
       '<hr style="border:none;border-top:1px solid #f0f0f0;">' +
@@ -996,9 +1010,9 @@
     document.getElementById('detalhe-f-titulo').textContent = f.nome || '—';
     document.getElementById('detalhe-f-corpo').innerHTML =
       '<div>' +
-        '<div style="font-size:17px;font-weight:700;color:#2d2d2d;">' + (f.nome || '—') + '</div>' +
-        '<div style="font-size:13px;color:#aaa;">' + (f.email || '') + '</div>' +
-        (p.whatsapp ? '<div style="font-size:13px;color:#3a4e2a;margin-top:4px;">📱 ' + p.whatsapp + '</div>' : '') +
+        '<div style="font-size:17px;font-weight:700;color:#2d2d2d;">' + (f.nome ? escapeHtml(f.nome) : '—') + '</div>' +
+        '<div style="font-size:13px;color:#aaa;">' + escapeHtml(f.email) + '</div>' +
+        (p.whatsapp ? '<div style="font-size:13px;color:#3a4e2a;margin-top:4px;">📱 ' + escapeHtml(p.whatsapp) + '</div>' : '') +
       '</div>' +
       '<hr style="border:none;border-top:1px solid #f0f0f0;">' +
       linha('Cidade', p.cidade) +

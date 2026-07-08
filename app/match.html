@@ -280,6 +280,13 @@
   var selF = null;
   var naoDeramCerto = []; // cuidadorIds já tentados com a família selecionada
 
+  // Escapa texto vindo do usuário antes de inserir como HTML (evita XSS armazenado)
+  function escapeHtml(str) {
+    return (str == null ? '' : String(str))
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   // ── AUTH ────────────────────────────────────────────
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
@@ -466,13 +473,13 @@
 
       return '<div class="card ' + sel + '" onclick="selecionarCuidador(' + i + ')" style="' + (jaTentado ? 'opacity:0.5;' : '') + '">' +
         topDir +
-        (jaTentado ? '<div style="font-size:11px;color:#e57373;font-weight:700;margin-bottom:4px;">❌ Não deu certo · ' + (matchAnterior.score || 0) + '% · ' + (matchAnterior.destaques || []).join(' · ') + '</div>' : '') +
-        '<div class="card-nome">' + c.nome + '</div>' +
-        '<div class="card-cidade">📍 ' + (c.cidade || '—') + '</div>' +
+        (jaTentado ? '<div style="font-size:11px;color:#e57373;font-weight:700;margin-bottom:4px;">❌ Não deu certo · ' + (matchAnterior.score || 0) + '% · ' + escapeHtml((matchAnterior.destaques || []).join(' · ')) + '</div>' : '') +
+        '<div class="card-nome">' + escapeHtml(c.nome) + '</div>' +
+        '<div class="card-cidade">📍 ' + (c.cidade ? escapeHtml(c.cidade) : '—') + '</div>' +
         '<div class="tags">' + exps + mods + '</div>' +
         '<div class="card-contato">' +
-          (c.whatsapp ? '<span>📱 ' + c.whatsapp + '</span>' : '') +
-          (c.email ? '<span>✉ ' + c.email + '</span>' : '') +
+          (c.whatsapp ? '<span>📱 ' + escapeHtml(c.whatsapp) + '</span>' : '') +
+          (c.email ? '<span>✉ ' + escapeHtml(c.email) + '</span>' : '') +
         '</div>' +
       '</div>';
     }).join('');
@@ -514,13 +521,13 @@
 
       return '<div class="card ' + sel + '" onclick="selecionarFamilia(' + i + ')">' +
         topDir +
-        '<div class="card-nome">' + f.nome + '</div>' +
-        '<div class="card-cidade">📍 ' + (f.cidade || '—') + '</div>' +
-        (idosoInfo ? '<div style="font-size:13px;color:#555;margin-bottom:8px;">👴 ' + idosoInfo + '</div>' : '') +
+        '<div class="card-nome">' + escapeHtml(f.nome) + '</div>' +
+        '<div class="card-cidade">📍 ' + (f.cidade ? escapeHtml(f.cidade) : '—') + '</div>' +
+        (idosoInfo ? '<div style="font-size:13px;color:#555;margin-bottom:8px;">👴 ' + escapeHtml(idosoInfo) + '</div>' : '') +
         '<div class="tags">' + conds + '</div>' +
         '<div class="card-contato">' +
-          (f.whatsapp ? '<span>📱 ' + f.whatsapp + '</span>' : '') +
-          (f.email ? '<span>✉ ' + f.email + '</span>' : '') +
+          (f.whatsapp ? '<span>📱 ' + escapeHtml(f.whatsapp) + '</span>' : '') +
+          (f.email ? '<span>✉ ' + escapeHtml(f.email) + '</span>' : '') +
         '</div>' +
       '</div>';
     }).join('');
@@ -583,13 +590,18 @@
     var ptsCuidado = 10;
     var dep = normalizar(f.dependencia);
     var cui = normalizar(c.cuidados);
-    if (dep === 'dependente') {
+    if (dep === 'independente') {
+      ptsCuidado = 20;
+    } else if (dep === 'semi') {
+      if (cui === 'todos') ptsCuidado = 20;
+      else if (cui.indexOf('maioria') !== -1) ptsCuidado = 18;
+      else if (cui.indexOf('menor') !== -1) ptsCuidado = 12;
+      else if (cui.indexOf('basico') !== -1) ptsCuidado = 8;
+    } else if (dep === 'dependente' || dep === 'acamado') {
       if (cui === 'todos') ptsCuidado = 20;
       else if (cui.indexOf('maioria') !== -1) ptsCuidado = 14;
       else if (cui.indexOf('menor') !== -1) ptsCuidado = 6;
       else if (cui.indexOf('basico') !== -1) ptsCuidado = 3;
-    } else if (dep === 'independente') {
-      ptsCuidado = 20;
     }
     pts += ptsCuidado;
     detalhes.push({ label: '💪 Cuidado', pts: ptsCuidado, max: 20 });
@@ -684,8 +696,8 @@
     if (!c && !f) { bar.classList.remove('visivel'); return; }
     bar.classList.add('visivel');
 
-    var nc = c ? '<strong>' + c.nome.split(' ')[0] + '</strong>' : '<span style="color:#aaa">← selecione cuidadora</span>';
-    var nf = f ? '<strong>' + f.nome.split(' ')[0] + '</strong>' : '<span style="color:#aaa">selecione família →</span>';
+    var nc = c ? '<strong>' + escapeHtml(c.nome.split(' ')[0]) + '</strong>' : '<span style="color:#aaa">← selecione cuidadora</span>';
+    var nf = f ? '<strong>' + escapeHtml(f.nome.split(' ')[0]) + '</strong>' : '<span style="color:#aaa">selecione família →</span>';
     nomes.innerHTML = nc + ' ↔ ' + nf;
 
     if (c && f) {
