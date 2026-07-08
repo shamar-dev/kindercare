@@ -529,14 +529,16 @@
   let interessesMap = {}; // cuidadorId -> { status, interesseId }
 
   // Escapa texto vindo do usuário antes de inserir como HTML (evita XSS armazenado)
-  function escapeHtml(str) {
+  // window.* pois esse arquivo tem um <script type="module"> e outro comum depois —
+  // sem isso, o segundo script não enxerga a função (mesmo bug que o coordCep já teve)
+  window.escapeHtml = function(str) {
     return (str == null ? '' : String(str))
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
+  };
   // Escapa texto vindo do usuário antes de embutir dentro de uma string JS de aspas simples
   // usada em atributo onclick="..." (evita quebrar o atributo ou a string JS)
-  function escapeJsAttr(str) {
+  window.escapeJsAttr = function(str) {
     return (str == null ? '' : String(str))
       .replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
   }
