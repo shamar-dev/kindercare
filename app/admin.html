@@ -111,6 +111,8 @@
     .status-select.suspenso   { border-color: #f0a0a0; color: #800000; background: #fee8e8; }
     .status-select.andamento  { border-color: #a0b8f0; color: #1a3a80; background: #e8f0ff; }
     .status-select.match      { border-color: #90c880; color: #2a5a1a; background: #eef8e8; }
+    .status-select.doc-ok      { border-color: #90c880; color: #2a5a1a; background: #eef8e8; }
+    .status-select.doc-vencido { border-color: #f0a0a0; color: #800000; background: #fee8e8; }
 
     .btn-whats { background: #25d366; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 
@@ -591,10 +593,11 @@
       var fmtData = function(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); };
       var datasC = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(c.criadoEm) + ' · 🕐 ' + fmtData(c.ultimoAcesso) + '</div>';
 
-      var docTag = function(url, label) {
-        return url
-          ? '<a href="' + url + '" target="_blank" onclick="event.stopPropagation()" style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;text-decoration:none;">✓ ' + label + '</a>'
-          : '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#f5f5f5;color:#bbb;">✗ ' + label + '</span>';
+      var docTag = function(url, tipo, label) {
+        if (!url) return '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#f5f5f5;color:#bbb;">✗ ' + label + '</span>';
+        var vencido = p.docStatus && p.docStatus[tipo] === 'vencido';
+        var bg = vencido ? '#fee8e8' : '#eef3e8', fg = vencido ? '#800000' : '#3a4e2a', icone = vencido ? '⚠️' : '✓';
+        return '<a href="' + url + '" target="_blank" onclick="event.stopPropagation()" style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:' + bg + ';color:' + fg + ';text-decoration:none;">' + icone + ' ' + label + '</a>';
       };
 
       var cidadeTag = p.cidade ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;">📍 ' + escapeHtml(p.cidade) + '</span>' : '';
@@ -608,7 +611,7 @@
             datasC +
           '</div>' +
           '<div style="display:flex;flex-direction:row;gap:4px;align-items:center;flex-shrink:0;">' +
-            docTag(p.docFrenteUrl, 'Frente') + docTag(p.docVersoUrl, 'Verso') + docTag(p.antecedentesUrl, 'Antecedentes') +
+            docTag(p.docFrenteUrl, 'frente', 'Frente') + docTag(p.docVersoUrl, 'verso', 'Verso') + docTag(p.antecedentesUrl, 'antecedentes', 'Antecedentes') +
           '</div>' +
           '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
             (c.status === 'excluido'
@@ -971,6 +974,26 @@
   }
   function arr(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); }
 
+  function docStatusHtml(uid, tipo, label, url, docStatus) {
+    if (!url) {
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid #f5f5f5;">' +
+        '<span style="font-size:13px;color:#2d2d2d;font-weight:600;">' + label + '</span>' +
+        '<span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;background:#fee8e8;color:#800000;">❌ Falta</span>' +
+      '</div>';
+    }
+    var st = (docStatus && docStatus[tipo]) || 'ok';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid #f5f5f5;">' +
+      '<span style="font-size:13px;color:#2d2d2d;font-weight:600;">' + label + '</span>' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+        '<a href="' + url + '" target="_blank" style="font-size:12px;font-weight:700;color:#3a4e2a;">👁️ Ver</a>' +
+        '<select class="status-select doc-' + st + '" onchange="mudarStatusDoc(\'' + uid + '\',\'' + tipo + '\',this)">' +
+          '<option value="ok"'      + (st==='ok'      ? ' selected' : '') + '>✅ OK</option>' +
+          '<option value="vencido"' + (st==='vencido' ? ' selected' : '') + '>⚠️ Vencido</option>' +
+        '</select>' +
+      '</div>' +
+    '</div>';
+  }
+
   window.abrirDetalhesCuidadora = function(event, uid) {
     if (event.target.closest('select,button,a')) return;
     var c = cuidadores.find(function(x) { return x.uid === uid; });
@@ -998,7 +1021,11 @@
       linha('Estilo de trabalho', arr(p.estilo)) +
       linha('Restrições', p.restricao) +
       linha('Limite de peso', p.limite) +
-      linha('Sobre', p.sobre);
+      linha('Sobre', p.sobre) +
+      '<div style="font-size:11px;font-weight:700;color:#6b7c52;text-transform:uppercase;letter-spacing:1px;margin:12px 0 4px;">Documentos</div>' +
+      docStatusHtml(c.uid, 'frente', 'RG/CNH — Frente', p.docFrenteUrl, p.docStatus) +
+      docStatusHtml(c.uid, 'verso', 'RG/CNH — Verso', p.docVersoUrl, p.docStatus) +
+      docStatusHtml(c.uid, 'antecedentes', 'Antecedentes criminais', p.antecedentesUrl, p.docStatus);
     document.getElementById('modal-detalhe-cuidadora').style.display = 'flex';
   };
 
@@ -1058,6 +1085,24 @@
       atualizarResumo();
     } catch(e) {
       alert('Erro ao salvar status: ' + e.message);
+    }
+  };
+
+  window.mudarStatusDoc = async function(uid, tipo, selectEl) {
+    var novoStatus = selectEl.value;
+    selectEl.className = 'status-select doc-' + novoStatus;
+    try {
+      var campo = {};
+      campo['perfil.docStatus.' + tipo] = novoStatus;
+      await updateDoc(doc(db, 'cuidadores', uid), campo);
+      var item = cuidadores.find(function(i) { return i.uid === uid; });
+      if (item) {
+        item.perfil = item.perfil || {};
+        item.perfil.docStatus = item.perfil.docStatus || {};
+        item.perfil.docStatus[tipo] = novoStatus;
+      }
+    } catch(e) {
+      alert('Erro ao salvar status do documento: ' + e.message);
     }
   };
 
