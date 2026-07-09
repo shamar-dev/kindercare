@@ -756,8 +756,14 @@
       else if (dist <= 50) ptsCidade = 5;
       else ptsCidade = 0;
       labelLocal = '📍 Distância (' + dist.toFixed(0) + 'km)';
+    } else if (c.cidade && f.cidade && normalizar(c.cidade) === normalizar(f.cidade)) {
+      ptsCidade = 25;
+      labelLocal = '📍 Cidade';
+    } else if (c.estado && f.estado && normalizar(c.estado) === normalizar(f.estado)) {
+      ptsCidade = 12;
+      labelLocal = '📍 Mesmo estado';
     } else {
-      ptsCidade = (c.cidade && f.cidade && normalizar(c.cidade) === normalizar(f.cidade)) ? 25 : 0;
+      ptsCidade = 0;
       labelLocal = '📍 Cidade';
     }
     pts += ptsCidade; detalhes.push({ label: labelLocal, pts: ptsCidade, max: 25 });
@@ -1217,6 +1223,7 @@
       var arr = function(v) { return Array.isArray(v) ? v.join(', ') : (v || ''); };
       var familia = {
         cidade: p.cidade || '',
+        estado: p.estado || '',
         lat: p.lat != null ? p.lat : null,
         lng: p.lng != null ? p.lng : null,
         condicao: arr(p.condicao),
@@ -1237,6 +1244,7 @@
             whatsapp: pr.whatsapp || '',
             fotoUrl: pr.fotoUrl || '',
             cidade: pr.cidade || '',
+            estado: pr.estado || '',
             lat: pr.lat != null ? pr.lat : null,
             lng: pr.lng != null ? pr.lng : null,
             experiencia: Array.isArray(pr.experiencia) ? pr.experiencia : [],

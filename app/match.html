@@ -349,6 +349,7 @@
           nome: data.nome || '',
           email: data.email || '',
           cidade: p.cidade || '',
+          estado: p.estado || '',
           lat: typeof p.lat === 'number' ? p.lat : null,
           lng: typeof p.lng === 'number' ? p.lng : null,
           whatsapp: p.whatsapp || '',
@@ -377,6 +378,7 @@
         nome: data.nome || '',
         email: data.email || '',
         cidade: p.cidade || '',
+        estado: p.estado || '',
         lat: typeof p.lat === 'number' ? p.lat : null,
         lng: typeof p.lng === 'number' ? p.lng : null,
         whatsapp: p.whatsapp || '',
@@ -563,8 +565,14 @@
       else if (dist <= 50) ptsCidade = 5;
       else                 ptsCidade = 0;
       labelLocal = '📍 Distância (' + dist.toFixed(0) + 'km)';
+    } else if (c.cidade && f.cidade && normalizar(c.cidade) === normalizar(f.cidade)) {
+      ptsCidade = 25;
+      labelLocal = '📍 Cidade';
+    } else if (c.estado && f.estado && normalizar(c.estado) === normalizar(f.estado)) {
+      ptsCidade = 12;
+      labelLocal = '📍 Mesmo estado';
     } else {
-      ptsCidade = (c.cidade && f.cidade && normalizar(c.cidade) === normalizar(f.cidade)) ? 25 : 0;
+      ptsCidade = 0;
       labelLocal = '📍 Cidade';
     }
     pts += ptsCidade;
