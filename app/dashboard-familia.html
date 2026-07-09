@@ -1234,7 +1234,7 @@
         genero_pref: p.genero_pref || ''
       };
 
-      sugestoesList = snap.docs
+      var candidatos = snap.docs
         .filter(function(d) { return d.data().disponivel !== false; })
         .map(function(d) {
           var data = d.data(), pr = data.perfil || {};
@@ -1279,12 +1279,27 @@
             .map(function(d) { return d.label.indexOf('📍') === 0 ? d.label.replace('📍 ', '') : (valoresMap[d.label] || ''); })
             .filter(function(v) { return v; });
           return c;
+        });
+
+      sugestoesList = candidatos
+        .filter(function(c) {
+          // corta quem esta muito longe (cuidado de idoso e presencial) —
+          // so filtra quando da pra calcular distancia real (ambos com lat/lng)
+          if (c.lat != null && c.lng != null && familia.lat != null && familia.lng != null) {
+            return distanciaKm(c.lat, c.lng, familia.lat, familia.lng) <= 50;
+          }
+          return true;
         })
         .sort(function(a, b) { return b._score - a._score; });
 
       window._sugestoesList = sugestoesList;
 
-      if (!sugestoesList.length) return;
+      if (!sugestoesList.length) {
+        if (candidatos.length > 0) {
+          el.innerHTML = '<div class="vazio-msg">Não há cuidadoras cadastradas num raio de 50km da sua região ainda.<br>Assim que aparecer alguém perto, você vê aqui.</div>';
+        }
+        return;
+      }
       renderSugeridos(false);
     } catch(e) {
       el.innerHTML = '<div style="font-size:13px;color:#aaa;">Erro ao carregar sugestões.</div>';
