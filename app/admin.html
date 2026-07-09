@@ -607,7 +607,7 @@
 
       var cidadeTag = p.cidade ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;">📍 ' + escapeHtml(p.cidade) + '</span>' : '';
       var obsId = 'obs-c-' + c.uid;
-      return '<div class="card" style="padding:12px 16px;cursor:pointer;" onclick="abrirDetalhesCuidadora(event,\'' + c.uid + '\')">' +
+      return '<div class="card" style="padding:12px 16px;">' +
         '<div style="display:flex;align-items:center;gap:14px;">' +
           '<div class="card-foto" style="flex-shrink:0;">' + foto + '</div>' +
           '<div style="flex:1;min-width:0;">' +
@@ -619,6 +619,7 @@
             docTag(p.docFrenteUrl, 'frente', 'Frente') + docTag(p.docVersoUrl, 'verso', 'Verso') + docTag(p.antecedentesUrl, 'antecedentes', 'Antecedentes') +
           '</div>' +
           '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
+            '<button onclick="abrirDetalhesCuidadora(event,\'' + c.uid + '\')" style="background:#eef0ea;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">👁️ Ver perfil</button>' +
             (c.status === 'excluido'
               ? '<button onclick="restaurarRegistro(\'cuidadores\',\'' + c.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
               : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'cuidadores\',\'' + c.uid + '\',this)">' +
@@ -658,7 +659,7 @@
 
       var cidadeTagF = p.cidade ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;">📍 ' + escapeHtml(p.cidade) + '</span>' : '';
       var obsIdF = 'obs-f-' + f.uid;
-      return '<div class="card" style="padding:12px 16px;cursor:pointer;" onclick="abrirDetalhesFamilia(event,\'' + f.uid + '\')">' +
+      return '<div class="card" style="padding:12px 16px;">' +
         '<div style="display:flex;align-items:center;gap:14px;">' +
           '<div class="card-foto" style="flex-shrink:0;">🏠</div>' +
           '<div style="flex:1;min-width:0;">' +
@@ -667,6 +668,7 @@
             datasF +
           '</div>' +
           '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
+            '<button onclick="abrirDetalhesFamilia(event,\'' + f.uid + '\')" style="background:#eef0ea;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">👁️ Ver perfil</button>' +
             (f.status === 'excluido'
               ? '<button onclick="restaurarRegistro(\'familias\',\'' + f.uid + '\')" style="background:#eef3e8;color:#3a4e2a;border:none;padding:6px 12px;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;font-weight:700;cursor:pointer;">↩ Restaurar</button>'
               : '<select class="status-select ' + statusCls + '" onchange="mudarStatus(\'familias\',\'' + f.uid + '\',this)">' +
@@ -1002,7 +1004,6 @@
   }
 
   window.abrirDetalhesCuidadora = function(event, uid) {
-    if (event.target.closest('select,button,a')) return;
     var c = cuidadores.find(function(x) { return x.uid === uid; });
     if (!c) return;
     var p = c.perfil || {};
@@ -1037,7 +1038,6 @@
   };
 
   window.abrirDetalhesFamilia = function(event, uid) {
-    if (event.target.closest('select,button,a')) return;
     var f = familias.find(function(x) { return x.uid === uid; });
     if (!f) return;
     var p = f.perfil || {};
