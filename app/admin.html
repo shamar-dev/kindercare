@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>emailjs.init('sNQgEYMxGZ6_abMxT');</script>
+  <script src="email-utils.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #f0f2ec; font-family: 'Nunito', sans-serif; min-height: 100vh; }
@@ -779,11 +780,7 @@
     btn.disabled = true;
     btn.textContent = 'Enviando...';
     try {
-      await emailjs.send('service_l99a8hr', 'template_4s63nga', {
-        para_email: email,
-        nome: nome.split(' ')[0],
-        email: email
-      });
+      await enviarNotificacao('cadastro_incompleto', { email: email, nome: nome });
       await updateDoc(doc(db, 'cuidadores', uid), { emailDocsSolicitado: true });
       btn.textContent = '✓ Email enviado';
       btn.style.background = '#f0f0f0';
