@@ -1609,21 +1609,20 @@
     if (v.replace(/\D/g,'').length === 8) {
       status.textContent = '🔍';
       try {
-        const res  = await fetch('https://brasilapi.com.br/api/cep/v2/' + v.replace(/\D/g,''));
+        const res  = await fetch('https://cep.awesomeapi.com.br/json/' + v.replace(/\D/g,''));
         const data = await res.json();
         const bairroEl = document.getElementById('p-bairro');
         const cidadeEl = document.getElementById('p-cidade');
         const estadoEl = document.getElementById('p-estado');
-        if (data.city !== undefined) {
+        if (res.ok && data.city !== undefined) {
           bairroEl.readOnly = true;
           cidadeEl.readOnly = true;
           estadoEl.readOnly = true;
-          bairroEl.value = data.neighborhood || '';
-          cidadeEl.value = data.city      || '';
-          estadoEl.value = data.state     || '';
-          const coords = data.location && data.location.coordinates;
-          coordCep.lat = coords && coords.latitude  ? Math.round(parseFloat(coords.latitude)  * 100) / 100 : null;
-          coordCep.lng = coords && coords.longitude ? Math.round(parseFloat(coords.longitude) * 100) / 100 : null;
+          bairroEl.value = data.district || '';
+          cidadeEl.value = data.city     || '';
+          estadoEl.value = data.state    || '';
+          coordCep.lat = data.lat ? Math.round(parseFloat(data.lat) * 100) / 100 : null;
+          coordCep.lng = data.lng ? Math.round(parseFloat(data.lng) * 100) / 100 : null;
           status.textContent = '✓';
         } else {
           bairroEl.readOnly = false;

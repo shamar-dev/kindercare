@@ -1436,7 +1436,7 @@
     this.value = v;
   });
 
-  // CEP com BrasilAPI
+  // CEP com AwesomeAPI (BrasilAPI nao retorna coordenadas de verdade)
   document.getElementById('p-cep').addEventListener('input', async function() {
     var v = this.value.replace(/\D/g,'').slice(0,8);
     v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
@@ -1445,21 +1445,20 @@
     if (v.replace(/\D/g,'').length === 8) {
       st.textContent = '🔍';
       try {
-        var res  = await fetch('https://brasilapi.com.br/api/cep/v2/' + v.replace(/\D/g,''));
+        var res  = await fetch('https://cep.awesomeapi.com.br/json/' + v.replace(/\D/g,''));
         var data = await res.json();
         var bairroEl = document.getElementById('p-bairro');
         var cidadeEl = document.getElementById('p-cidade');
         var estadoEl = document.getElementById('p-estado');
-        if (data.city !== undefined) {
+        if (res.ok && data.city !== undefined) {
           bairroEl.readOnly = true;
           cidadeEl.readOnly = true;
           estadoEl.readOnly = true;
-          bairroEl.value = data.neighborhood  || '';
-          cidadeEl.value = data.city          || '';
-          estadoEl.value = data.state         || '';
-          var coords = data.location && data.location.coordinates;
-          coordCep.lat = coords && coords.latitude  ? Math.round(parseFloat(coords.latitude)  * 100) / 100 : null;
-          coordCep.lng = coords && coords.longitude ? Math.round(parseFloat(coords.longitude) * 100) / 100 : null;
+          bairroEl.value = data.district || '';
+          cidadeEl.value = data.city     || '';
+          estadoEl.value = data.state    || '';
+          coordCep.lat = data.lat ? Math.round(parseFloat(data.lat) * 100) / 100 : null;
+          coordCep.lng = data.lng ? Math.round(parseFloat(data.lng) * 100) / 100 : null;
           st.textContent = '✓';
         } else {
           bairroEl.readOnly = false;
