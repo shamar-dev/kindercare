@@ -694,6 +694,8 @@
         };
       }
 
+      update.atualizadoEm = new Date().toISOString();
+
       await updateDoc(ref, update);
       mostrarFb(fb, 'ok', '✓ Salvo!');
       atualizarProgresso();

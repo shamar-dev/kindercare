@@ -1307,6 +1307,8 @@
         };
       }
 
+      update.atualizadoEm = new Date().toISOString();
+
       await updateDoc(ref, update);
       // Atualiza dadosFirestore local
       Object.keys(update).forEach(function(k) {
@@ -1402,9 +1404,11 @@
       await uploadBytes(ref, file, { contentType: file.type });
       const url = await getDownloadURL(ref);
 
-      await updateDoc(doc(db, 'cuidadores', currentUser.uid), { [cfg.campo]: url });
+      var agora = new Date().toISOString();
+      await updateDoc(doc(db, 'cuidadores', currentUser.uid), { [cfg.campo]: url, atualizadoEm: agora });
       dadosFirestore.perfil = dadosFirestore.perfil || {};
       dadosFirestore.perfil[cfg.firestoreKey] = url;
+      dadosFirestore.atualizadoEm = agora;
 
       textoEl.textContent = 'Substituir';
       okEl.style.display = 'inline';

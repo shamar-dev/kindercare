@@ -226,6 +226,7 @@
     <input type="text" id="filtro-busca" placeholder="Buscar por nome ou email..." oninput="renderAtual()">
     <select id="filtro-ordem" onchange="renderAtual()" style="width:auto;">
       <option value="">Mais recentes primeiro</option>
+      <option value="atualizado">Última atualização</option>
       <option value="az">A → Z</option>
       <option value="za">Z → A</option>
     </select>
@@ -574,6 +575,9 @@
     });
     if (ordem === 'az') resultado.sort(function(a, b) { return (a.nome||'').localeCompare(b.nome||'', 'pt'); });
     else if (ordem === 'za') resultado.sort(function(a, b) { return (b.nome||'').localeCompare(a.nome||'', 'pt'); });
+    else if (ordem === 'atualizado') resultado.sort(function(a, b) {
+      return parseDataGenerica(b.atualizadoEm) - parseDataGenerica(a.atualizadoEm);
+    });
     else resultado.sort(function(a, b) {
       return parseDataGenerica(b.criadoEm) - parseDataGenerica(a.criadoEm);
     });
@@ -591,7 +595,7 @@
       var statusCls = c.status || 'pendente';
       var foto = p.fotoUrl ? '<img src="' + p.fotoUrl + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">' : '🧑‍⚕️';
       var fmtData = function(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); };
-      var datasC = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(c.criadoEm) + ' · 🕐 ' + fmtData(c.ultimoAcesso) + '</div>';
+      var datasC = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(c.criadoEm) + ' · 🕐 ' + fmtData(c.ultimoAcesso) + (c.atualizadoEm ? ' · ✏️ ' + fmtData(c.atualizadoEm) : '') + '</div>';
 
       var docTag = function(url, tipo, label) {
         if (!url) return '<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#f5f5f5;color:#bbb;">✗ ' + label + '</span>';
@@ -643,7 +647,7 @@
       var p = f.perfil || {};
       var statusCls = f.status || 'pendente';
       var fmtData = function(iso) { if (!iso) return '—'; var d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); };
-      var datasF = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(f.criadoEm) + ' · 🕐 ' + fmtData(f.ultimoAcesso) + '</div>';
+      var datasF = '<div style="font-size:10px;color:#bbb;margin-top:2px;">📅 ' + fmtData(f.criadoEm) + ' · 🕐 ' + fmtData(f.ultimoAcesso) + (f.atualizadoEm ? ' · ✏️ ' + fmtData(f.atualizadoEm) : '') + '</div>';
 
       var cidadeTagF = p.cidade ? ' <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:#eef3e8;color:#3a4e2a;">📍 ' + escapeHtml(p.cidade) + '</span>' : '';
       var obsIdF = 'obs-f-' + f.uid;
