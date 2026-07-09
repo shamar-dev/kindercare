@@ -631,6 +631,12 @@
             ) +
           '</div>' +
         '</div>' +
+        (c.status !== 'excluido' ? '<div style="margin:8px 0 4px;" onclick="event.stopPropagation()">' +
+          '<button id="btn-email-' + c.uid + '" onclick="enviarEmailDocs(\'' + c.uid + '\',\'' + escapeJsAttr(c.nome||'') + '\',\'' + (c.email||'') + '\')" ' +
+          (c.emailDocsSolicitado ? 'disabled style="font-size:11px;font-weight:700;padding:4px 12px;background:#f0f0f0;color:#aaa;border:none;border-radius:8px;cursor:not-allowed;"' : 'style="font-size:11px;font-weight:700;padding:4px 12px;background:#eef3e8;color:#3a4e2a;border:none;border-radius:8px;cursor:pointer;"') + '>' +
+          (c.emailDocsSolicitado ? '✓ Email enviado' : '📧 Solicitar docs') +
+          '</button>' +
+        '</div>' : '') +
         '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5;" onclick="event.stopPropagation()">' +
           '<textarea id="' + obsId + '" placeholder="📝 Observação interna..." onblur="salvarObs(\'cuidadores\',\'' + c.uid + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid #ece9e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;color:#555;resize:none;outline:none;background:#fffdf7;height:54px;line-height:1.5;">' + escapeHtml(c.observacaoAdmin) + '</textarea>' +
         '</div>' +
