@@ -17,6 +17,13 @@ var NOTIFICACOES = {
       mensagem: 'Seu perfil foi aprovado! Agora você já pode acessar a plataforma e ver as cuidadoras disponíveis, entrar em contato e demonstrar interesse diretamente.',
       texto_botao: 'Explorar cuidadoras'
     };
+  },
+  aprovado_cuidadora: function(dados) {
+    return {
+      titulo: 'Seu perfil foi aprovado no Kinder!',
+      mensagem: 'Parabéns! Seu cadastro foi aprovado e agora seu perfil já está visível pras famílias que buscam cuidadoras compatíveis com você. Fique de olho no seu painel — assim que uma família demonstrar interesse, você recebe uma mensagem por lá.',
+      texto_botao: 'Ver meu perfil'
+    };
   }
 };
 
