@@ -10,6 +10,13 @@ var NOTIFICACOES = {
       mensagem: 'O Kinder está avançando e chegou a hora do próximo passo. Para analisar seu perfil e conectá-la(o) com famílias, acesse o aplicativo e complete seu cadastro com foto de perfil, documento com foto (RG, CPF ou CNH) e certidão de antecedentes criminais.',
       texto_botao: 'Completar cadastro'
     };
+  },
+  aprovado_explorar: function(dados) {
+    return {
+      titulo: 'Você já pode explorar cuidadoras no Kinder!',
+      mensagem: 'Seu perfil foi aprovado! Agora você já pode acessar a plataforma e ver as cuidadoras disponíveis, entrar em contato e demonstrar interesse diretamente.',
+      texto_botao: 'Explorar cuidadoras'
+    };
   }
 };
 
