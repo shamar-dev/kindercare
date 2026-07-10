@@ -26,7 +26,9 @@ function perfilIncompletoFamilia(p) {
 }
 function documentosIncompletos(p) {
   p = p || {};
-  return !p.docFrenteUrl || !p.docVersoUrl || !p.antecedentesUrl;
+  var ds = p.docStatus || {};
+  return !p.docFrenteUrl || !p.docVersoUrl || !p.antecedentesUrl ||
+    ds.frente === 'vencido' || ds.verso === 'vencido' || ds.antecedentes === 'vencido';
 }
 
 async function main() {
