@@ -13,8 +13,8 @@ var NOTIFICACOES = {
   },
   cadastro_incompleto_familia: function(dados) {
     return {
-      titulo: 'Falta pouco para explorar as cuidadoras',
-      mensagem: 'Pra analisarmos seu cadastro e liberar o acesso às cuidadoras disponíveis, acesse o aplicativo e complete seu perfil com cidade, WhatsApp, rotina e as condições do seu familiar.',
+      titulo: 'Falta pouco para explorar o perfil de cuidadoras',
+      mensagem: 'Pra analisarmos seu cadastro e liberar o acesso ao perfil de cuidadoras disponíveis, acesse o aplicativo e complete seu perfil com cidade, WhatsApp, rotina e as condições do seu familiar.',
       texto_botao: 'Completar cadastro'
     };
   },
