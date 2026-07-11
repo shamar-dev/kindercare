@@ -686,11 +686,15 @@
             ) +
           '</div>' +
         '</div>' +
-        (f.status === 'andamento' ? '<div style="margin:8px 0 4px;" onclick="event.stopPropagation()">' +
-          '<button id="btn-aprov-' + f.uid + '" onclick="avisarAprovacao(\'' + f.uid + '\',\'' + escapeJsAttr(f.nome||'') + '\',\'' + (f.email||'') + '\')" ' +
+        (f.status !== 'excluido' ? '<div style="margin:8px 0 4px;display:flex;gap:6px;" onclick="event.stopPropagation()">' +
+          '<button id="btn-email-' + f.uid + '" onclick="enviarEmailPerfilFamilia(\'' + f.uid + '\',\'' + escapeJsAttr(f.nome||'') + '\',\'' + (f.email||'') + '\')" ' +
           'style="font-size:11px;font-weight:700;padding:4px 12px;background:#eef3e8;color:#3a4e2a;border:none;border-radius:8px;cursor:pointer;">' +
-          '📧 Avisar aprovação' +
+          '📧 Solicitar perfil completo' +
           '</button>' +
+          (f.status === 'andamento' ? '<button id="btn-aprov-' + f.uid + '" onclick="avisarAprovacao(\'' + f.uid + '\',\'' + escapeJsAttr(f.nome||'') + '\',\'' + (f.email||'') + '\')" ' +
+            'style="font-size:11px;font-weight:700;padding:4px 12px;background:#eef3e8;color:#3a4e2a;border:none;border-radius:8px;cursor:pointer;">' +
+            '📧 Avisar aprovação' +
+            '</button>' : '') +
         '</div>' : '') +
         '<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5;" onclick="event.stopPropagation()">' +
           '<textarea id="' + obsIdF + '" placeholder="📝 Observação interna..." onblur="salvarObs(\'familias\',\'' + f.uid + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid #ece9e0;border-radius:8px;font-family:Nunito,sans-serif;font-size:12px;color:#555;resize:none;outline:none;background:#fffdf7;height:54px;line-height:1.5;">' + escapeHtml(f.observacaoAdmin) + '</textarea>' +
@@ -814,6 +818,31 @@
     } catch(e) {
       btn.disabled = false;
       btn.textContent = '📧 Solicitar docs';
+      alert('Erro ao enviar email: ' + (e.text || e.message));
+    }
+  };
+
+  window.enviarEmailPerfilFamilia = async function(uid, nome, email) {
+    var btn = document.getElementById('btn-email-' + uid);
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    try {
+      await enviarNotificacao('cadastro_incompleto_familia', { email: email, nome: nome, link: 'https://kindercare.com.br/app/login-familia.html' });
+      var item = familias.find(function(x) { return x.uid === uid; });
+      var obsAtual = (item && item.observacaoAdmin) || '';
+      var novaObs = '[' + new Date().toLocaleString('pt-BR') + '] Email solicitando completar perfil enviado.' + (obsAtual ? '\n' + obsAtual : '');
+      await updateDoc(doc(db, 'familias', uid), { observacaoAdmin: novaObs });
+      if (item) item.observacaoAdmin = novaObs;
+      var textarea = document.getElementById('obs-f-' + uid);
+      if (textarea) textarea.value = novaObs;
+      btn.textContent = '✓ Enviado agora';
+      setTimeout(function() {
+        btn.disabled = false;
+        btn.textContent = '📧 Solicitar perfil completo';
+      }, 2000);
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = '📧 Solicitar perfil completo';
       alert('Erro ao enviar email: ' + (e.text || e.message));
     }
   };
