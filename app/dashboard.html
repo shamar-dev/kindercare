@@ -877,6 +877,7 @@
       <button onclick="fecharModalConversa()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;">✕</button>
     </div>
     <div id="conv-msgs" style="flex:1;overflow-y:auto;margin-bottom:16px;display:flex;flex-direction:column;gap:8px;"></div>
+    <p style="font-size:11px;color:#a05a3a;background:#fff3e8;border-radius:8px;padding:6px 10px;margin-bottom:10px;">⚠️ Não compartilhe dados de contato (telefone, email, endereço). A conexão acontece somente após o match ser aprovado.</p>
     <div style="display:flex;gap:8px;">
       <input type="text" id="conv-input" placeholder="Responder..." style="flex:1;padding:10px 12px;border:1.5px solid #e8e8e8;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;outline:none;">
       <button onclick="enviarResposta()" style="padding:10px 16px;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">Enviar</button>
@@ -1156,11 +1157,39 @@
     _convAberta = null;
   };
 
+  function contemDadosContato(texto) {
+    var semSeparadores = texto.replace(/[\s\-.()]/g, '');
+    var temTelefone = /\d{8,}/.test(semSeparadores);
+    var temEmail = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i.test(texto);
+    return temTelefone || temEmail;
+  }
+
+  function podeEnviarMensagem() {
+    var key = 'kinder_rate_msgs_cuidadora';
+    var agora = Date.now();
+    var janela = 2 * 60 * 1000;
+    var limite = 5;
+    var timestamps = JSON.parse(localStorage.getItem(key) || '[]').filter(function(t) { return agora - t < janela; });
+    if (timestamps.length >= limite) {
+      var espera = Math.ceil((janela - (agora - timestamps[0])) / 1000);
+      alert('Você enviou muitas mensagens em pouco tempo. Aguarde ' + espera + ' segundos antes de enviar outra.');
+      return false;
+    }
+    timestamps.push(agora);
+    localStorage.setItem(key, JSON.stringify(timestamps));
+    return true;
+  }
+
   window.enviarResposta = async function() {
     if (!_convAberta) return;
     var input = document.getElementById('conv-input');
     var texto = input.value.trim();
     if (!texto) return;
+    if (contemDadosContato(texto)) {
+      alert('Não é permitido compartilhar telefone ou email pela mensagem. A troca de contato acontece somente após o match ser aprovado. Edite sua mensagem e tente novamente.');
+      return;
+    }
+    if (!podeEnviarMensagem()) return;
     input.disabled = true;
     try {
       await setDoc(doc(collection(db, 'mensagens')), {
