@@ -114,6 +114,12 @@
           <label>Confirmar senha</label>
           <input type="password" id="cad-confirma" placeholder="Repita a senha" autocomplete="new-password">
         </div>
+        <div class="campo">
+          <label>CEP</label>
+          <input type="text" id="cad-cep" placeholder="00000-000" maxlength="9" autocomplete="postal-code">
+          <div style="font-size:11px;color:#aaa;margin-top:6px;">🔒 Usamos pra mostrar se já há cuidadoras na sua região e calcular a distância pro match — não salvamos o CEP em si, só a cidade e coordenadas aproximadas.</div>
+          <div id="cad-cep-status" style="font-size:13px;font-weight:700;margin-top:8px;min-height:18px;"></div>
+        </div>
         <div style="display:flex;align-items:flex-start;gap:10px;margin:14px 0;">
           <input type="checkbox" id="cad-termos" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;cursor:pointer;">
           <label for="cad-termos" style="font-size:13px;color:#555;line-height:1.5;cursor:pointer;">Li e concordo com os <a href="termos.html" target="_blank">Termos de Uso</a> e a <a href="privacidade.html" target="_blank">Política de Privacidade</a>.</label>
@@ -164,6 +170,41 @@
   const db   = getFirestore(app);
 
   let criandoConta = false;
+  var cadCoords = { lat: null, lng: null };
+  var cadCidade = '', cadBairro = '', cadEstado = '';
+
+  document.getElementById('cad-cep').addEventListener('input', async function() {
+    var v = this.value.replace(/\D/g,'').slice(0,8);
+    v = v.replace(/^(\d{5})(\d{0,3})/, '$1-$2');
+    this.value = v;
+    var st = document.getElementById('cad-cep-status');
+    if (v.replace(/\D/g,'').length !== 8) { st.textContent = ''; return; }
+    st.style.color = '#888';
+    st.textContent = '🔍 Buscando...';
+    try {
+      var res  = await fetch('https://cep.awesomeapi.com.br/json/' + v.replace(/\D/g,''));
+      var data = await res.json();
+      if (res.ok && data.city !== undefined) {
+        cadCidade = data.city || '';
+        cadBairro = data.district || '';
+        cadEstado = data.state || '';
+        cadCoords.lat = data.lat ? Math.round(parseFloat(data.lat) * 100) / 100 : null;
+        cadCoords.lng = data.lng ? Math.round(parseFloat(data.lng) * 100) / 100 : null;
+        st.style.color = '#3a4e2a';
+        st.textContent = '✓ CEP encontrado — ' + cadCidade + '/' + cadEstado;
+      } else {
+        cadCidade = cadBairro = cadEstado = '';
+        cadCoords.lat = cadCoords.lng = null;
+        st.style.color = '#c0392b';
+        st.textContent = '✗ CEP não encontrado — você pode continuar mesmo assim';
+      }
+    } catch(e) {
+      cadCidade = cadBairro = cadEstado = '';
+      cadCoords.lat = cadCoords.lng = null;
+      st.style.color = '#c0392b';
+      st.textContent = '✗ Erro ao buscar — você pode continuar mesmo assim';
+    }
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if (!user || criandoConta) return;
@@ -205,6 +246,7 @@
     const email    = document.getElementById('cad-email').value.trim();
     const senha    = document.getElementById('cad-senha').value;
     const confirma = document.getElementById('cad-confirma').value;
+    const cep      = document.getElementById('cad-cep').value.trim();
     const termos   = document.getElementById('cad-termos').checked;
     const btn      = document.getElementById('btn-cadastro');
     const msg      = document.getElementById('msg-auth');
@@ -212,6 +254,7 @@
     if (!nome || !email || !senha || !confirma) { mostrarMsg(msg, 'erro', 'Preencha todos os campos.'); return; }
     if (senha !== confirma) { mostrarMsg(msg, 'erro', 'As senhas não coincidem.'); return; }
     if (senha.length < 6)  { mostrarMsg(msg, 'erro', 'A senha precisa ter pelo menos 6 caracteres.'); return; }
+    if (!cep) { mostrarMsg(msg, 'erro', 'Informe seu CEP.'); return; }
     if (!termos) { mostrarMsg(msg, 'erro', 'Você precisa concordar com os Termos de Uso e a Política de Privacidade.'); return; }
 
     btn.disabled = true; btn.textContent = 'Criando conta...';
@@ -227,7 +270,7 @@
         criadoEm: new Date().toISOString(),
         termosAceitosEm: new Date().toISOString(),
         senhaInicial: false,
-        perfil: {}
+        perfil: { cidade: cadCidade, bairro: cadBairro, estado: cadEstado, lat: cadCoords.lat, lng: cadCoords.lng }
       });
       window.location.href = './dashboard-familia.html';
     } catch(e) {

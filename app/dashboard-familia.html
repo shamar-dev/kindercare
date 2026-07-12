@@ -165,6 +165,16 @@
   </div>
 </div>
 
+<!-- Modal boas-vindas / cobertura na região -->
+<div id="modal-boas-vindas" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400;align-items:center;justify-content:center;padding:24px 16px;">
+  <div style="background:white;border-radius:16px;padding:28px 24px;max-width:420px;width:100%;text-align:center;">
+    <div id="bv-emoji" style="font-size:40px;margin-bottom:12px;"></div>
+    <h3 id="bv-titulo" style="font-size:17px;font-weight:700;color:#2d2d2d;margin-bottom:8px;"></h3>
+    <p id="bv-texto" style="font-size:13px;color:#666;line-height:1.6;margin-bottom:20px;"></p>
+    <button onclick="fecharBoasVindasCobertura()" style="width:100%;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;padding:13px;cursor:pointer;">Entendi</button>
+  </div>
+</div>
+
 <div class="container" id="container">
 
   <!-- TELA: EXPLORAR -->
@@ -596,6 +606,30 @@
         '</div>';
     }
   });
+
+  function mostrarBoasVindasCobertura(perto, total) {
+    var emoji = document.getElementById('bv-emoji');
+    var titulo = document.getElementById('bv-titulo');
+    var texto = document.getElementById('bv-texto');
+    if (perto > 0) {
+      emoji.textContent = '🎉';
+      titulo.textContent = perto + ' cuidadora' + (perto > 1 ? 's' : '') + ' na sua região!';
+      texto.textContent = 'Já encontramos cuidadoras cadastradas num raio de 50km de você. Vá em "Explorar" pra conhecer os perfis compatíveis.';
+    } else if (total > 0) {
+      emoji.textContent = '🌱';
+      titulo.textContent = 'Ainda não temos cuidadoras na sua região';
+      texto.textContent = 'Estamos crescendo rápido — assim que aparecer alguém num raio de 50km de você, ela aparece na sua lista de sugestões.';
+    } else {
+      return; // sem cuidadoras aprovadas em lugar nenhum ainda — não vale mostrar
+    }
+    document.getElementById('modal-boas-vindas').style.display = 'flex';
+  }
+
+  window.fecharBoasVindasCobertura = async function() {
+    document.getElementById('modal-boas-vindas').style.display = 'none';
+    dadosFS.boasVindasVista = true;
+    try { await updateDoc(doc(db, 'familias', currentUser.uid), { boasVindasVista: true }); } catch(e) { console.error(e); }
+  };
 
   async function iniciarAreaFamilia(user) {
     await carregarInteresses(user.uid);
@@ -1378,6 +1412,10 @@
         .sort(function(a, b) { return b._score - a._score; });
 
       window._sugestoesList = sugestoesList;
+
+      if (!dadosFS.boasVindasVista && familia.lat != null && familia.lng != null) {
+        mostrarBoasVindasCobertura(sugestoesList.length, candidatos.length);
+      }
 
       if (!sugestoesList.length) {
         if (candidatos.length > 0) {
