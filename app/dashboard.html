@@ -511,6 +511,20 @@
 
 <div class="loading" id="loading">Carregando seu perfil...</div>
 
+<!-- Modal reconsentimento (termos/privacidade) -->
+<div id="modal-reconsentimento" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:center;justify-content:center;padding:24px 16px;">
+  <div style="background:white;border-radius:16px;padding:28px 24px;max-width:440px;width:100%;">
+    <h3 style="font-size:16px;font-weight:700;color:#2d2d2d;margin-bottom:10px;">📋 Atualizamos nossos termos</h3>
+    <p style="font-size:13px;color:#666;line-height:1.6;margin-bottom:16px;">Antes de continuar, precisamos que você confirme que leu e concorda com os nossos Termos de Uso e Política de Privacidade.</p>
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;">
+      <input type="checkbox" id="reconsent-termos" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;cursor:pointer;">
+      <label for="reconsent-termos" style="font-size:13px;color:#555;line-height:1.5;cursor:pointer;">Li e concordo com os <a href="termos.html" target="_blank">Termos de Uso</a> e a <a href="privacidade.html" target="_blank">Política de Privacidade</a>.</label>
+    </div>
+    <p id="reconsent-msg" style="font-size:12px;color:#c0392b;margin-bottom:10px;display:none;">Marque a caixa para continuar.</p>
+    <button id="btn-reconsentimento" onclick="confirmarReconsentimento()" style="width:100%;background:#3a4e2a;color:#c8d8a0;border:none;border-radius:10px;font-family:Nunito,sans-serif;font-size:14px;font-weight:700;padding:13px;cursor:pointer;">Continuar</button>
+  </div>
+</div>
+
 <div class="container" id="container">
 
   <!-- STATUS -->
@@ -958,6 +972,13 @@
       }
 
       window._dadosFirestore = dadosFirestore;
+
+      if (!dadosFirestore.termosAceitosEm) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('modal-reconsentimento').style.display = 'flex';
+        return;
+      }
+
       carregarUI(user, dadosFirestore);
 
     } catch (e) {
@@ -970,6 +991,31 @@
         '</div>';
     }
   });
+
+  window.confirmarReconsentimento = async function() {
+    var checkbox = document.getElementById('reconsent-termos');
+    var msg = document.getElementById('reconsent-msg');
+    if (!checkbox.checked) {
+      msg.style.display = 'block';
+      return;
+    }
+    var btn = document.getElementById('btn-reconsentimento');
+    btn.disabled = true;
+    btn.textContent = 'Confirmando...';
+    try {
+      var agora = new Date().toISOString();
+      await updateDoc(doc(db, 'cuidadores', currentUser.uid), { termosAceitosEm: agora });
+      window._dadosFirestore.termosAceitosEm = agora;
+      document.getElementById('modal-reconsentimento').style.display = 'none';
+      carregarUI(currentUser, window._dadosFirestore);
+    } catch (e) {
+      console.error(e);
+      btn.disabled = false;
+      btn.textContent = 'Continuar';
+      msg.textContent = 'Erro ao confirmar. Tente novamente.';
+      msg.style.display = 'block';
+    }
+  };
 
   function carregarUI(user, dados) {
 

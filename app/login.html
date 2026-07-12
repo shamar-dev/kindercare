@@ -248,6 +248,10 @@
           <label>Confirmar senha</label>
           <input type="password" id="cad-confirma" placeholder="Repita a senha" autocomplete="new-password">
         </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin:14px 0;">
+          <input type="checkbox" id="cad-termos" style="width:18px;height:18px;flex-shrink:0;margin-top:2px;cursor:pointer;">
+          <label for="cad-termos" style="font-size:13px;color:#555;line-height:1.5;cursor:pointer;">Li e concordo com os <a href="termos.html" target="_blank">Termos de Uso</a> e a <a href="privacidade.html" target="_blank">Política de Privacidade</a>.</label>
+        </div>
         <button class="btn-principal" id="btn-cadastro" onclick="criarConta()">Criar conta →</button>
       </div>
     </div>
@@ -347,6 +351,7 @@
     const email    = document.getElementById('cad-email').value.trim();
     const senha    = document.getElementById('cad-senha').value;
     const confirma = document.getElementById('cad-confirma').value;
+    const termos   = document.getElementById('cad-termos').checked;
     const btn      = document.getElementById('btn-cadastro');
     const msg      = document.getElementById('msg-auth');
 
@@ -358,6 +363,9 @@
     }
     if (senha.length < 6) {
       mostrarMsg(msg, 'erro', 'A senha precisa ter pelo menos 6 caracteres.'); return;
+    }
+    if (!termos) {
+      mostrarMsg(msg, 'erro', 'Você precisa concordar com os Termos de Uso e a Política de Privacidade.'); return;
     }
 
     btn.disabled = true;
@@ -375,6 +383,7 @@
         email: email,
         status: 'pendente',
         criadoEm: new Date().toISOString(),
+        termosAceitosEm: new Date().toISOString(),
         perfil: {}
       });
 
