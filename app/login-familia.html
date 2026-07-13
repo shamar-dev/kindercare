@@ -276,7 +276,7 @@
       await updateProfile(cred.user, { displayName: nome });
       await setDoc(doc(db, 'familias', cred.user.uid), {
         nome, email,
-        status: 'pendente',
+        status: 'andamento',
         criadoEm: new Date().toISOString(),
         termosAceitosEm: new Date().toISOString(),
         senhaInicial: false,
