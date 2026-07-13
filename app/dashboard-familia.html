@@ -733,12 +733,6 @@
     const ref = doc(db, 'familias', currentUser.uid);
     const btn = document.querySelector('#sec-' + secao + ' .btn-salvar');
     const fb  = document.getElementById('fb-' + secao);
-
-    if (secao === 'responsavel') {
-      const whatsapp = document.getElementById('p-whatsapp').value.trim();
-      if (!whatsapp) { mostrarFb(fb, 'erro', 'Informe seu WhatsApp — é como a cuidadora vai te contatar.'); return; }
-    }
-
     btn.disabled = true; btn.textContent = 'Salvando...';
 
     try {
