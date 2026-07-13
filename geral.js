@@ -22,7 +22,7 @@ function perfilIncompletoCuidadora(p) {
 }
 function perfilIncompletoFamilia(p) {
   p = p || {};
-  return !p.cidade || !p.whatsapp || !p.rotina || !(p.condicao && p.condicao.length);
+  return !p.cidade || !p.rotina || !(p.condicao && p.condicao.length);
 }
 function documentosIncompletos(p) {
   p = p || {};
